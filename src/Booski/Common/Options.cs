@@ -45,7 +45,7 @@ public class Options
         public bool HornyOnlyOnX { get; set; }
 
         // Dev
-        [Option("sleep-time-fetch", Default = 1000, Hidden = true, HelpText = "Interval (in seconds) between fetching batches of your feed (limited to 100) from Bluesky.")]
+        [Option("sleep-time-fetch", Default = 1, Hidden = true, HelpText = "Interval (in seconds) between fetching batches of your feed (limited to 100) from Bluesky.")]
         public int SleepTimeFetch { get; set; }
         [Option("run-once", Hidden = true, HelpText = "Exit after first loop.")]
         public bool RunOnceThenExit { get; set; }
