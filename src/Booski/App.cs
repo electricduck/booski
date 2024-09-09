@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Web;
 using Booski.Common;
 using Booski.Contexts;
 using Booski.Helpers;
@@ -22,6 +23,7 @@ internal sealed class App : IApp
     private AtProto _atProto;
     private BskyApi.App.Bsky.Actor _bskyActor;
     private IBskyContext _bskyContext;
+    private IGitHubContext _githubContext;
     private IHttpContext _httpContext;
     private IMastodonContext _mastodonContext;
     private IPostHelpers _postHelpers;
@@ -32,6 +34,7 @@ internal sealed class App : IApp
         AtProto atProto,
         BskyApi.App.Bsky.Actor bskyActor,
         IBskyContext bskyContext,
+        IGitHubContext githubContext,
         IHttpContext httpContext,
         IMastodonContext mastodonContext,
         IPostHelpers postHelpers,
@@ -42,6 +45,7 @@ internal sealed class App : IApp
         _atProto = atProto;
         _bskyActor = bskyActor;
         _bskyContext = bskyContext;
+        _githubContext = githubContext;
         _httpContext = httpContext;
         _mastodonContext = mastodonContext;
         _postHelpers = postHelpers;
@@ -52,6 +56,10 @@ internal sealed class App : IApp
     public async Task Run(Options o)
     {
         Console.WriteLine($"Booski {GetVersion()}");
+
+        if(!o.DoNotCheckForUpdates)
+            await CheckUpdates();
+        
         await ConfigureApp(o.ConfigPath);
         await CreateBskyClient(o);
         await CreateAdditionalClients(o);
@@ -78,6 +86,29 @@ internal sealed class App : IApp
                 Environment.Exit(0);
             else
                 Thread.Sleep(o.SleepTime);
+        }
+    }
+
+    private async Task CheckUpdates()
+    {
+        await _githubContext.CreateClient();
+        var releases = await _githubContext.Client.Repository.Release.GetAll("electricduck", "booski");
+        
+        if(releases != null)
+        {
+            var latestRelease = releases[0];
+            var latestTag = latestRelease.TagName;
+            var latestVersion = latestTag.Split('/').Last();
+            var latestVersionLink = $"https://github.com/electricduck/booski/releases/tag/{HttpUtility.UrlEncode(latestTag)}";
+            //var runningVersion = GetVersion();
+            var runningVersion = "0.1";
+
+            if(latestVersion != runningVersion)
+            {
+                Say.Separate();
+                Say.Warning("An update is available.", $"Version {latestVersion} is available. Download from {latestVersionLink}.");
+                Say.Separate();
+            }
         }
     }
 

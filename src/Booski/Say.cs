@@ -14,6 +14,11 @@ public class Say
         ConsoleMessage(message, "ℹ️", reason);
     }
 
+    public static void Separate(int length = 80, char separator = '-')
+    {
+        Console.WriteLine(new String(separator, length));
+    }
+
     public static void Success(string message)
     {
         ConsoleMessage(message, "✅");

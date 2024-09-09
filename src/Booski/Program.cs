@@ -23,6 +23,7 @@ public class Program
             builder.Services.AddSingleton<IBskyContext, BskyContext>();
             builder.Services.AddSingleton<IBskyHelpers, BskyHelpers>();
             builder.Services.AddSingleton<IFileCacheContext, FileCacheContext>();
+            builder.Services.AddSingleton<IGitHubContext, GitHubContext>();
             builder.Services.AddSingleton<IHttpContext, HttpContext>();
             builder.Services.AddSingleton<IMastodonContext, MastodonContext>();
             builder.Services.AddSingleton<IMastodonHelpers, MastodonHelpers>();
@@ -45,7 +46,11 @@ public class Program
         }
         catch (Exception e)
         {
-            Say.Error(e);
+            #if DEBUG
+                throw;
+            #else
+                Say.Error(e);
+            #endif
             Environment.Exit(1);
         }
     }
