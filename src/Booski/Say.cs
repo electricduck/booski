@@ -7,9 +7,9 @@ public class Say
         ConsoleMessage($"Error: {e.Message}", "🛑");
     }
 
-    public static void Info(string message)
+    public static void Info(string message, string reason = "")
     {
-        ConsoleMessage(message, "ℹ️");
+        ConsoleMessage(message, "ℹ️", reason);
     }
 
     public static void Success(string message)

@@ -11,7 +11,7 @@ public class XUtilities
     public static async Task<string> GeneratePostText(Post post)
     {
         // NOTE: We're parsing the mention facet just to make replacements easier
-        string captionText = BskyUtilities.ParseFacets(
+        /*string captionText = BskyUtilities.ParseFacets(
             post.Record.Text,
             post.Record.Facets,
             linkStringStart: "[",
@@ -20,7 +20,8 @@ public class XUtilities
             mentionStringEnd: "](https://bsky.app/profile/[did])",
             tagStringStart: "",
             tagStringEnd: ""
-        );
+        );*/
+        string captionText = "";
         captionText = await ReplaceUsernames(captionText);
         captionText = UnTruncateLinks(captionText);
         string readMoreLink = $"{Environment.NewLine}—{Environment.NewLine}➡️ https://bsky.app/profile/{post.Profile.Did}/post/{post.RecordKey}";

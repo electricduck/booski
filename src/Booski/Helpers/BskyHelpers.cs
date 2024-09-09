@@ -1,18 +1,72 @@
-namespace Booski.Utilities;
 using System.Text;
 using Booski.Common;
+using Booski.Contexts;
 using Booski.Lib.Common;
 using Booski.Lib.Polymorphs.AppBsky;
+using Booski.Lib.Polymorphs.ComAtproto;
+using BskyApi = Booski.Lib.Lexicon;
 
-public class BskyUtilities
+namespace Booski.Helpers;
+
+public interface IBskyHelpers
 {
-    public static string GetContentWarning(Polymorph labels)
+    Uri BuildCdnUrl(string did, string link, string mimeType);
+    Task<Lib.Internal.ComAtproto.Responses.ListRecordsResponse> GetProfileFeed(string cursor);
+    string ParseContentWarning(Polymorph labels);
+    Embed ParseEmbeds(Polymorph embed, string did);
+    string ParseFacets(
+        string originalString,
+        List<Booski.Lib.Internal.AppBsky.Common.Facet> facets,
+        string linkStringStart = "<a href=\"[uri]\">",
+        string linkStringEnd = "</a>",
+        string mentionStringStart = "<a href=\"https://bsky.app/profile/[did]\">",
+        string mentionStringEnd = "</a>",
+        string tagStringStart = "<a href=\"https://bsky.app/search?q=%23[tag]\">",
+        string tagStringEnd = "</a>"
+    );
+}
+
+internal sealed class BskyHelpers : IBskyHelpers
+{
+    private BskyApi.Com.Atproto.Repo _atprotoRepo;
+    private IBskyContext _bskyContext;
+
+    public BskyHelpers(
+        BskyApi.Com.Atproto.Repo atprotoRepo,
+        IBskyContext bskyContext
+    )
+    {
+        _atprotoRepo = atprotoRepo;
+        _bskyContext = bskyContext;
+    }
+
+    public Uri BuildCdnUrl(string did, string link, string mimeType)
+    {
+        // TODO: Is this the right way to do this?
+        return new Uri($"https://cdn.bsky.app/img/feed_fullsize/plain/{did}/{link}@{mimeType.Split('/').Last()}");
+    }
+
+    public async Task<Lib.Internal.ComAtproto.Responses.ListRecordsResponse> GetProfileFeed(
+        string cursor
+    )
+    {
+        var listRecordsResponse = await _atprotoRepo.ListRecords(
+            "app.bsky.feed.post",
+            _bskyContext.State.Did,
+            cursor,
+            100
+        );
+
+        return listRecordsResponse.Data;
+    }
+
+    public string ParseContentWarning(Polymorph labels)
     {
         string contentWarning = "";
 
-        if(labels.GetType() == typeof(Booski.Lib.Polymorphs.ComAtproto.LabelDefsSelfLabels))
+        if(labels.GetType() == typeof(LabelDefsSelfLabels))
         {
-            var selfLabels = labels as Booski.Lib.Polymorphs.ComAtproto.LabelDefsSelfLabels;
+            var selfLabels = labels as LabelDefsSelfLabels;
 
             foreach(var label in selfLabels.Values)
             {
@@ -29,7 +83,7 @@ public class BskyUtilities
         return contentWarning;
     }
 
-    public static Embed ParseEmbeds(
+    public Embed ParseEmbeds(
         Polymorph embed,
         string did
     )
@@ -44,37 +98,44 @@ public class BskyUtilities
             case Type when embedType == typeof(EmbedExternal):
                 var embedItem = new EmbedItem();
                 var externalEmbed = embed as EmbedExternal;
-                var externalEmbedUri = externalEmbed.External.Uri;
 
-                if (
-                    externalEmbedUri.ToString().Contains("media.tenor.com") &&
-                    externalEmbedUri.ToString().Contains(".gif")
-                )
+                if(externalEmbed != null)
                 {
-                    parsedEmbeds.Type = Enums.EmbedType.Gif;
-                    embedItem.MimeType = "image/gif";
+                    var externalEmbedUri = externalEmbed.External.Uri;
+
+                    if (
+                        externalEmbedUri.ToString().Contains("media.tenor.com") &&
+                        externalEmbedUri.ToString().Contains(".gif")
+                    )
+                    {
+                        parsedEmbeds.Type = Enums.EmbedType.Gif;
+                        embedItem.MimeType = "image/gif";
+                    }
+
+                    embedItem.Uri = externalEmbedUri;
+
+                    parsedEmbeds.Items.Add(embedItem);
                 }
-
-                embedItem.Uri = externalEmbedUri;
-
-                parsedEmbeds.Items.Add(embedItem);
                 break;
 
             case Type when embedType == typeof(EmbedImages):
                 var imagesEmbed = embed as EmbedImages;
                 parsedEmbeds.Type = Enums.EmbedType.Images;
 
-                foreach (var image in imagesEmbed.Images)
+                if(imagesEmbed != null)
                 {
-                    var imageFile = image.File as Booski.Lib.Internal.ComAtproto.Common.FileBlob;
-                    var imageUri = GetCdnUri(did, imageFile.Ref.Link, imageFile.MimeType);
+                    foreach (var image in imagesEmbed.Images)
+                    {
+                        var imageFile = image.File as Booski.Lib.Internal.ComAtproto.Common.FileBlob;
+                        var imageUri = BuildCdnUrl(did, imageFile.Ref.Link, imageFile.MimeType);
 
-                    parsedEmbeds.Items.Add(
-                        new EmbedItem {
-                            MimeType = imageFile.MimeType,
-                            Uri = imageUri
-                        }
-                    );
+                        parsedEmbeds.Items.Add(
+                            new EmbedItem {
+                                MimeType = imageFile.MimeType,
+                                Uri = imageUri
+                            }
+                        );
+                    }
                 }
                 break;
         }
@@ -82,7 +143,7 @@ public class BskyUtilities
         return parsedEmbeds;
     }
 
-    public static string ParseFacets(
+    public string ParseFacets(
         string originalString,
         List<Booski.Lib.Internal.AppBsky.Common.Facet> facets,
         string linkStringStart = "<a href=\"[uri]\">",
@@ -160,13 +221,7 @@ public class BskyUtilities
         return originalString;
     }
 
-    static Uri GetCdnUri(string did, string link, string mimeType)
-    {
-        // TODO: Is this the right way to do this?
-        return new Uri($"https://cdn.bsky.app/img/feed_fullsize/plain/{did}/{link}@{mimeType.Split('/').Last()}");
-    }
-
-    static ParsedFacet ParseIndividualFacet(
+    ParsedFacet ParseIndividualFacet(
         string originalString,
         string facetStartString,
         string facetEndString,
