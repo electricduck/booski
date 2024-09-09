@@ -1,3 +1,5 @@
+using System.Text;
+
 namespace Booski;
 
 public class Say
@@ -28,17 +30,31 @@ public class Say
         string reason = ""
     )
     {
+        var emojiByteLength = Encoding.UTF8.GetBytes(emoji).Length;
+        var emojiPadding = 0;
+
+        // i don't fuckin understand unicode
+        switch(emojiByteLength)
+        {
+            case 3:
+            case 4:
+                emojiPadding = 1;
+                break;
+            case 5:
+            case 6:
+                emojiPadding = 2;
+                break;
+        }
+
+        var emojiPaddingString = new String(' ', emojiPadding);
+
         if(!String.IsNullOrEmpty(emoji))
-            message = $"{emoji}  {message}";
+            message = $"{emoji}{emojiPaddingString}{message}";
 
         if(!String.IsNullOrEmpty(reason))
         {
-            string padding = "";
-
-            if(!String.IsNullOrEmpty(emoji))
-                padding = new String(' ', emoji.Length + 1);
-
-            message = $"{message}{Environment.NewLine}{padding}{reason}";
+            var reasonPadding = $"{emojiPaddingString} ";
+            message = $"{message}{Environment.NewLine}{reasonPadding}{reason}";
         }
 
         Console.WriteLine(message);
