@@ -100,8 +100,7 @@ internal sealed class App : IApp
             var latestTag = latestRelease.TagName;
             var latestVersion = latestTag.Split('/').Last();
             var latestVersionLink = $"https://github.com/electricduck/booski/releases/tag/{HttpUtility.UrlEncode(latestTag)}";
-            //var runningVersion = GetVersion();
-            var runningVersion = "0.1";
+            var runningVersion = GetVersion();
 
             if(latestVersion != runningVersion)
             {
