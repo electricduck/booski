@@ -5,6 +5,8 @@ using Booski.Common;
 using Booski.Contexts;
 using Booski.Helpers;
 using Booski.Lib;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Http;
 
 namespace Booski;
 
@@ -29,6 +31,7 @@ public class Program
             builder.Services.AddSingleton<ITelegramHelpers, TelegramHelpers>();
             builder.Services.AddSingleton<IXContext, XContext>();
             builder.Services.AddSingleton<IXHelpers, XHelpers>();
+            builder.Services.RemoveAll<IHttpMessageHandlerBuilderFilter>();
 
             using IHost host = builder.Build();
 
