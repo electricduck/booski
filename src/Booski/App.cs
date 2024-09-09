@@ -2,15 +2,18 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Web;
 using Booski.Common;
+using Booski.Common.Config;
 using Booski.Contexts;
 using Booski.Helpers;
 using Booski.Lib;
+using Microsoft.Extensions.Configuration;
 using BskyApi = Booski.Lib.Lexicon;
 
 namespace Booski;
 
 public interface IApp
 {
+    ConfigRoot Config { get; set; }
     Options Options { get; set; }
 
     Task Run(Options o);
@@ -18,6 +21,7 @@ public interface IApp
 
 internal sealed class App : IApp
 {
+    public ConfigRoot Config { get; set; }
     public Options Options { get; set; }
 
     private AtProto _atProto;
@@ -61,7 +65,7 @@ internal sealed class App : IApp
             await CheckUpdates();
         
         await ConfigureApp(o.ConfigPath);
-        await CreateBskyClient(o);
+        await CreateBskyClient();
         await CreateAdditionalClients(o);
 
         if (
@@ -149,6 +153,14 @@ internal sealed class App : IApp
 
         Say.Info($"Using config path: {configPath}");
 
+        IConfiguration config = new ConfigurationBuilder()
+            .AddJsonFile(Path.Combine(configPath, "booski.json"))
+            .AddEnvironmentVariables()
+            .Build();
+
+        Config = new ConfigRoot();
+        Config.Clients = config.GetRequiredSection("Clients").Get<ClientsConfig>();
+        
         if (!Directory.Exists(configPath))
             Directory.CreateDirectory(configPath);
 
@@ -207,19 +219,26 @@ internal sealed class App : IApp
         }
     }
 
-    private async Task CreateBskyClient(Options o)
+    private async Task CreateBskyClient()
     {
         _bskyContext.State = new BskyState();
 
+        if(
+            Config == null &&
+            Config?.Clients == null &&
+            Config?.Clients?.Bsky == null
+        )
+            return;
+
         await _atProto.CreateSession(
-            o.BskyUsername,
-            o.BskyPassword,
-            o.BskyHost
+            Config?.Clients?.Bsky?.Username,
+            Config?.Clients?.Bsky?.Password,
+            Config?.Clients?.Bsky?.Host
         );
 
         if (_atProto.GetSession() != null)
         {
-            var bskyProfileResponse = await _bskyActor.GetProfile(o.BskyUsername);
+            var bskyProfileResponse = await _bskyActor.GetProfile(Config?.Clients?.Bsky?.Username);
             _bskyContext.State.Profile = bskyProfileResponse.Data;
             _bskyContext.State.SetAdditionalFields();
 
