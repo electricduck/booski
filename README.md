@@ -10,7 +10,7 @@
     <strong>
         <a href="https://github.com/electricduck/booski/releases/latest">⬇️ Download</a> &nbsp;|&nbsp;
         <a href="https://github.com/electricduck/booski/wiki/Getting-Started">✨ Getting Started</a> &nbsp;|&nbsp;
-        <a href="https://github.com/electricduck/booski/wiki">📖 Docs </a> &nbsp;|&nbsp;
+        <a href="https://github.com/electricduck/booski/wiki">📖 Docs</a> &nbsp;|&nbsp;
         <a href="https://github.com/electricduck/booski/issues/new">💣 Submit Issue</a>
     </strong>
 </p>
