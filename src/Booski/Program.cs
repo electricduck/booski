@@ -217,7 +217,6 @@ public class Program
                         var homeDir = Environment.GetEnvironmentVariable("HOME");
                         if (!String.IsNullOrEmpty(homeDir))
                             homeConfDir = Path.Combine(homeDir, ".config");
-                        appName = appNameLower;
                     }
 
                     if (!String.IsNullOrEmpty(homeConfDir))
