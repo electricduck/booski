@@ -19,7 +19,7 @@
 
 ## ✨ Quick Start
 
-_This Quick Start makes general assumptions about your environment, such as using Linux (x86_64). For a more comprehensive guide, see [Getting Started](https://github.com/electricduck/booski/wiki/Getting-Started)._
+>  This Quick Start makes general assumptions about your environment, such as using Linux (x86_64). For a more comprehensive guide, see [Getting Started](https://github.com/electricduck/booski/wiki/Getting-Started).
 
 ```sh
 cd ~/.local/bin
@@ -30,7 +30,7 @@ chmod +x booski-0.3.3-linux-x64.bin
 
 ## 🏗️ Building
 
-This reposity currently houses two tangenically related projects (under `./src`): the Bluesky cross-poster (`Booski`), and a general-purpose Bluesky library (`Booski.Lib`).
+This repository currently houses two tangenically related projects (under `./src`): the Bluesky cross-poster (`Booski`), and a general-purpose Bluesky library (`Booski.Lib`).
 
 > For some background, Booski began life as a Bluesky library. Shortly into development, these plans folded as maitaining a library (especially for an ever-evolving unstable API) is a hard task at scale and [another, more feature-complete, Bluesky library already exists](https://github.com/drasticactions/FishyFlip). Instead of ditching weeks-worth of work that created the library (it's some of my best work, if I do say so myself) it was decided to utilize it for the new cross-poster, which itself became **Booski**, and the library became **Booski.Lib**.
 >
