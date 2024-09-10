@@ -44,7 +44,7 @@ internal sealed class RunCommand : IRunCommand
     {
         await CreateBskyClient(Program.Config.Clients);
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
-        await CreateAdditionalClients(Program.Config.Clients);
+        await CreateAdditionalClients(Program.Config.Clients, o);
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
 
         if(o.ExitAfterConnecting)
@@ -68,7 +68,7 @@ internal sealed class RunCommand : IRunCommand
         }
     }
 
-    private async Task CreateAdditionalClients(ClientsConfig clientsConfig)
+    private async Task CreateAdditionalClients(ClientsConfig clientsConfig, RunOptions o)
     {
         _httpContext.CreateClient($"Booski/{Program.GetVersion()}");
         _mastodonContext.ResetClient();
@@ -76,6 +76,7 @@ internal sealed class RunCommand : IRunCommand
         _xContext.ResetClient();
 
         if (
+            !o.NoConnectMastodon &&
             clientsConfig.Mastodon != null &&
             !String.IsNullOrEmpty(clientsConfig.Mastodon.Instance) &&
             !String.IsNullOrEmpty(clientsConfig.Mastodon.Token)
@@ -93,6 +94,7 @@ internal sealed class RunCommand : IRunCommand
         }
 
         if (
+            !o.NoConnectTelegram &&
             clientsConfig.Telegram != null &&
             !String.IsNullOrEmpty(clientsConfig.Telegram.Channel) &&
             !String.IsNullOrEmpty(clientsConfig.Telegram.Token)
@@ -109,7 +111,14 @@ internal sealed class RunCommand : IRunCommand
                 Say.Warning("Unable to connect to Telegram");
         }
 
+        if(
+            !o.NoConnectThreads
+        )
+        {
+        }
+
         if (
+            !o.NoConnectX&&
             clientsConfig.X != null &&
             !String.IsNullOrEmpty(clientsConfig.X.AccessToken) &&
             !String.IsNullOrEmpty(clientsConfig.X.AccessSecret) &&

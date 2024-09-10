@@ -7,6 +7,14 @@ public class RunOptions : GlobalOptions
 {
     [Option('s', "sleep-time", Default = 1, HelpText = "Interval (in seconds) between checking for new posts on Bluesky.")]
     public int SleepTime { get; set; }
+    [Option("no-connect-mastodon", HelpText = "Do not connect to Mastodon.")]
+    public bool NoConnectMastodon { get; set; }
+    [Option("no-connect-telegram", HelpText = "Do not connect to Telegram.")]
+    public bool NoConnectTelegram { get; set; }
+    [Option("no-connect-threads", HelpText = "Do not connect to Threads.")]
+    public bool NoConnectThreads { get; set; }
+    [Option("no-connect-x", HelpText = "Do not connect to X.")]
+    public bool NoConnectX { get; set; }
     [Option("exit-connect", HelpText = "Exit after connecting to services.")]
     public bool ExitAfterConnecting { get; set; }
     [Option("exit-run-once", HelpText = "Exit after first loop.")]
