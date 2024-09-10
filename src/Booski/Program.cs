@@ -172,30 +172,45 @@ public class Program
     {
         ConfigDir = Environment.GetEnvironmentVariable("BOOSKI_CONFIG_PATH");
 
-        if (String.IsNullOrEmpty(ConfigDir))
-        {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                var linuxUser = Environment.GetEnvironmentVariable("USER");
-                var linuxHome = Environment.GetEnvironmentVariable("HOME");
+        string appName = "Booski"; // TODO: Get programatically
+        string appNameLower = appName.ToLower().Replace(" ", "-"); 
 
-                if (linuxUser == "root")
-                {
-                    ConfigDir = "/etc/booski";
-                }
-                else
-                {
-                    if (!String.IsNullOrEmpty(linuxHome))
-                    {
-                        ConfigDir = Path.Combine(linuxHome, ".config", "booski");
-                    }
-                }
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        if (String.IsNullOrEmpty(ConfigDir))
+        {            
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 var windowsLocalAppData = Environment.SpecialFolder.LocalApplicationData.ToString();
                 if (!String.IsNullOrEmpty(windowsLocalAppData))
-                    ConfigDir = Path.Combine(windowsLocalAppData, "Booski");
+                    ConfigDir = Path.Combine(windowsLocalAppData, appName);
+            }
+            else
+            {
+                var user = Environment.GetEnvironmentVariable("USER");
+
+                if (user == "root")
+                {
+                    ConfigDir = $"/etc/{appName}";
+                }
+                else
+                {
+                    var homeConfDir = "";
+
+                    if(RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                    {
+                        // TODO: Get homedir properly on macOS
+                        homeConfDir = $"/Users/{user}/Library/Preferences";
+                    }
+                    else
+                    {
+                        var homeDir = Environment.GetEnvironmentVariable("HOME");
+                        if(!String.IsNullOrEmpty(homeDir))
+                        	homeConfDir = Path.Combine(homeDir, ".config");
+                        appName = appNameLower;
+                    }
+
+                    if (!String.IsNullOrEmpty(homeConfDir))
+                        ConfigDir = Path.Combine(homeConfDir, ".config", appName);
+                }
             }
 
             if (string.IsNullOrEmpty(ConfigDir))
