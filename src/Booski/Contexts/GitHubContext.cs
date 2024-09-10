@@ -7,6 +7,7 @@ public interface IGitHubContext
     GitHubClient? Client { get; set; }
 
     Task CreateClient();
+    void ResetClient();
 }
 
 internal sealed class GitHubContext : IGitHubContext

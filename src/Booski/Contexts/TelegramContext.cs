@@ -44,7 +44,7 @@ internal sealed class TelegramContext : ITelegramContext
         if(clientTestApi)
         {
             State.Account = await Client.GetMeAsync();
-            State.Channel = channel; // TODO: Check if channel is valid?
+            State.Channel = channel;
             State.SetAdditionalFields();
 
             IsConnected = true;

@@ -4,6 +4,20 @@ namespace Booski;
 
 public class Say
 {
+    static bool IsLastSaySeparate { get; set; }
+
+    public static void Custom(string message, string reason = "", string emoji = "", bool separate = false)
+    {
+        ConsoleMessage(message, emoji, reason, separate);
+    }
+
+    public static void Debug(string message, string reason = "")
+    {
+#if DEBUG
+        ConsoleMessage(message, "⚙️", reason);
+#endif
+    }
+
     public static void Error(Exception e)
     {
         ConsoleMessage($"Error: {e.Message}", "🛑");
@@ -16,7 +30,11 @@ public class Say
 
     public static void Separate(int length = 80, char separator = '-')
     {
-        Console.WriteLine(new String(separator, length));
+        if(!IsLastSaySeparate)
+        {
+            Console.WriteLine(new String(separator, length));
+            IsLastSaySeparate = true;
+        }
     }
 
     public static void Success(string message)
@@ -24,15 +42,16 @@ public class Say
         ConsoleMessage(message, "✅");
     }
 
-    public static void Warning(string message, string reason = "")
+    public static void Warning(string message, string reason = "", bool separate = false)
     {
-        ConsoleMessage(message, "⚠️", reason);
+        ConsoleMessage(message, "⚠️", reason, separate);
     }
 
     static void ConsoleMessage(
         string message,
         string emoji = "",
-        string reason = ""
+        string reason = "",
+        bool separate = false
     )
     {
         var emojiByteLength = Encoding.UTF8.GetBytes(emoji).Length;
@@ -62,6 +81,13 @@ public class Say
             message = $"{message}{Environment.NewLine}{reasonPadding}{reason}";
         }
 
+        if(separate)
+            Separate();
+        
         Console.WriteLine(message);
+        IsLastSaySeparate = false;
+
+        if(separate)
+            Separate();
     }
 }

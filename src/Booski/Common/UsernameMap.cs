@@ -7,5 +7,6 @@ public class UsernameMap {
 
     public string Mastodon_Handle { get; set; }
     public string Telegram_Handle { get; set; }
-    public string X_Handle { get; set; } // NOTE: Futureproofing. X support is not a priority
+    public string Threads_Handle { get; set; } // Note: Futureproofing. Threads is not a priority.
+    public string X_Handle { get; set; }
 }
