@@ -28,7 +28,7 @@ public class Program
 {
     "Clients": {
         "Bluesky": {
-            "Host": "public.apk.bsky.app",
+            "Host": "public.api.bsky.app",
             "Password": "",
             "Username": ""
         },
