@@ -1,14 +1,7 @@
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Web;
-using Microsoft.Extensions.Configuration;
-using Booski.Common;
 using Booski.Common.Config;
 using Booski.Common.Options;
 using Booski.Contexts;
 using Booski.Helpers;
-using Booski.Lib;
-using BskyApi = Booski.Lib.Lexicon;
 
 namespace Booski.Commands;
 
@@ -23,10 +16,7 @@ internal sealed class RunCommand : IRunCommand
 {
     public RunOptions Options { get; set; }
 
-    private AtProto _atProto;
-    private BskyApi.App.Bsky.Actor _bskyActor;
     private IBskyContext _bskyContext;
-    private IGitHubContext _githubContext;
     private IHttpContext _httpContext;
     private IMastodonContext _mastodonContext;
     private IPostHelpers _postHelpers;
@@ -34,10 +24,7 @@ internal sealed class RunCommand : IRunCommand
     private IXContext _xContext;
 
     public RunCommand(
-        AtProto atProto,
-        BskyApi.App.Bsky.Actor bskyActor,
         IBskyContext bskyContext,
-        IGitHubContext githubContext,
         IHttpContext httpContext,
         IMastodonContext mastodonContext,
         IPostHelpers postHelpers,
@@ -45,10 +32,7 @@ internal sealed class RunCommand : IRunCommand
         IXContext xContext
     )
     {
-        _atProto = atProto;
-        _bskyActor = bskyActor;
         _bskyContext = bskyContext;
-        _githubContext = githubContext;
         _httpContext = httpContext;
         _mastodonContext = mastodonContext;
         _postHelpers = postHelpers;
@@ -158,41 +142,18 @@ internal sealed class RunCommand : IRunCommand
 
     private async Task CreateBskyClient(ClientsConfig clientsConfig)
     {
-        _bskyContext.State = new BskyState();
+        await _bskyContext.CreateSession(clientsConfig);
 
-        if(
-            clientsConfig == null &&
-            clientsConfig?.Bluesky == null
-        )
-            return;
-
-#pragma warning disable CS8604 // Possible null reference argument.
-        await _atProto.CreateSession(
-            clientsConfig?.Bluesky?.Username,
-            clientsConfig?.Bluesky?.Password,
-            clientsConfig?.Bluesky?.Host
-        );
-#pragma warning restore CS8604 // Possible null reference argument.
-
-        if (_atProto.GetSession() != null)
+        if (!String.IsNullOrEmpty(_bskyContext.State.Did))
         {
-#pragma warning disable CS8604 // Possible null reference argument.
-            var bskyProfileResponse = await _bskyActor.GetProfile(clientsConfig?.Bluesky?.Username);
-#pragma warning restore CS8604 // Possible null reference argument.
-            _bskyContext.State.Profile = bskyProfileResponse.Data;
-            _bskyContext.State.SetAdditionalFields();
-
-            if (!String.IsNullOrEmpty(_bskyContext.State.Did))
-            {
-                _bskyContext.IsConnected = true;
-                Say.Success($"Connected to Bluesky: {_bskyContext.State.Handle} ({_bskyContext.State.Did})");
-            }
-            else
-            {
-                _bskyContext.IsConnected = false;
-                _bskyContext.State = null;
-                Say.Warning("Unable to connect to Bluesky");
-            }
+            _bskyContext.IsConnected = true;
+            Say.Success($"Connected to Bluesky: {_bskyContext.State.Handle} ({_bskyContext.State.Did})");
+        }
+        else
+        {
+            _bskyContext.IsConnected = false;
+            _bskyContext.State = null;
+            Say.Warning("Unable to connect to Bluesky");
         }
     }
 }
