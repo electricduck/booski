@@ -69,10 +69,15 @@ internal sealed class MastodonHelpers : IMastodonHelpers
             }
         }
 
+        bool sensitive = false;
+
+        if(post.Sensitivity != Enums.Sensitivity.None)
+            sensitive = true;
+
         sentMessage = await _mastodonContext.Client.PublishStatus(
             mediaIds: messageAttachments.Select(ma => ma.Id).ToArray(),
             replyStatusId: replyId,
-            sensitive: post.Sensitive,
+            sensitive: sensitive,
             status: await GenerateStatusText(post),
             visibility: Visibility.Public
         );
