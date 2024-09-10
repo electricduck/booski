@@ -3,7 +3,7 @@
 </h1>
 
 <p align="center">
-    <strong>Booski</strong> is a Bluesky cross-poster for inferior services<br /><em>(and a .NET library for <a href="https://atproto.com/">ATProto</a> and <a href="https://bsky.social/">Bluesky</a>)</em>
+    <strong>Booski</strong> is a Bluesky cross-poster for inferior services*<br /><em>(and a .NET library for <a href="https://atproto.com/">ATProto</a> and <a href="https://bsky.social/">Bluesky</a>)</em>
 </p>
 
 <p align="center">
@@ -16,6 +16,17 @@
 </p>
 
 <hr />
+
+## ✨ Quick Start
+
+_This Quick Start makes general assumptions about your environment, such as using Linux (x86_64). For a more comprehensive guide, see [Getting Started](https://github.com/electricduck/booski/wiki/Getting-Started)._
+
+```sh
+cd ~/.local/bin
+wget https://github.com/electricduck/booski/releases/download/v%2F0.x%2F0.3.3/booski-0.3.3-linux-x64.bin
+chmod +x booski-0.3.3-linux-x64.bin
+./booski-0.3.3-linux-x64.bin run
+```
 
 ## 🏗️ Building
 
