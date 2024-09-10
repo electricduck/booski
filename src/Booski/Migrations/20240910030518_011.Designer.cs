@@ -3,6 +3,7 @@ using System;
 using Booski;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Booski.Migrations
 {
     [DbContext(typeof(Database))]
-    partial class DatabaseModelSnapshot : ModelSnapshot
+    [Migration("20240910030518_011")]
+    partial class _011
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.8");
@@ -66,15 +69,19 @@ namespace Booski.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Mastodon_Handle")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Telegram_Handle")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Threads_Handle")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("X_Handle")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Bluesky_Did");

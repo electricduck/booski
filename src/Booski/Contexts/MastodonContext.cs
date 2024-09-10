@@ -38,9 +38,6 @@ internal sealed class MastodonContext : IMastodonContext
 
         State = new MastodonState();
 
-        if(!instance.StartsWith("https://"))
-            instance = $"https://{instance}";
-
         var authClient = new AuthenticationClient(instance, _httpContext.Client);
         Client = new MastodonClient(instance, token, _httpContext.Client);
 

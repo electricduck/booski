@@ -1,6 +1,7 @@
 using System.Text;
 using Booski.Common;
 using Booski.Contexts;
+using Booski.Enums;
 using Booski.Lib.Common;
 using Booski.Lib.Polymorphs.AppBsky;
 using Booski.Lib.Polymorphs.ComAtproto;
@@ -12,7 +13,6 @@ public interface IBskyHelpers
 {
     Uri BuildCdnUrl(string did, string link, string mimeType);
     Task<Lib.Internal.ComAtproto.Responses.ListRecordsResponse> GetProfileFeed(string cursor);
-    string ParseContentWarning(Polymorph labels);
     Embed ParseEmbeds(Polymorph embed, string did);
     string ParseFacets(
         string originalString,
@@ -24,6 +24,7 @@ public interface IBskyHelpers
         string tagStringStart = "<a href=\"https://bsky.app/search?q=%23[tag]\">",
         string tagStringEnd = "</a>"
     );
+    Sensitivity ParseLabels(Polymorph labels);
 }
 
 internal sealed class BskyHelpers : IBskyHelpers
@@ -58,29 +59,6 @@ internal sealed class BskyHelpers : IBskyHelpers
         );
 
         return listRecordsResponse.Data;
-    }
-
-    public string ParseContentWarning(Polymorph labels)
-    {
-        string contentWarning = "";
-
-        if(labels.GetType() == typeof(LabelDefsSelfLabels))
-        {
-            var selfLabels = labels as LabelDefsSelfLabels;
-
-            foreach(var label in selfLabels.Values)
-            {
-                contentWarning = label.Val switch
-                {
-                    "nudity" => "Nudity",
-                    "porn" => "Porn",
-                    "sexual" => "Suggestive",
-                    _ => "Unknown"
-                };
-            }
-        }
-
-        return contentWarning;
     }
 
     public Embed ParseEmbeds(
@@ -252,5 +230,31 @@ internal sealed class BskyHelpers : IBskyHelpers
         parsedFacet.Text = Encoding.UTF8.GetString(newStringByteList.ToArray());
 
         return parsedFacet;
+    }
+
+    public Sensitivity ParseLabels(Polymorph labels)
+    {
+        Sensitivity contentWarning = Sensitivity.None;
+
+        if(labels.GetType() == typeof(LabelDefsSelfLabels))
+        {
+            var selfLabels = labels as LabelDefsSelfLabels;
+
+            if(selfLabels != null)
+            {
+                foreach(var label in selfLabels.Values)
+                {
+                    contentWarning = label.Val switch
+                    {
+                        "nudity" => Sensitivity.Nudity,
+                        "porn" => Sensitivity.Porn,
+                        "sexual" => Sensitivity.Suggestive,
+                        _ => Sensitivity.None
+                    };
+                }
+            }
+        }
+
+        return contentWarning;
     }
 }

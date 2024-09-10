@@ -131,7 +131,7 @@ internal sealed class PostHelpers : IPostHelpers
             PostLog? replyParentPostLog = await GetReplyParentForPost(post);
 
             if (post.Record.Labels != null)
-                post.Sensitive = !String.IsNullOrEmpty(_bskyHelpers.ParseContentWarning(post.Record.Labels));
+                post.Sensitivity = _bskyHelpers.ParseLabels(post.Record.Labels);
         
             if(
                 _mastodonContext.IsConnected &&
@@ -154,7 +154,7 @@ internal sealed class PostHelpers : IPostHelpers
             )
             {
                 // BUG: If the user forgets to pass --horny-only-x, their X will be irreversibly flooded
-                if(HornyOnlyOnX && !post.Sensitive)
+                if(HornyOnlyOnX && post.Sensitivity == Enums.Sensitivity.None)
                     continue;
 
                 await SyncAddedPostWithX(postLog, post, embed, replyParentPostLog);

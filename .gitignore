@@ -402,6 +402,5 @@ FodyWeavers.xsd
 # End of https://www.toptal.com/developers/gitignore/api/csharp
 
 /examples
-/booski.sln
 *.db
 *.db-*

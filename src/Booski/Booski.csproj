@@ -14,21 +14,29 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.8" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.2" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
+    <PackageReference Include="Octokit" Version="13.0.1" />
     <PackageReference Include="Telegram.Bot" Version="19.0.0" />
   </ItemGroup>
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net9.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <PublishSelfContained>true</PublishSelfContained>
-    <PublishSingleFile>true</PublishSingleFile>
-    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <Version Condition="'$(RELEASE_VERSION)' != ''">$(RELEASE_VERSION)</Version>
     <VersionPrefix Condition="'$(RELEASE_VERSION)' == ''">0.2.1</VersionPrefix>
     <!--VersionSuffix Condition="'$(RELEASE_VERSION)' == ''">$([System.DateTime]::UtcNow.ToString(`yyyyMMdd-HHmm`))</VersionSuffix-->
+
+    <Authors>Ducky</Authors>
+    <Product>Booski</Product>
+    <ProjectUrl>https://github.com/electricduck/booski</ProjectUrl>
+    <RepositoryUrl>https://github.com/electricduck/booski</RepositoryUrl>
+    
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <Nullable>enable</Nullable>
+    <OutputType>Exe</OutputType>
+    <PublishSelfContained>true</PublishSelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <TargetFramework>net9.0</TargetFramework>
   </PropertyGroup>
 
 </Project>
