@@ -213,12 +213,12 @@ public class Program
                     }
 
                     if (!String.IsNullOrEmpty(homeConfDir))
-                        ConfigDir = Path.Combine(homeConfDir, ".config", appName);
+                        ConfigDir = Path.Combine(homeConfDir, appName);
                 }
             }
         }
 
-        if (!String.IsNullOrEmpty(ConfigDir))
+        if (String.IsNullOrEmpty(ConfigDir))
             ConfigDir = Path.Combine(Directory.GetCurrentDirectory(), "config");
 
         if (!String.IsNullOrEmpty(configDirSuffix))
