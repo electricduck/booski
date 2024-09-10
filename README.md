@@ -17,6 +17,8 @@
 
 <hr />
 
+## 🏗️ Building
+
 This reposity currently houses two tangenically related projects (under `./src`): the Bluesky cross-poster (`Booski`), and a general-purpose Bluesky library (`Booski.Lib`).
 
 > For some background, Booski began life as a Bluesky library. Shortly into development, these plans folded as maitaining a library (especially for an ever-evolving unstable API) is a hard task at scale and [another, more feature-complete, Bluesky library already exists](https://github.com/drasticactions/FishyFlip). Instead of ditching weeks-worth of work that created the library (it's some of my best work, if I do say so myself) it was decided to utilize it for the new cross-poster, which itself became **Booski**, and the library became **Booski.Lib**.
@@ -53,3 +55,9 @@ _(Todo)_
 #### _Booski.Lib_
 
 _(Todo)_
+
+<!--
+## 🤝 Acknowledgements
+
+_(Todo)_
+-->
