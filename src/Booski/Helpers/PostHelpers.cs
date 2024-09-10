@@ -154,7 +154,7 @@ internal sealed class PostHelpers : IPostHelpers
             )
             {
                 // BUG: If the user forgets to pass --horny-only-x, their X will be irreversibly flooded
-                if(HornyOnlyOnX && post.Sensitivity != Enums.Sensitivity.None)
+                if(HornyOnlyOnX && post.Sensitivity == Enums.Sensitivity.None)
                     continue;
 
                 await SyncAddedPostWithX(postLog, post, embed, replyParentPostLog);

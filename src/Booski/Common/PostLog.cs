@@ -1,10 +1,9 @@
 namespace Booski.Common;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 public class PostLog {
     [Key]
-    public string RecordKey { get; set; }
+    public string? RecordKey { get; set; }
 
     public string? Repository { get; set; }
 
