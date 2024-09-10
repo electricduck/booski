@@ -177,7 +177,15 @@ public class Program
         var configDirSuffix = Environment.GetEnvironmentVariable("BOOSKI_CONFIG_DIR_SUFFIX");
 
         string appName = "Booski"; // TODO: Get programatically
-        string appNameLower = appName.ToLower().Replace(" ", "-");
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            appName = appName.ToLower().Replace(" ", "-");
+
+        if(
+            RuntimeInformation.IsOSPlatform(OSPlatform.Linux) &&
+            Directory.Exists("/etc/Booski")
+        )
+            Directory.Move("/etc/Booski", "/etc/booski");
 
         if (String.IsNullOrEmpty(ConfigDir))
         {
