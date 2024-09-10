@@ -65,7 +65,6 @@ public class Program
             builder.Services.AddSingleton<IFileCacheContext, FileCacheContext>();
             builder.Services.AddSingleton<IGitHubContext, GitHubContext>();
             builder.Services.AddSingleton<IHttpContext, HttpContext>();
-            builder.Services.AddSingleton<IMakeConfigCommand, MakeConfigCommand>();
             builder.Services.AddSingleton<IMastodonContext, MastodonContext>();
             builder.Services.AddSingleton<IMastodonHelpers, MastodonHelpers>();
             builder.Services.AddSingleton<IPostHelpers, PostHelpers>();
@@ -79,7 +78,6 @@ public class Program
 
             using IHost host = builder.Build();
 
-            var _makeConfig = host.Services.GetRequiredService<IMakeConfigCommand>();
             var _run = host.Services.GetRequiredService<IRunCommand>();
             var _usernameMap = host.Services.GetRequiredService<IUsernameMapCommand>();
             
@@ -88,11 +86,10 @@ public class Program
             Database.Migrate();
 
             await Parser.Default
-                .ParseArguments<RunOptions, MakeConfigOptions, UsernameMapOptions>(args)
+                .ParseArguments<RunOptions, UsernameMapOptions>(args)
                 .MapResult(
                     (RunOptions o) => _run.Invoke(o),
                     (UsernameMapOptions o) => _usernameMap.Invoke(o),
-                    (MakeConfigOptions o) => _makeConfig.Invoke(o),
                     errs => Task.FromResult(0)
                 );
 
