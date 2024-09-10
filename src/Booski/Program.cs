@@ -80,7 +80,7 @@ public class Program
 
             var _run = host.Services.GetRequiredService<IRunCommand>();
             var _usernameMap = host.Services.GetRequiredService<IUsernameMapCommand>();
-            
+
             await CheckUpdates(host.Services.GetRequiredService<IGitHubContext>());
             Configure();
             Database.Migrate();
@@ -100,7 +100,7 @@ public class Program
 #if DEBUG
                 throw;
 #else
-                Say.Error(e);
+            Say.Error(e);
 #endif
 
 #pragma warning disable CS0162 // Unreachable code detected
@@ -141,7 +141,7 @@ public class Program
     {
         var ignoreUpdates = Environment.GetEnvironmentVariable("BOOSKI_IGNORE_UPDATES");
 
-        if(ignoreUpdates == "1" || ignoreUpdates == "true")
+        if (ignoreUpdates == "1" || ignoreUpdates == "true")
             return;
 
         await _githubContext.CreateClient();
@@ -157,7 +157,7 @@ public class Program
             var latestVersionLink = $"https://github.com/electricduck/booski/releases/tag/{HttpUtility.UrlEncode(latestTag)}";
             var runningVersion = GetVersion();
 
-            if(latestVersion != runningVersion)
+            if (latestVersion != runningVersion)
             {
                 Say.Separate();
                 Say.Warning("An update is available", $"Version {latestVersion} is available. Download from {latestVersionLink}");
@@ -170,13 +170,17 @@ public class Program
 
     static void Configure()
     {
-        ConfigDir = Environment.GetEnvironmentVariable("BOOSKI_CONFIG_PATH");
+        ConfigDir = !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("BOOSKI_CONFIG_DIR")) ?
+            Environment.GetEnvironmentVariable("BOOSKI_CONFIG_DIR") :
+            Environment.GetEnvironmentVariable("BOOSKI_CONFIG_PATH");
+
+        var configDirSuffix = Environment.GetEnvironmentVariable("BOOSKI_CONFIG_DIR_SUFFIX");
 
         string appName = "Booski"; // TODO: Get programatically
-        string appNameLower = appName.ToLower().Replace(" ", "-"); 
+        string appNameLower = appName.ToLower().Replace(" ", "-");
 
         if (String.IsNullOrEmpty(ConfigDir))
-        {            
+        {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 var windowsLocalAppData = Environment.SpecialFolder.LocalApplicationData.ToString();
@@ -195,7 +199,7 @@ public class Program
                 {
                     var homeConfDir = "";
 
-                    if(RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                    if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                     {
                         // TODO: Get homedir properly on macOS
                         homeConfDir = $"/Users/{user}/Library/Preferences";
@@ -203,8 +207,8 @@ public class Program
                     else
                     {
                         var homeDir = Environment.GetEnvironmentVariable("HOME");
-                        if(!String.IsNullOrEmpty(homeDir))
-                        	homeConfDir = Path.Combine(homeDir, ".config");
+                        if (!String.IsNullOrEmpty(homeDir))
+                            homeConfDir = Path.Combine(homeDir, ".config");
                         appName = appNameLower;
                     }
 
@@ -212,92 +216,93 @@ public class Program
                         ConfigDir = Path.Combine(homeConfDir, ".config", appName);
                 }
             }
+        }
 
-            if (string.IsNullOrEmpty(ConfigDir))
-            {
-                ConfigDir = Path.Combine(Directory.GetCurrentDirectory(), "config");
-            }
+        if (!String.IsNullOrEmpty(ConfigDir))
+            ConfigDir = Path.Combine(Directory.GetCurrentDirectory(), "config");
 
-            ConfigDir = Path.GetFullPath(ConfigDir);
-            ConfigPath = Path.Combine(ConfigDir, "booski.json");
-            DbPath = Path.Combine(ConfigDir, "booski.db");
-            bool firstRun = false;
+        if (!String.IsNullOrEmpty(configDirSuffix))
+            ConfigDir = Path.Combine(ConfigDir, configDirSuffix);
 
-            if (!Directory.Exists(ConfigDir))
-                Directory.CreateDirectory(ConfigDir);
+        ConfigDir = Path.GetFullPath(ConfigDir);
+        ConfigPath = Path.Combine(ConfigDir, "booski.json");
+        DbPath = Path.Combine(ConfigDir, "booski.db");
+        bool firstRun = false;
 
-            if(File.Exists(ConfigPath))
-            {
-                using StreamReader configFileReader = new(ConfigPath);
-                string configFileText = configFileReader.ReadToEnd();
+        if (!Directory.Exists(ConfigDir))
+            Directory.CreateDirectory(ConfigDir);
 
-                if(configFileText == DefaultConfigFileContent)
-                    firstRun = true;
-            }
-            else if(
-                !File.Exists(ConfigPath) ||
-                new FileInfo(ConfigPath).Length == 0 
-            )
-            {
+        if (File.Exists(ConfigPath))
+        {
+            using StreamReader configFileReader = new(ConfigPath);
+            string configFileText = configFileReader.ReadToEnd();
+
+            if (configFileText == DefaultConfigFileContent)
                 firstRun = true;
+        }
+        else if (
+            !File.Exists(ConfigPath) ||
+            new FileInfo(ConfigPath).Length == 0
+        )
+        {
+            firstRun = true;
+        }
+
+        if (firstRun)
+        {
+            File.WriteAllText(ConfigPath, DefaultConfigFileContent);
+            Say.Custom("Hey there, seems like you haven't ran Booski before!", $"Edit the config at '{ConfigPath}'", "👋", true);
+
+            Exit(1);
+        }
+
+        IConfiguration config = new ConfigurationBuilder()
+            .AddJsonFile(ConfigPath)
+            .AddEnvironmentVariables()
+            .Build();
+
+        Config = new ConfigRoot();
+
+        var clientsConfigSection = config.GetRequiredSection("Clients");
+        Config.Clients = clientsConfigSection.Get<ClientsConfig>();
+
+        // TODO: Improve this!
+        if (
+            Config.Clients == null ||
+            Config.Clients.Bluesky == null ||
+            Config.Clients.Bluesky.Password == null ||
+            Config.Clients.Bluesky.Username == null
+        )
+        {
+            Say.Error("Required config values are missing");
+        }
+
+        if (Config.Clients != null)
+        {
+            if (Config.Clients.Bluesky != null)
+            {
+                if (Config.Clients.Bluesky.Host.StartsWith("http://"))
+                    Config.Clients.Bluesky.Host.Replace("http://", "");
+                if (Config.Clients.Bluesky.Host.StartsWith("https://"))
+                    Config.Clients.Bluesky.Host.Replace("https://", "");
             }
 
-            if(firstRun)
+            if (Config.Clients.Mastodon != null)
             {
-                File.WriteAllText(ConfigPath, DefaultConfigFileContent);
-                Say.Custom("Hey there, seems like you haven't ran Booski before!", $"Edit the config at '{ConfigPath}'", "👋", true);
-                
-                Exit(1);
+                if (
+                    !Config.Clients.Mastodon.Instance.StartsWith("https://") &&
+                    !Config.Clients.Mastodon.Instance.StartsWith("http://")
+                )
+                    Config.Clients.Mastodon.Instance = $"https://{Config.Clients.Mastodon.Instance}";
             }
 
-            IConfiguration config = new ConfigurationBuilder()
-                .AddJsonFile(ConfigPath)
-                .AddEnvironmentVariables()
-                .Build();
-
-            Config = new ConfigRoot();
-
-            var clientsConfigSection = config.GetRequiredSection("Clients");
-            Config.Clients = clientsConfigSection.Get<ClientsConfig>();
-
-            // TODO: Improve this!
-            if(
-                Config.Clients == null ||
-                Config.Clients.Bluesky == null ||
-                Config.Clients.Bluesky.Password == null ||
-                Config.Clients.Bluesky.Username == null
-            )
+            if (Config.Clients.Telegram != null)
             {
-                Say.Error("Required config values are missing");
-            }
-
-            if(Config.Clients != null)
-            {
-                if(Config.Clients.Bluesky != null)
-                {
-                    if(Config.Clients.Bluesky.Host.StartsWith("http://"))
-                        Config.Clients.Bluesky.Host.Replace("http://", "");
-                    if(Config.Clients.Bluesky.Host.StartsWith("https://"))
-                        Config.Clients.Bluesky.Host.Replace("https://", "");
-                }
-
-                if(Config.Clients.Mastodon != null)
-                {
-                    if(
-                        !Config.Clients.Mastodon.Instance.StartsWith("https://") &&
-                        !Config.Clients.Mastodon.Instance.StartsWith("http://")
-                    )
-                        Config.Clients.Mastodon.Instance = $"https://{Config.Clients.Mastodon.Instance}";
-                }
-
-                if(Config.Clients.Telegram != null)
-                {
-                    if(
-                        !Config.Clients.Telegram.Channel.StartsWith("-1") &&
-                        !Config.Clients.Telegram.Channel.StartsWith("@")
-                    )
-                        Config.Clients.Telegram.Channel = $"@{Config.Clients.Telegram.Channel}";
-                }
+                if (
+                    !Config.Clients.Telegram.Channel.StartsWith("-1") &&
+                    !Config.Clients.Telegram.Channel.StartsWith("@")
+                )
+                    Config.Clients.Telegram.Channel = $"@{Config.Clients.Telegram.Channel}";
             }
         }
     }
