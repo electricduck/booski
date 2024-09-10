@@ -18,11 +18,11 @@ namespace Booski;
 
 public class Program
 {
-    public static string[] Arguments { get; set; }
+    public static string[]? Arguments { get; set; }
     public static ConfigRoot? Config { get; set; }
-    public static string ConfigDir { get; set; }
-    public static string ConfigPath { get; set; }
-    public static string DbPath { get; set; }
+    public static string? ConfigDir { get; set; }
+    public static string? ConfigPath { get; set; }
+    public static string? DbPath { get; set; }
 
     private static readonly string DefaultConfigFileContent = """
 {
@@ -243,9 +243,7 @@ public class Program
             Config = new ConfigRoot();
 
             var clientsConfigSection = config.GetRequiredSection("Clients");
-
-            if(clientsConfigSection != null)
-                Config.Clients = clientsConfigSection.Get<ClientsConfig>();
+            Config.Clients = clientsConfigSection.Get<ClientsConfig>();
 
             // TODO: Improve this!
             if(
