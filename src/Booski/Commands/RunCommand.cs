@@ -52,14 +52,15 @@ internal sealed class RunCommand : IRunCommand
 
         o.SleepTime = o.SleepTime * 1000;
         o.SleepTimeFetch = o.SleepTimeFetch * 1000;
+        o.SleepTimeSync = o.SleepTimeSync * 1000;
         _postHelpers.HornyOnlyOnX = o.HornyOnlyOnX;
 
         while (true)
         {
             _postHelpers.PostCache = await _postHelpers.BuildPostCache(o.SleepTimeFetch);
 
-            await _postHelpers.SyncDeletedPosts();
-            await _postHelpers.SyncAddedPosts();
+            await _postHelpers.SyncDeletedPosts(o.SleepTimeSync);
+            await _postHelpers.SyncAddedPosts(o.SleepTimeSync, o.RetryIgnoredPosts);
 
             if (o.ExitAfterRunOnce)
                 Environment.Exit(0);

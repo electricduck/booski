@@ -1,14 +1,15 @@
-using Booski.Common;
 using Microsoft.EntityFrameworkCore;
+using Booski.Common;
+using Booski.Enums;
 
 namespace Booski.Data;
 
 public class PostLogs
 {
-    public async static Task<PostLog> AddPostLog(
+    public async static Task<PostLog> AddOrUpdatePostLog(
         string recordKey,
         string repository,
-        bool ignored = false
+        IgnoredReason ignored = IgnoredReason.None
     )
     {
         using (var db = new Database())
@@ -45,9 +46,7 @@ public class PostLogs
     }
 
     public async static Task<int> CountPostLogs(
-        string repository,
-        bool includeDeleted = false,
-        bool includeIgnored = true
+        string repository
     )
     {
         using (var db = new Database())
@@ -55,8 +54,7 @@ public class PostLogs
             var postLogsCount = await db
                 .PostLogs
                 .Where(pl => pl.Repository == repository)
-                .Where(pl => pl.Deleted == includeDeleted)
-                .Where(pl => pl.Ignored == includeIgnored)
+                .Where(pl => pl.Deleted == false)
                 .CountAsync();
 
             return postLogsCount;
@@ -136,7 +134,8 @@ public class PostLogs
 
     public async static Task<PostLog?> IgnorePostLog(
         string recordKey,
-        string repository
+        string repository,
+        IgnoredReason reason = IgnoredReason.None
     )
     {
         using (var db = new Database())
@@ -149,7 +148,7 @@ public class PostLogs
 
             if (existingPostLog != null)
             {
-                existingPostLog.Ignored = true;
+                existingPostLog.Ignored = reason;
                 await db.SaveChangesAsync();
             }
 

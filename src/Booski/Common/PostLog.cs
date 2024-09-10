@@ -1,5 +1,7 @@
-namespace Booski.Common;
 using System.ComponentModel.DataAnnotations;
+using Booski.Enums;
+
+namespace Booski.Common;
 
 public class PostLog {
     [Key]
@@ -17,7 +19,7 @@ public class PostLog {
     public string? X_PostId { get; set; }
 
     public bool Deleted { get; set;}
-    public bool Ignored { get; set; }
+    public IgnoredReason Ignored { get; set; }
     public DateTime UpdatedAt { get; set; }
     public int Version { get; set; }
 }

@@ -73,7 +73,7 @@ internal sealed class BskyContext : IBskyContext
             host
         );
 
-    if (_atProto.GetSession() != null)
+        if (_atProto.GetSession() != null)
         {
             var bskyProfileResponse = await _bskyActorApi.GetProfile(username);
             State.Profile = bskyProfileResponse.Data;

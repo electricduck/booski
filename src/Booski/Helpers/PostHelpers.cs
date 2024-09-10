@@ -1,6 +1,7 @@
 using Booski.Common;
 using Booski.Contexts;
 using Booski.Data;
+using Booski.Enums;
 
 namespace Booski.Helpers;
 
@@ -10,8 +11,8 @@ public interface IPostHelpers
     List<Post> PostCache { get; set; }
 
     Task<List<Post>> BuildPostCache(int fetchSleep);
-    Task SyncAddedPosts();
-    Task SyncDeletedPosts();
+    Task SyncAddedPosts(int syncSleep, bool retryIgnored);
+    Task SyncDeletedPosts(int syncSleep);
 }
 
 internal sealed class PostHelpers : IPostHelpers
@@ -96,10 +97,11 @@ internal sealed class PostHelpers : IPostHelpers
         }
 
         Say.Success($"Fetched {posts.Count()} posts");
+        posts = posts.OrderByDescending(p => p.RecordKey).ToList();
         return posts;
     }
 
-    public async Task SyncAddedPosts()
+    public async Task SyncAddedPosts(int syncSleep, bool retryIgnored)
     {
         bool firstRun = await IsFirstRun();
 
@@ -112,8 +114,8 @@ internal sealed class PostHelpers : IPostHelpers
 
             if (postLog == null)
             {
-                postLog = await PostLogs.AddPostLog(
-                    ignored: firstRun,
+                postLog = await PostLogs.AddOrUpdatePostLog(
+                    ignored: firstRun ? IgnoredReason.FirstRun : IgnoredReason.None,
                     recordKey: post.RecordKey,
                     repository: _bskyContext.State.Did
                 );
@@ -122,9 +124,22 @@ internal sealed class PostHelpers : IPostHelpers
                     Say.Success($"Added: {postLog.RecordKey}");
             }
 
-            await UpdatePostLogIgnored(post, postLog);
+            if(
+                retryIgnored &&
+                postLog.Ignored != IgnoredReason.None &&
+                postLog.Ignored != IgnoredReason.FirstRun
+            )
+            {
+                postLog = await PostLogs.IgnorePostLog(
+                    reason: IgnoredReason.None,
+                    recordKey: post.RecordKey,
+                    repository: _bskyContext.State.Did
+                );
+            }
 
-            if (postLog.Ignored)
+            postLog = await UpdatePostLogIgnored(post, postLog);
+
+            if (postLog.Ignored != IgnoredReason.None)
                 continue;
 
             Embed? embed = await GetEmbedForPost(post);
@@ -159,10 +174,12 @@ internal sealed class PostHelpers : IPostHelpers
 
                 await SyncAddedPostWithX(postLog, post, embed, replyParentPostLog);
             }
+
+            Thread.Sleep(syncSleep);
         }
     }
 
-    public async Task SyncDeletedPosts()
+    public async Task SyncDeletedPosts(int syncSleep)
     {
         if(!await IsFirstRun())
         {
@@ -203,6 +220,7 @@ internal sealed class PostHelpers : IPostHelpers
                     {
                         Say.Success($"Deleted: {postLog.RecordKey}");
                         await PostLogs.DeletePostLog(postLog.RecordKey, _bskyContext.State.Did);
+                        Thread.Sleep(syncSleep);
                     }
                 }
             }
@@ -454,10 +472,10 @@ internal sealed class PostHelpers : IPostHelpers
         return deletedFromX;
     }
 
-    async Task UpdatePostLogIgnored(Post post, PostLog postLog)
+    async Task<PostLog> UpdatePostLogIgnored(Post post, PostLog postLog)
     {
-        if(postLog.Ignored) // NOTE: Posts cannot be un-ignored
-            return;
+        if(postLog.Ignored != IgnoredReason.None)
+            return postLog;
 
         Embed? embed = await GetEmbedForPost(post);
         PostLog? replyParentPostLog = await GetReplyParentForPost(post);
@@ -468,7 +486,7 @@ internal sealed class PostHelpers : IPostHelpers
         )
         {
             Say.Warning($"Ignoring: {postLog.RecordKey}", "Post has embeds but none are supported");
-            postLog = await PostLogs.IgnorePostLog(postLog.RecordKey, _bskyContext.State.Did);
+            postLog = await PostLogs.IgnorePostLog(postLog.RecordKey, _bskyContext.State.Did, IgnoredReason.EmbedsButNotSupported);
         }
 
         if (
@@ -476,14 +494,19 @@ internal sealed class PostHelpers : IPostHelpers
             replyParentPostLog == null
         )
         {
+            // BUG: If you start Booski after a long period and an un-synced post is a reply
+            //      to an un-synced parent it will be inadvertidly ignored.
+            //      --retry-ignored can be passed by the user to attempt to repair these.
             Say.Warning($"Ignoring: {postLog.RecordKey}", "Post is a reply, but parent doesn't exist (either deleted or not ours)");
-            postLog = await PostLogs.IgnorePostLog(postLog.RecordKey, _bskyContext.State.Did);
+            postLog = await PostLogs.IgnorePostLog(postLog.RecordKey, _bskyContext.State.Did, IgnoredReason.ReplyButNoParent);
         }
 
         if (post.Record.Text.StartsWith("@")) // TODO: Check if this is a real mention?
         {
             Say.Warning($"Ignoring: {postLog.RecordKey}", "Post starts with \"@\"");
-            postLog = await PostLogs.IgnorePostLog(postLog.RecordKey, _bskyContext.State.Did);
+            postLog = await PostLogs.IgnorePostLog(postLog.RecordKey, _bskyContext.State.Did, IgnoredReason.StartsWithMention);
         }
+
+        return postLog;
     }
 }
