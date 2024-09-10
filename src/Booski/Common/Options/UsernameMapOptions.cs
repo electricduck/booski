@@ -3,7 +3,7 @@ using Booski.Utilities;
 
 namespace Booski.Common.Options;
 
-[Verb("usernames", HelpText = "Map Bluesky usernames to other services")]
+[Verb("usernames", HelpText = "Map Bluesky usernames to other services.")]
 public class UsernameMapOptions : GlobalOptions
 {
     [Option('u', "username", Required = true, HelpText = "Handle or DID of Bluesky user to operate on.\nExamples: @jay.bsky.team, did:plc:oky5czdrnfjpqslsw2a5iclo.")]
