@@ -2,8 +2,15 @@
 
 platforms=(
     "linux-x64"
+    "linux-arm64"
+    "linux-musl-x64"
+    "linux-musl-arm64"
+    "osx-x64"
+    "osx-arm64"
     "win-x64"
+    "win-arm64"
 )
+# SEE: https://learn.microsoft.com/en-us/dotnet/core/rid-catalog
 
 base_dir="$(dirname "$(realpath -s "$0")")"
 git_tag="$(git describe --exact-match --tags)"
