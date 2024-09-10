@@ -11,7 +11,7 @@ git_commit="$(git rev-parse --short HEAD)"
 version=""
 
 if [[ -z $git_tag ]]; then
-    version="git-$git_commit"
+    version="git.$git_commit"
 else    
     version="$(echo $git_tag | sed 's:.*/::')"
 fi
