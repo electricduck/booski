@@ -47,15 +47,6 @@ internal sealed class RunCommand : IRunCommand
         await CreateAdditionalClients(Program.Config.Clients);
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
 
-        if (
-            _bskyContext.State == null ||
-            _bskyContext.State != null &&
-            _bskyContext.IsConnected == false
-        ) {
-            Say.Warning("Not connected to Bluesky", $"Did you enter your credentials correctly in '{Program.ConfigPath}'?");
-            return;
-        }
-
         if(o.ExitAfterConnecting)
             return;
 
@@ -144,15 +135,13 @@ internal sealed class RunCommand : IRunCommand
     {
         await _bskyContext.CreateSession(clientsConfig);
 
-        if (!String.IsNullOrEmpty(_bskyContext.State.Did))
+        if (_bskyContext.IsConnected)
         {
-            _bskyContext.IsConnected = true;
             Say.Success($"Connected to Bluesky: {_bskyContext.State.Handle} ({_bskyContext.State.Did})");
         }
         else
         {
-            _bskyContext.IsConnected = false;
-            _bskyContext.State = null;
+            _bskyContext.ClearSession();
             Say.Warning("Unable to connect to Bluesky");
         }
     }

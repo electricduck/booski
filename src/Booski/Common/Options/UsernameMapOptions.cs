@@ -17,11 +17,11 @@ public class UsernameMapOptions : GlobalOptions
     public bool GetMap { get; set; }
 
     [Option("mastodon", HelpText = "Handle of Mastodon/ActivityPub user to map Bluesky user to.\nExample: @Gargron@mastodon.social.")]
-    public string MastodonHandle { get; set; }
+    public string? MastodonHandle { get; set; }
     [Option("telegram", HelpText = "Handle of Telegram user to map Bluesky user to.\nExample: @durov.")]
-    public string ThreadsHandle { get; set; }
+    public string? TelegramHandle { get; set; }
     [Option("threads", HelpText = "Handle of Threads user to map Bluesky user to.\nExample: @mosseri.\nNote: Threads is currently not supported, and this option is intended for futureproofing.")]
-    public string TelegramHandle { get; set; }
+    public string? ThreadsHandle { get; set; }
     [Option("xapp", HelpText = "Handle of X user to map Bluesky user to.\nExample: @elonmusk.")]
-    public string XHandle { get; set; }
+    public string? XHandle { get; set; }
 }

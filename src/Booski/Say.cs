@@ -18,9 +18,14 @@ public class Say
 #endif
     }
 
+    public static void Error(string message, string reason = "")
+    {
+        ConsoleMessage($"Error: {message}", "🛑", reason);
+    }
+
     public static void Error(Exception e)
     {
-        ConsoleMessage($"Error: {e.Message}", "🛑");
+        Error(e.Message);
     }
 
     public static void Info(string message, string reason = "")
@@ -77,8 +82,28 @@ public class Say
 
         if(!String.IsNullOrEmpty(reason))
         {
-            var reasonPadding = $"{emojiPaddingString} ";
-            message = $"{message}{Environment.NewLine}{reasonPadding}{reason}";
+            string paddedReason = "";
+
+            using (StringReader reader = new StringReader(reason))
+            {
+                string line = string.Empty;
+                do
+                {
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+                    line = reader.ReadLine();
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+                    if (line != null)
+                    {
+                        paddedReason += Environment.NewLine;
+                        if(!String.IsNullOrEmpty(emojiPaddingString))
+                            paddedReason += $"{emojiPaddingString} ";
+                        paddedReason += line;
+                    }
+
+                } while (line != null);
+            }
+
+            message += paddedReason;
         }
 
         if(separate)

@@ -7,14 +7,16 @@ namespace Booski.Contexts;
 
 public interface IBskyContext
 {
+    bool IsConnected { get; set; }
+    BskyState? State { get; set; }
+
+    void ClearSession();
     Task CreateSession(ClientsConfig clientsConfig);
     Task CreateSession(
         string username,
         string password,
         string host
     );
-    bool IsConnected { get; set; }
-    BskyState? State { get; set; }
 }
 
 internal sealed class BskyContext : IBskyContext
@@ -23,15 +25,21 @@ internal sealed class BskyContext : IBskyContext
     public BskyState? State { get; set; }
 
     private AtProto _atProto;
-    private BskyApi.App.Bsky.Actor _bskyActor;
+    private BskyApi.App.Bsky.Actor _bskyActorApi;
 
     public BskyContext(
         AtProto atProto,
-        BskyApi.App.Bsky.Actor bskyActor
+        BskyApi.App.Bsky.Actor bskyActorApi
     )
     {
         _atProto = atProto;
-        _bskyActor = bskyActor;
+        _bskyActorApi = bskyActorApi;
+    }
+
+    public void ClearSession()
+    {
+        _atProto.ClearSession();
+        State = null;
     }
 
     public async Task CreateSession(ClientsConfig clientsConfig)
@@ -67,9 +75,10 @@ internal sealed class BskyContext : IBskyContext
 
     if (_atProto.GetSession() != null)
         {
-            var bskyProfileResponse = await _bskyActor.GetProfile(username);
+            var bskyProfileResponse = await _bskyActorApi.GetProfile(username);
             State.Profile = bskyProfileResponse.Data;
             State.SetAdditionalFields();
+            IsConnected = true;
         }
     }
 }

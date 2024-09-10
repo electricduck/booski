@@ -160,7 +160,7 @@ public class Program
             if(latestVersion != runningVersion)
             {
                 Say.Separate();
-                Say.Warning("An update is available.", $"Version {latestVersion} is available. Download from {latestVersionLink}.");
+                Say.Warning("An update is available", $"Version {latestVersion} is available. Download from {latestVersionLink}");
                 Say.Separate();
             }
         }
@@ -230,7 +230,7 @@ public class Program
             if(firstRun)
             {
                 File.WriteAllText(ConfigPath, DefaultConfigFileContent);
-                Say.Custom("Hey there, seems like you haven't ran Booski before!", $"Edit the config at '{ConfigPath}'.", "👋", true);
+                Say.Custom("Hey there, seems like you haven't ran Booski before!", $"Edit the config at '{ConfigPath}'", "👋", true);
                 
                 Exit(1);
             }
@@ -246,6 +246,17 @@ public class Program
 
             if(clientsConfigSection != null)
                 Config.Clients = clientsConfigSection.Get<ClientsConfig>();
+
+            // TODO: Improve this!
+            if(
+                Config.Clients == null ||
+                Config.Clients.Bluesky == null ||
+                Config.Clients.Bluesky.Password == null ||
+                Config.Clients.Bluesky.Username == null
+            )
+            {
+                Say.Error("Required config values are missing");
+            }
 
             if(Config.Clients != null)
             {

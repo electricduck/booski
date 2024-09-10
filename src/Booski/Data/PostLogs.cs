@@ -1,6 +1,7 @@
-namespace Booski.Data;
-using Microsoft.EntityFrameworkCore;
 using Booski.Common;
+using Microsoft.EntityFrameworkCore;
+
+namespace Booski.Data;
 
 public class PostLogs
 {
