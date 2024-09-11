@@ -482,7 +482,9 @@ internal sealed class PostHelpers : IPostHelpers
 
         if (
             embed != null &&
-            embed.Items.Count() == 0
+            embed.Items.Count() == 0 &&
+            embed.Type != EmbedType.Unknown &&
+            embed.Type != EmbedType.Video
         )
         {
             Say.Warning($"Ignoring: {postLog.RecordKey}", "Post has embeds but none are supported");
