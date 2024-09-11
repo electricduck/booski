@@ -1,9 +1,9 @@
 
 namespace Booski.Lib.Internal.AppBsky.Common {
-    public class ImageView {
+    public class VideoView {
         public string Alt { get; set; }
         public AspectRatio AspectRatio { get; set; }
-        public Uri Fullsize { get; set; }
-        public Uri Thumb { get; set; }
+        public Uri Playlist { get; set; }
+        public Uri Thumbnail { get; set; }
     }
 }
