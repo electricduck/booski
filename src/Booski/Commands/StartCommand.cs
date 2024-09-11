@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Booski.Common.Config;
 using Booski.Common.Options;
 using Booski.Contexts;
@@ -5,16 +6,16 @@ using Booski.Helpers;
 
 namespace Booski.Commands;
 
-public interface IRunCommand
+public interface IStartCommand
 {
-    RunOptions Options { get; set; }
+    StartOptions Options { get; set; }
 
-    Task Invoke(RunOptions o);
+    Task Invoke(StartOptions o);
 }
 
-internal sealed class RunCommand : IRunCommand
+internal sealed class StartCommand : IStartCommand
 {
-    public RunOptions Options { get; set; }
+    public StartOptions Options { get; set; }
 
     private IBskyContext _bskyContext;
     private IHttpContext _httpContext;
@@ -23,7 +24,7 @@ internal sealed class RunCommand : IRunCommand
     private ITelegramContext _telegramContext;
     private IXContext _xContext;
 
-    public RunCommand(
+    public StartCommand(
         IBskyContext bskyContext,
         IHttpContext httpContext,
         IMastodonContext mastodonContext,
@@ -40,8 +41,31 @@ internal sealed class RunCommand : IRunCommand
         _xContext = xContext;
     }
 
-    public async Task Invoke(RunOptions o)
+    public async Task Invoke(StartOptions o)
     {
+        if(!o.NoDaemon)
+        {
+            string currentProcessPath = Program.CurrentProcess.MainModule.FileName;
+
+            if(Pid.GetPid() != null)
+            {
+                Say.Error("Already running daemon");
+            }
+            else
+            {
+                var newProcess = Process.Start(currentProcessPath, $"start --no-daemon --no-say {Program.Arguments}");
+                var newProcessPid = newProcess.Id;
+                Pid.CreatePid(newProcessPid);
+
+                Say.Success($"Started daemon ({newProcessPid})");
+            }
+
+            Program.Exit(kill: true);
+        }
+
+        if(o.NoSay)
+            Program.NoSay = true;
+
         await CreateBskyClient(Program.Config.Clients);
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
         await CreateAdditionalClients(Program.Config.Clients, o);
@@ -63,13 +87,13 @@ internal sealed class RunCommand : IRunCommand
             await _postHelpers.SyncAddedPosts(o.SleepTimeSync, o.RetryIgnoredPosts);
 
             if (o.ExitAfterRunOnce)
-                Environment.Exit(0);
+                Program.Exit();
             else
                 Thread.Sleep(o.SleepTime);
         }
     }
 
-    private async Task CreateAdditionalClients(ClientsConfig clientsConfig, RunOptions o)
+    private async Task CreateAdditionalClients(ClientsConfig clientsConfig, StartOptions o)
     {
         _httpContext.CreateClient($"Booski/{Program.GetVersion()}");
         _mastodonContext.ResetClient();

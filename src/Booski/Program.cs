@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Web;
 using CommandLine;
@@ -18,11 +19,14 @@ namespace Booski;
 
 public class Program
 {
-    public static string[]? Arguments { get; set; }
+    public static string? Arguments { get; set; }
     public static ConfigRoot? Config { get; set; }
     public static string? ConfigDir { get; set; }
     public static string? ConfigPath { get; set; }
+    public static Process CurrentProcess { get; set; }
     public static string? DbPath { get; set; }
+    public static bool NoSay { get; set; }
+    public static string? PidPath { get; set; }
 
     private static readonly string DefaultConfigFileContent = """
 {
@@ -52,7 +56,19 @@ public class Program
 
     public static async Task Main(string[] args)
     {
-        Arguments = args;
+        CurrentProcess = Process.GetCurrentProcess();
+
+        if(
+            args.Length > 0 &&
+            args[0] == "run"
+        )
+        {
+            args = args.Skip(1).ToArray();
+            args = args.Prepend("--no-daemon").Prepend("start").ToArray();
+        }
+
+        foreach(var arg in args)
+            Arguments+= $"{arg} ";
 
 #pragma warning disable CS0168 // Variable is declared but never used
         try
@@ -68,7 +84,9 @@ public class Program
             builder.Services.AddSingleton<IMastodonContext, MastodonContext>();
             builder.Services.AddSingleton<IMastodonHelpers, MastodonHelpers>();
             builder.Services.AddSingleton<IPostHelpers, PostHelpers>();
-            builder.Services.AddSingleton<IRunCommand, RunCommand>();
+            builder.Services.AddSingleton<IStartCommand, StartCommand>();
+            builder.Services.AddSingleton<IStatusCommand, StatusCommand>();
+            builder.Services.AddSingleton<IStopCommand, StopCommand>();
             builder.Services.AddSingleton<ITelegramContext, TelegramContext>();
             builder.Services.AddSingleton<ITelegramHelpers, TelegramHelpers>();
             builder.Services.AddSingleton<IUsernameMapCommand, UsernameMapCommand>();
@@ -78,7 +96,9 @@ public class Program
 
             using IHost host = builder.Build();
 
-            var _run = host.Services.GetRequiredService<IRunCommand>();
+            var _startCommand = host.Services.GetRequiredService<IStartCommand>();
+            var _statusCommand = host.Services.GetRequiredService<IStatusCommand>();
+            var _stopCommand = host.Services.GetRequiredService<IStopCommand>();
             var _usernameMap = host.Services.GetRequiredService<IUsernameMapCommand>();
 
             await CheckUpdates(host.Services.GetRequiredService<IGitHubContext>());
@@ -86,9 +106,11 @@ public class Program
             Database.Migrate();
 
             await Parser.Default
-                .ParseArguments<RunOptions, UsernameMapOptions>(args)
+                .ParseArguments<StartOptions, StopOptions, StatusOptions, UsernameMapOptions>(args)
                 .MapResult(
-                    (RunOptions o) => _run.Invoke(o),
+                    (StartOptions o) => _startCommand.Invoke(o),
+                    (StopOptions o) => _stopCommand.Invoke(o),
+                    (StatusOptions o) => _statusCommand.Invoke(o),
                     (UsernameMapOptions o) => _usernameMap.Invoke(o),
                     errs => Task.FromResult(0)
                 );
@@ -104,16 +126,21 @@ public class Program
 #endif
 
 #pragma warning disable CS0162 // Unreachable code detected
-            Exit(1);
+            Exit(true);
 #pragma warning restore CS0162 // Unreachable code detected
         }
 #pragma warning restore CS0168 // Variable is declared but never used
     }
 
-    public static void Exit(int exitCode = 0)
+    public static void Exit(bool notClean = false, bool kill = false)
     {
+        int exitCode = notClean ? 255 : 0;
+
         Say.Debug($"Exiting ({exitCode})");
-        Environment.Exit(exitCode);
+        if(kill && Program.CurrentProcess != null)
+            Program.CurrentProcess.Kill();
+        else
+            Environment.Exit(exitCode);
     }
 
     public static string GetVersion()
@@ -236,6 +263,7 @@ public class Program
         ConfigDir = Path.GetFullPath(ConfigDir);
         ConfigPath = Path.Combine(ConfigDir, "booski.json");
         DbPath = Path.Combine(ConfigDir, "booski.db");
+        PidPath = Path.Combine(ConfigDir, "booski.pid");
         bool firstRun = false;
 
         if (!Directory.Exists(ConfigDir))
@@ -262,7 +290,7 @@ public class Program
             File.WriteAllText(ConfigPath, DefaultConfigFileContent);
             Say.Custom("Hey there, seems like you haven't ran Booski before!", $"Edit the config at '{ConfigPath}'", "👋", true);
 
-            Exit(1);
+            Exit();
         }
 
         IConfiguration config = new ConfigurationBuilder()

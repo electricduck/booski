@@ -83,6 +83,18 @@ public class PostLogs
         }
     }
 
+    public async static Task<List<PostLog>> GetAllPostLogs()
+    {
+        using (var db = new Database())
+        {
+            var postLogs = await db
+                .PostLogs
+                .ToListAsync();
+
+            return postLogs;
+        }
+    }
+
     public async static Task<PostLog> GetPostLogByRecordKey(
         string recordKey,
         string repository

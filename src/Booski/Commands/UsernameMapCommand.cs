@@ -136,10 +136,10 @@ internal sealed class UsernameMapCommand : IUsernameMapCommand
 
         string outputHeader = $"@{bskyProfile.Handle} ({bskyDid})";
 
-string outputBody = $@" ↳ Mastodon: {mastodonHandle}
- ↳ Telegram: {telegramHandle}
- ↳ Threads:  {threadsHandle}
- ↳ X:        {xHandle}";
+string outputBody = $@"↳ Mastodon: {mastodonHandle}
+↳ Telegram: {telegramHandle}
+↳ Threads:  {threadsHandle}
+↳ X:        {xHandle}";
 
         Say.Custom(outputHeader, outputBody, "🔀");
     }
@@ -170,8 +170,9 @@ string outputBody = $@" ↳ Mastodon: {mastodonHandle}
 
         if (!_bskyContext.IsConnected)
         {
+            // TODO: Throw exception
             Say.Error("Unable to connect to Bluesky", "To resolve DIDs, a valid login to Bluesky is required");
-            Program.Exit(0);
+            Program.Exit(true);
         }
 
         if (handle.StartsWith("@"))
@@ -184,8 +185,9 @@ string outputBody = $@" ↳ Mastodon: {mastodonHandle}
         }
         catch (Exception e)
         {
+            // TODO: Throw exception
             Say.Error($"Unable to find profile for '{handle}'");
-            Program.Exit(1);
+            Program.Exit(true);
         }
 
         return resolvedProfile;

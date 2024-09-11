@@ -106,13 +106,16 @@ public class Say
             message += paddedReason;
         }
 
-        if(separate)
-            Separate();
-        
-        Console.WriteLine(message);
-        IsLastSaySeparate = false;
+        if(!Program.NoSay)
+        {
+            if(separate)
+                Separate();
+            
+            Console.WriteLine(message);
+            IsLastSaySeparate = false;
 
-        if(separate)
-            Separate();
+            if(separate)
+                Separate();
+        }
     }
 }

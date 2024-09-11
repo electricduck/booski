@@ -2,11 +2,13 @@ using CommandLine;
 
 namespace Booski.Common.Options;
 
-[Verb("run", HelpText = "Run the service.")]
-public class RunOptions : GlobalOptions
+[Verb("start", HelpText = "Start the service.\nUse --no-daemon to not run as a daemon.")]
+public class StartOptions : GlobalOptions
 {
     [Option('s', "sleep-time", Default = 1, HelpText = "Interval (in seconds) between checking for new posts on Bluesky.")]
     public int SleepTime { get; set; }
+    [Option('n', "no-daemon", HelpText = "Do not run service as daemon.")]
+    public bool NoDaemon { get; set; }
     [Option("retry-ignored", HelpText = "Retry posts that have been logged but ignored (does not include posts logged before first run).")]
     public bool RetryIgnoredPosts { get; set; }
     [Option("no-connect-mastodon", HelpText = "Do not connect to Mastodon.")]
@@ -28,4 +30,6 @@ public class RunOptions : GlobalOptions
     public int SleepTimeSync { get; set; }
     [Option("horny-only-x", Hidden = true, HelpText = "Only post sensitive content to X.\nWhat else is this garbage platform even for these days?")]
     public bool HornyOnlyOnX { get; set; }
+    [Option("no-say", Hidden = true)]
+    public bool NoSay { get; set; }
 }
