@@ -1,6 +1,6 @@
 
 namespace Booski.Lib.Internal.AppBsky.Common {
-    public class ImageAspectRatio {
+    public class AspectRatio {
         public int Height { get; set; }
         public int Width { get; set; }
     }

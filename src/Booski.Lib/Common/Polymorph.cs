@@ -21,6 +21,8 @@ namespace Booski.Lib.Common {
     [JsonDerivedType(typeof(AppBskyPolymorphs.EmbedRecordView), typeDiscriminator: "app.bsky.embed.record#view")]
     [JsonDerivedType(typeof(AppBskyPolymorphs.EmbedRecordWithMedia), typeDiscriminator: "app.bsky.embed.recordWithMedia")]
     [JsonDerivedType(typeof(AppBskyPolymorphs.EmbedRecordWithMediaView), typeDiscriminator: "app.bsky.embed.recordWithMedia#view")]
+    [JsonDerivedType(typeof(AppBskyPolymorphs.EmbedVideo), typeDiscriminator: "app.bsky.embed.video")]
+    [JsonDerivedType(typeof(AppBskyPolymorphs.EmbedVideoView), typeDiscriminator: "app.bsky.embed.video#view")]
     [JsonDerivedType(typeof(AppBskyPolymorphs.FeedBlockedPost), typeDiscriminator: "app.bsky.feed.defs#blockedPost")]
     [JsonDerivedType(typeof(AppBskyPolymorphs.FeedNotFoundPost), typeDiscriminator: "app.bsky.feed.defs#notFoundPost")]
     [JsonDerivedType(typeof(AppBskyPolymorphs.FeedPostView), typeDiscriminator: "app.bsky.feed.defs#postView")]
