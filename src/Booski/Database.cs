@@ -5,6 +5,7 @@ namespace Booski;
 
 public class Database : DbContext
 {
+    public DbSet<FileCache> FileCaches { get; set; }
     public DbSet<PostLog> PostLogs { get; set; }
     public DbSet<UsernameMap> UsernameMaps { get; set; }
 
