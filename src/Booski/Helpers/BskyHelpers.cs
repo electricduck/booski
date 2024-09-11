@@ -1,4 +1,5 @@
 using System.Text;
+using System.Web;
 using Booski.Common;
 using Booski.Contexts;
 using Booski.Enums;
@@ -11,7 +12,6 @@ namespace Booski.Helpers;
 
 public interface IBskyHelpers
 {
-    Uri BuildCdnUrl(string did, string link, string mimeType);
     Task<Lib.Internal.ComAtproto.Responses.ListRecordsResponse> GetProfileFeed(string cursor);
     Embed ParseEmbeds(Polymorph embed, string did);
     string ParseFacets(
@@ -41,12 +41,6 @@ internal sealed class BskyHelpers : IBskyHelpers
         _bskyContext = bskyContext;
     }
 
-    public Uri BuildCdnUrl(string did, string link, string mimeType)
-    {
-        // TODO: Is this the right way to do this?
-        return new Uri($"https://cdn.bsky.app/img/feed_fullsize/plain/{did}/{link}@{mimeType.Split('/').Last()}");
-    }
-
     public async Task<Lib.Internal.ComAtproto.Responses.ListRecordsResponse> GetProfileFeed(
         string cursor
     )
@@ -71,10 +65,11 @@ internal sealed class BskyHelpers : IBskyHelpers
 
         Type embedType = embed.GetType();
 
+        Console.WriteLine(embedType.ToString());
+
         switch (embedType)
         {
             case Type when embedType == typeof(EmbedExternal):
-                var embedItem = new EmbedItem();
                 var externalEmbed = embed as EmbedExternal;
 
                 if(externalEmbed != null)
@@ -86,31 +81,63 @@ internal sealed class BskyHelpers : IBskyHelpers
                         externalEmbedUri.ToString().Contains(".gif")
                     )
                     {
-                        parsedEmbeds.Type = Enums.EmbedType.Gif;
-                        embedItem.MimeType = "image/gif";
+                        parsedEmbeds.Type = EmbedType.Gif;
+
+                        parsedEmbeds.Items.Add(
+                            new EmbedItem {
+                                MimeType = "image/gif",
+                                Uri = externalEmbedUri
+                            }
+                        );
                     }
-
-                    embedItem.Uri = externalEmbedUri;
-
-                    parsedEmbeds.Items.Add(embedItem);
                 }
                 break;
 
             case Type when embedType == typeof(EmbedImages):
                 var imagesEmbed = embed as EmbedImages;
-                parsedEmbeds.Type = Enums.EmbedType.Images;
+                parsedEmbeds.Type = EmbedType.Images;
 
                 if(imagesEmbed != null)
                 {
                     foreach (var image in imagesEmbed.Images)
                     {
                         var imageFile = image.File as Booski.Lib.Internal.ComAtproto.Common.FileBlob;
-                        var imageUri = BuildCdnUrl(did, imageFile.Ref.Link, imageFile.MimeType);
+
+                        if(imageFile != null)
+                        {
+                            var imageUri = BuildImageCdnUrl(did, imageFile.Ref.Link, imageFile.MimeType);
+
+                            parsedEmbeds.Items.Add(
+                                new EmbedItem {
+                                    MimeType = imageFile.MimeType,
+                                    Ref = imageFile.Ref.Link,
+                                    Uri = imageUri
+                                }
+                            );
+                        }
+                    }
+                }
+                break;
+
+            case Type when embedType == typeof(EmbedVideo):
+                var videoEmbed = embed as EmbedVideo;
+
+                if(videoEmbed != null)
+                {
+                    parsedEmbeds.Type = EmbedType.Video;
+
+                    var video = videoEmbed;
+                    var videoFile = video.File as Booski.Lib.Internal.ComAtproto.Common.FileBlob;
+
+                    if(videoFile != null)
+                    {
+                        var videoUri = BuildVideoCdnUrl(did, videoFile.Ref.Link);
 
                         parsedEmbeds.Items.Add(
                             new EmbedItem {
-                                MimeType = imageFile.MimeType,
-                                Uri = imageUri
+                                MimeType = videoFile.MimeType,
+                                Ref = videoFile.Ref.Link,
+                                Uri = videoUri
                             }
                         );
                     }
@@ -119,6 +146,18 @@ internal sealed class BskyHelpers : IBskyHelpers
         }
 
         return parsedEmbeds;
+    }
+
+    Uri BuildImageCdnUrl(string did, string link, string mimeType)
+    {
+        // TODO: Is this the right way to do this?
+        return new Uri($"https://cdn.bsky.app/img/feed_fullsize/plain/{did}/{link}@{mimeType.Split('/').Last()}");
+    }
+
+    Uri BuildVideoCdnUrl(string did, string link)
+    {
+        // TODO: Is this the right way to do this?
+        return new Uri($"https://video.bsky.app/watch/{HttpUtility.UrlEncode(did)}/{link}/playlist.m3u8");
     }
 
     public string ParseFacets(
