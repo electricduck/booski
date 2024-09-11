@@ -25,7 +25,7 @@
 cd ~/.local/bin
 wget https://github.com/electricduck/booski/releases/download/v%2F0.x%2F0.3.3/booski-0.3.3-linux-x64.bin
 chmod +x booski-0.3.3-linux-x64.bin
-./booski-0.3.3-linux-x64.bin run
+./booski-0.3.3-linux-x64.bin start --no-daemon
 ```
 
 ## 🏗️ Building
