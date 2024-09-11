@@ -6,10 +6,9 @@ namespace Booski.Common;
 public class FileCache
 {
     [Key]
-    public string Ref { get; set; }
+    public string Uri { get; set; }
 
     public bool Available { get; set; }
     public DateTime DownloadedAt { get; set; }
     public string Filename { get; set; }
-    public string Uri { get; set; }
 }
