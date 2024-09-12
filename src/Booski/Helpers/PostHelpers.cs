@@ -313,12 +313,12 @@ internal sealed class PostHelpers : IPostHelpers
             
             if(mastodonMessage != null)
             {
-                /*postLog = await PostLogs.UpdatePostLog(
+                postLog = await PostLogs.UpdatePostLog(
                     recordKey: postLog.RecordKey,
                     repository: _bskyContext.State.Did,
                     mastodonInstanceDomain: _mastodonContext.State.Domain,
                     mastodonStatusId: mastodonMessage.Id
-                );*/
+                );
 
                 Say.Success($"Posted to Mastodon: {postLog.RecordKey} ({postLog.Mastodon_InstanceDomain}/{postLog.Mastodon_StatusId})");
             }
@@ -391,7 +391,6 @@ internal sealed class PostHelpers : IPostHelpers
         }
         catch (Exception e)
         {
-            throw;
             Say.Warning($"Unable to post to X: {post.RecordKey}", e.Message);
         }
     }

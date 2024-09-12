@@ -129,7 +129,9 @@ internal sealed class MastodonHelpers : IMastodonHelpers
         if(hasEmbedsButFailed)
         {
             string attachmentLink = _bskyHelpers.GetPostLink(post);
-            statusText += $"{Environment.NewLine}—{Environment.NewLine}";
+            
+            if(!String.IsNullOrEmpty(statusText))
+                statusText += $"{Environment.NewLine}—{Environment.NewLine}";
 
             switch(embedType)
             {
