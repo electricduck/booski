@@ -74,9 +74,6 @@ internal sealed class StartCommand : IStartCommand
         await CreateAdditionalClients(Program.Config.Clients, o);
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
 
-        await _mastodonHelpers.GetBridgyBskyAccount("astra.blue");
-        Program.Exit();
-
         if(o.ExitAfterConnecting)
             return;
 
