@@ -69,8 +69,6 @@ namespace Booski.Lib.Internal.AppBsky.Commands {
         ) {
             var filterString = EnumUtilities.GetEnumMemberValue<AuthorFeedFilter>(filter);
 
-            Console.WriteLine(filterString);
-
             List<QueryParam> getAuthorFeedParams = new List<QueryParam> {
                 new QueryParam("actor", actor),
                 new QueryParam("cursor", cursor),
