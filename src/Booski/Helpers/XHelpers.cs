@@ -197,7 +197,7 @@ internal sealed class XHelpers : IXHelpers
             tagStringEnd: ""
         );
         captionText = await ReplaceUsernames(captionText);
-        captionText = UnTruncateLinks(captionText);
+        captionText = RichTextUtilities.UnTruncateMarkdownLinks(captionText);
 
         bool forceReadMoreText = false;
         string readMoreLink = _bskyHelpers.GetPostLink(post);
@@ -241,26 +241,6 @@ internal sealed class XHelpers : IXHelpers
         }
 
         return captionText;
-    }
-
-    string UnTruncateLinks(string originalString)
-    {
-        string pattern = "(\\[.*?\\]\\((.*?)\\))";
-        foreach (Match match in Regex.Matches(originalString, pattern, RegexOptions.IgnoreCase))
-        {
-            string originalLink = match.Value;
-            if (match.Groups[2] != null)
-            {
-                string originalUrl = match.Groups[2].Value;
-
-                originalString = originalString.Replace(
-                    originalLink,
-                    originalUrl
-                );
-            }
-        }
-
-        return originalString;
     }
 
     static async Task<string> ReplaceUsernames(string originalString)

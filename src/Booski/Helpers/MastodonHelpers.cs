@@ -3,6 +3,7 @@ using Booski.Common;
 using Booski.Contexts;
 using Booski.Data;
 using Booski.Enums;
+using Booski.Utilities;
 using Mastonet;
 using Mastonet.Entities;
 
@@ -136,6 +137,9 @@ internal sealed class MastodonHelpers : IMastodonHelpers
         );
         statusText = await ReplaceUsernames(statusText);
 
+        if(_mastodonContext.State.NoRichText)
+            statusText = RichTextUtilities.UnTruncateMarkdownLinks(statusText);
+
         if(hasEmbedsButFailed)
         {
             string attachmentLink = _bskyHelpers.GetPostLink(post);
@@ -143,18 +147,18 @@ internal sealed class MastodonHelpers : IMastodonHelpers
             if(!String.IsNullOrEmpty(statusText))
                 statusText += $"{Environment.NewLine}—{Environment.NewLine}";
 
-            switch(embedType)
-            {
-                case EmbedType.Images:
-                    statusText += $"[📷 See Photos on Bluesky]({attachmentLink})";
-                    break;
-                case EmbedType.Video:
-                    statusText += $"[▶️ Watch Video on Bluesky]({attachmentLink})";
-                    break;
-                default:
-                    statusText += $"[🔗 See Attachment on Bluesky]({attachmentLink})";
-                    break;
-            }
+            if(_mastodonContext.State.NoRichText)
+                statusText += embedType switch {
+                    EmbedType.Images => $"📷 See Photos: {attachmentLink}",
+                    EmbedType.Video => $"▶️ Watch Video: {attachmentLink}",
+                    _ => $"🔗 See Attachment: {attachmentLink}"
+                };
+            else
+                statusText += embedType switch {
+                    EmbedType.Images => $"[📷 See Photos on Bluesky]({attachmentLink})",
+                    EmbedType.Video => $"[▶️ Watch Video on Bluesky]({attachmentLink})",
+                    _ => $"[🔗 See Attachment on Bluesky]({attachmentLink})"
+                };
         }
 
         return statusText;

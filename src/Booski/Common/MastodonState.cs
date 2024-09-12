@@ -9,6 +9,7 @@ public class MastodonState
     public string Domain { get; set; }
     public InstanceV2 Instance { get; set; }
     public string InstanceSoftware { get; set; }
+    public bool NoRichText { get; set; } = true;
     public string UserId { get; set; }
     public string Username { get; set; }
 
@@ -41,6 +42,12 @@ public class MastodonState
                     InstanceSoftware = "Hometown";
                     
             }
+
+            if(
+                InstanceSoftware == "GoToSocial" ||
+                InstanceSoftware == "Glitch"
+            )
+                NoRichText = false;
         }
     }
 }
