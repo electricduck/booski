@@ -120,7 +120,7 @@ internal sealed class StartCommand : IStartCommand
             if (_mastodonContext.IsConnected && _mastodonContext.State != null)
                 Say.Success($"Connected to {_mastodonContext.State.InstanceSoftware}: {_mastodonContext.State.Username} ({_mastodonContext.State.UserId})");
             else
-                Say.Warning($"Unable to connect to {_mastodonContext.State.InstanceSoftware}");
+                Say.Warning($"Unable to connect to Mastodon");
         }
 
         if (

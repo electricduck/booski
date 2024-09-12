@@ -33,27 +33,31 @@ internal sealed class MastodonContext : IMastodonContext
         string token
     )
     {
-        if(_httpContext.Client == null)
+        if (_httpContext.Client == null)
             _httpContext.CreateClient();
 
         State = new MastodonState();
 
-        var authClient = new AuthenticationClient(instance, _httpContext.Client);
-        Client = new MastodonClient(instance, token, _httpContext.Client);
-
-        State.Instance = await Client.GetInstanceV2();
-        State.Account = await Client.GetCurrentUser();
-
-        if (
-            State.Account != null &&
-            State.Instance != null &&
-            !String.IsNullOrEmpty(State.Account.Id)
-        )
+        try
         {
-            State.SetAdditionalFields();
-            IsConnected = true;
+            var authClient = new AuthenticationClient(instance, _httpContext.Client);
+            Client = new MastodonClient(instance, token, _httpContext.Client);
+
+            State.Instance = await Client.GetInstanceV2();
+            State.Account = await Client.GetCurrentUser();
+            if (
+                State.Account != null &&
+                State.Instance != null &&
+                !String.IsNullOrEmpty(State.Account.Id)
+            )
+            {
+                State.SetAdditionalFields();
+                IsConnected = true;
+            }
+            else
+                ResetClient();
         }
-        else
+        catch
         {
             ResetClient();
         }

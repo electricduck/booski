@@ -35,34 +35,39 @@ internal sealed class XContext : IXContext
         string accessSecret
     )
     {
-        if(_httpContext.Client == null)
+        if (_httpContext.Client == null)
             _httpContext.CreateClient();
 
         State = new XState();
 
-        var authClient = new LinqToTwitter.OAuth.SingleUserAuthorizer
+        try
         {
-            CredentialStore = new LinqToTwitter.OAuth.SingleUserInMemoryCredentialStore
+            var authClient = new LinqToTwitter.OAuth.SingleUserAuthorizer
             {
-                ConsumerKey = apiKey,
-                ConsumerSecret = apiSecret,
-                AccessToken = accessToken,
-                AccessTokenSecret = accessSecret
+                CredentialStore = new LinqToTwitter.OAuth.SingleUserInMemoryCredentialStore
+                {
+                    ConsumerKey = apiKey,
+                    ConsumerSecret = apiSecret,
+                    AccessToken = accessToken,
+                    AccessTokenSecret = accessSecret
+                }
+            };
+            Client = new TwitterContext(authClient);
+
+            State.Account = await Client
+                .Account
+                .Where(a => a.Type == AccountType.VerifyCredentials)
+                .FirstOrDefaultAsync();
+
+            if (State.Account != null)
+            {
+                State.SetAdditionalFields();
+                IsConnected = true;
             }
-        };
-        Client = new TwitterContext(authClient);
-
-        State.Account = await Client
-            .Account    
-            .Where(a => a.Type == AccountType.VerifyCredentials)
-            .FirstOrDefaultAsync();
-
-        if (State.Account != null)
-        {
-            State.SetAdditionalFields();
-            IsConnected = true;
+            else
+                ResetClient();
         }
-        else
+        catch
         {
             ResetClient();
         }

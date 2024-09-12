@@ -33,23 +33,29 @@ internal sealed class TelegramContext : ITelegramContext
         string channel = ""
     )
     {
-        if(_httpContext.Client == null)
+        if (_httpContext.Client == null)
             _httpContext.CreateClient();
 
         State = new TelegramState();
-        Client = new TelegramBotClient(token, _httpContext.Client);
 
-        var clientTestApi = await Client.TestApiAsync();
-
-        if(clientTestApi)
+        try
         {
-            State.Account = await Client.GetMeAsync();
-            State.Channel = channel;
-            State.SetAdditionalFields();
+            Client = new TelegramBotClient(token, _httpContext.Client);
 
-            IsConnected = true;
+            var clientTestApi = await Client.TestApiAsync();
+
+            if (clientTestApi)
+            {
+                State.Account = await Client.GetMeAsync();
+                State.Channel = channel;
+                State.SetAdditionalFields();
+
+                IsConnected = true;
+            }
+            else
+                ResetClient();
         }
-        else
+        catch
         {
             ResetClient();
         }
