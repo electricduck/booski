@@ -52,10 +52,10 @@ internal sealed class PostHelpers : IPostHelpers
 
     public async Task<List<Post>> BuildPostCache(int fetchSleep)
     {
+        Say.Debug("[PostHelpers.BuildPostCache] Fetching posts...");
+
         string cursor = "";
         List<Post> posts = new List<Post>();
-
-        Say.Info($"Fetching posts...");
 
         while (true)
         {
@@ -96,7 +96,6 @@ internal sealed class PostHelpers : IPostHelpers
             Thread.Sleep(fetchSleep);
         }
 
-        Say.Success($"Fetched {posts.Count()} posts");
         posts = posts.OrderByDescending(p => p.RecordKey).ToList();
         return posts;
     }
@@ -320,12 +319,12 @@ internal sealed class PostHelpers : IPostHelpers
                     mastodonStatusId: mastodonMessage.Id
                 );
 
-                Say.Success($"Posted to Mastodon: {postLog.RecordKey} ({postLog.Mastodon_InstanceDomain}/{postLog.Mastodon_StatusId})");
+                Say.Success($"Posted to {_mastodonContext.State.InstanceSoftware}: {postLog.RecordKey} ({postLog.Mastodon_InstanceDomain}/{postLog.Mastodon_StatusId})");
             }
         }
         catch (Exception e)
         {
-            Say.Warning($"Unable to post to Mastodon: {post.RecordKey}", e.Message);
+            Say.Warning($"Unable to post to {_mastodonContext.State.InstanceSoftware}: {post.RecordKey}", e.Message);
         }
     }
 
@@ -403,19 +402,19 @@ internal sealed class PostHelpers : IPostHelpers
         if (postLog.Mastodon_InstanceDomain != _mastodonContext.State.Domain)
         {
             deletedFromMastodon = false;
-            Say.Warning($"Not deleting from Mastodon: {consoleMessageSuffix}", $"Current instance domain ({_mastodonContext.State.Domain} does not match logged domain ({postLog.Mastodon_InstanceDomain}))");
+            Say.Warning($"Not deleting from {_mastodonContext.State.InstanceSoftware}: {consoleMessageSuffix}", $"Current instance domain ({_mastodonContext.State.Domain} does not match logged domain ({postLog.Mastodon_InstanceDomain}))");
         }
         else
         {
             try
             {
                 await _mastodonHelpers.DeleteFromMastodon(postLog.Mastodon_StatusId);
-                Say.Success($"Deleted from Mastodon: {consoleMessageSuffix}");
+                Say.Success($"Deleted from {_mastodonContext.State.InstanceSoftware}: {consoleMessageSuffix}");
             }
             catch (Exception e)
             {
                 deletedFromMastodon = false;
-                Say.Warning($"Unable to delete from Mastodon: {consoleMessageSuffix}", e.Message);
+                Say.Warning($"Unable to delete from {_mastodonContext.State.InstanceSoftware}: {consoleMessageSuffix}", e.Message);
             }
         }
 

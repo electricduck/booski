@@ -30,6 +30,6 @@ public class StartOptions : GlobalOptions
     public int SleepTimeSync { get; set; }
     [Option("horny-only-x", Hidden = true, HelpText = "Only post sensitive content to X.\nWhat else is this garbage platform even for these days?")]
     public bool HornyOnlyOnX { get; set; }
-    [Option("no-say", Hidden = true)]
+    [Option("no-say", Hidden = true, HelpText = "Do not output anything.")]
     public bool NoSay { get; set; }
 }

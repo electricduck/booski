@@ -81,6 +81,8 @@ internal sealed class StartCommand : IStartCommand
 
         while (true)
         {
+            Say.Info($"Fetching posts every {o.SleepTime} seconds", "Change this with --sleep-time/-s (in seconds)");
+
             _postHelpers.PostCache = await _postHelpers.BuildPostCache(o.SleepTimeFetch);
 
             await _postHelpers.SyncDeletedPosts(o.SleepTimeSync);
@@ -113,9 +115,9 @@ internal sealed class StartCommand : IStartCommand
             );
 
             if (_mastodonContext.IsConnected && _mastodonContext.State != null)
-                Say.Success($"Connected to Mastodon: {_mastodonContext.State.Username} ({_mastodonContext.State.UserId})");
+                Say.Success($"Connected to {_mastodonContext.State.InstanceSoftware}: {_mastodonContext.State.Username} ({_mastodonContext.State.UserId})");
             else
-                Say.Warning("Unable to connect to Mastodon");
+                Say.Warning($"Unable to connect to {_mastodonContext.State.InstanceSoftware}");
         }
 
         if (

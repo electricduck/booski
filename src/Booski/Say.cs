@@ -13,9 +13,19 @@ public class Say
 
     public static void Debug(string message, string reason = "")
     {
+        bool say = false;
+
 #if DEBUG
-        ConsoleMessage(message, "⚙️", reason);
+        say = true;
+#else
+        var isDebug = Environment.GetEnvironmentVariable("BOOSKI_DEBUG");
+
+        if (isDebug == "1" || isDebug == "true")
+            say = true;
 #endif
+
+        if(say)
+            ConsoleMessage(message, "⚙️", reason);
     }
 
     public static void Error(string message, string reason = "")

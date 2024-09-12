@@ -35,7 +35,7 @@ public class Program
 {
     "Clients": {
         "Bluesky": {
-            "Host": "public.api.bsky.app",
+            "Host": "bsky.social",
             "Password": "",
             "Username": ""
         },
