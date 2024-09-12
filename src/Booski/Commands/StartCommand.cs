@@ -82,12 +82,12 @@ internal sealed class StartCommand : IStartCommand
         o.SleepTimeSync = o.SleepTimeSync * 1000;
         _postHelpers.HornyOnlyOnX = o.HornyOnlyOnX;
 
+        var sleepTimeSeconds = o.SleepTime / 1000;
+        var sleepTimeSecondsUnit = sleepTimeSeconds == 1 ? "second" : "seconds";
+        Say.Info($"Fetching posts every {sleepTimeSeconds} {sleepTimeSecondsUnit}", "Change this with --sleep-time/-s (in seconds)");
+
         while (true)
         {
-            var sleepTimeSeconds = o.SleepTime / 1000;
-            var sleepTimeSecondsUnit = sleepTimeSeconds == 1 ? "second" : "seconds";
-            Say.Info($"Fetching posts every {sleepTimeSeconds} {sleepTimeSecondsUnit}", "Change this with --sleep-time/-s (in seconds)");
-
             _postHelpers.PostCache = await _postHelpers.BuildPostCache(o.SleepTimeFetch);
 
             await _postHelpers.SyncDeletedPosts(o.SleepTimeSync);
