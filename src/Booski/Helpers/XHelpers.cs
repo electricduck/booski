@@ -14,7 +14,7 @@ public interface IXHelpers
     Task DeleteFromX(
         string postId
     );
-    Task<Tweet> PostToX(
+    Task<Tweet?> PostToX(
         Post post,
         Embed? embed,
         string? replyId = null
