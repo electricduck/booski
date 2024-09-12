@@ -123,22 +123,15 @@ public class Program
         }
         catch (Exception e)
         {
-            HandleError(e);
-        }
-    }
+            var throwError = Environment.GetEnvironmentVariable("BOOSKI_DEBUG");
 
-    public static void HandleError(Exception e, bool exit = true)
-    {
-        var throwError = Environment.GetEnvironmentVariable("BOOSKI_DEBUG");
-
-        if (throwError == "1" || throwError == "true")
-            throw e;
-        else
-        {
-            Say.Error(e);
-
-            if(exit)
+            if (throwError == "1" || throwError == "true")
+                throw;
+            else
+            {
+                Say.Error(e);
                 Exit(true);
+            }
         }
     }
 

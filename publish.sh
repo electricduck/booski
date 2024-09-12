@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+# SEE: https://learn.microsoft.com/en-us/dotnet/core/rid-catalog
 platforms=(
     "linux-x64"
     "linux-arm64"
@@ -10,7 +11,10 @@ platforms=(
     "win-x64"
     "win-arm64"
 )
-# SEE: https://learn.microsoft.com/en-us/dotnet/core/rid-catalog
+
+if [[ ! -z $1 ]]; then
+    platforms=($1)
+fi
 
 base_dir="$(dirname "$(realpath -s "$0")")"
 git_tag="$(git describe --exact-match --tags)"
