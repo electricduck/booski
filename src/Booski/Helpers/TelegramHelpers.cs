@@ -83,7 +83,7 @@ internal sealed class TelegramHelpers : ITelegramHelpers
                         break;
                     }
 
-                    var telegramMediaPhoto = new InputMediaPhoto(new InputFileStream(fileStream, embedItem.Ref));
+                    var telegramMediaPhoto = new InputMediaPhoto(new InputFileStream(fileStream, embedItem.GenerateFilename()));
 
                     if (firstMediaItem)
                     {
@@ -127,7 +127,7 @@ internal sealed class TelegramHelpers : ITelegramHelpers
                         case Enums.EmbedType.Gif:
                             sentMessages.Add(
                                 await _telegramContext.Client.SendAnimationAsync(
-                                    animation: new InputFileStream(fileStream),
+                                    animation: new InputFileStream(fileStream, firstEmbedItem.GenerateFilename()),
                                     caption: await GenerateCaption(post),
                                     chatId: chatId,
                                     parseMode: Telegram.Bot.Types.Enums.ParseMode.Html,
@@ -142,7 +142,7 @@ internal sealed class TelegramHelpers : ITelegramHelpers
                                     chatId: chatId,
                                     parseMode: Telegram.Bot.Types.Enums.ParseMode.Html,
                                     replyToMessageId: replyId,
-                                    video: new InputFileStream(fileStream)
+                                    video: new InputFileStream(fileStream, firstEmbedItem.GenerateFilename())
                                 )
                             );
                             break;

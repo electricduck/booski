@@ -107,6 +107,7 @@ internal sealed class BskyHelpers : IBskyHelpers
                         parsedEmbeds.Items.Add(
                             new EmbedItem {
                                 MimeType = "image/gif",
+                                Ref = externalEmbedUri.LocalPath.Split("/").Last(),
                                 Uri = externalEmbedUri
                             }
                         );
