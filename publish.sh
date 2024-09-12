@@ -19,7 +19,7 @@ fi
 base_dir="$(dirname "$(realpath -s "$0")")"
 git_tag="$(git describe --exact-match --tags)"
 git_commit="$(git rev-parse --short HEAD)"
-web_dir_prefix="$(realpath -s "~/Mount/fi02~ducky/www")"
+web_dir_prefix="$(realpath -s ~/Mount/fi02~ducky/www)"
 version=""
 
 cd $base_dir/src/Booski
@@ -62,8 +62,9 @@ for platform in ${platforms[@]}; do
         fi
 
         out_filename="booski-$version-$platform.$bin_ext"
+        new_out_path="$(realpath -s "$out_dir/../$out_filename")"
 
-        mv "$out_dir/$bin_name" "$out_dir/../$out_filename"
+        mv "$out_dir/$bin_name" "$new_out_path"
         rm -rf "$out_dir"
 
         if [[ -d "$web_dir_prefix" ]]; then
@@ -73,7 +74,7 @@ for platform in ${platforms[@]}; do
                 mkdir -p "$web_dir"
             fi
 
-            cp "$out_dir/../$out_filename" "$web_dir/$out_filename"
+            cp "$new_out_path" "$web_dir/$out_filename"
         fi
     fi
 done
