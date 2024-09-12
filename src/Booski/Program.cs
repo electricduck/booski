@@ -169,6 +169,7 @@ public class Program
         return versionString;
     }
 
+    // BUG: Handle when running version is RC
     private static async Task CheckUpdates(IGitHubContext _githubContext)
     {
         var ignoreUpdates = Environment.GetEnvironmentVariable("BOOSKI_IGNORE_UPDATES");
