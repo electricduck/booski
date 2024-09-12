@@ -16,13 +16,13 @@ if [[ ! -z $1 ]]; then
     platforms=($1)
 fi
 
-base_dir="$(dirname "$(realpath -s "$0")")"
+base_dir="$(realpath -s "$(dirname "$(realpath -s "$0")")/../..")"
 git_tag="$(git describe --exact-match --tags)"
 git_commit="$(git rev-parse --short HEAD)"
 web_dir_prefix="$(realpath -s ~/Mount/fi02~ducky/www)"
 version=""
 
-cd $base_dir/src/Booski
+cd "$base_dir/src/Booski"
 
 dotnet build
 
