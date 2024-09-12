@@ -45,7 +45,7 @@ internal sealed class XHelpers : IXHelpers
         await _xContext.Client.DeleteTweetAsync(postId);
     }
 
-    public async Task<Tweet> PostToX(
+    public async Task<Tweet?> PostToX(
         Post post,
         Embed? embed,
         string? replyId = null
@@ -56,13 +56,12 @@ internal sealed class XHelpers : IXHelpers
 
         if (
             embed != null && embed.Type == Enums.EmbedType.Gif ||
-            embed != null && embed.Type == Enums.EmbedType.Images
+            embed != null && embed.Type == Enums.EmbedType.Images ||
+            embed != null && embed.Type == Enums.EmbedType.Video
         )
         {
             if (embed.Items.Count() > 0)
             {
-                var httpClient = new HttpClient();
-
                 string mediaCategory = "";
 
                 switch (embed.Type)
@@ -83,7 +82,7 @@ internal sealed class XHelpers : IXHelpers
                     var fileByteArray = await _fileCacheContext.GetFileFromUriAsByteArray(embedItem.Uri);
 
                     if(fileByteArray == null)
-                        return sentMessage;
+                        return null;
 
                     var attachment = await _xContext.Client.UploadMediaAsync(
                         fileByteArray,

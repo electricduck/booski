@@ -46,7 +46,7 @@ internal sealed class TelegramHelpers : ITelegramHelpers
         );
     }
 
-    public async Task<List<Message>> PostToTelegram(
+    public async Task<List<Message>?> PostToTelegram(
         Post post,
         Embed? embed,
         string? chatId = null,
