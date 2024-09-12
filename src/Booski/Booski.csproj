@@ -36,6 +36,7 @@
     <OutputType>Exe</OutputType>
     <PublishSelfContained>true</PublishSelfContained>
     <PublishSingleFile>true</PublishSingleFile>
+    <PublishReadyToRun>true</PublishReadyToRun>
     <TargetFramework>net9.0</TargetFramework>
   </PropertyGroup>
 
