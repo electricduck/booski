@@ -17,6 +17,14 @@ git_tag="$(git describe --exact-match --tags)"
 git_commit="$(git rev-parse --short HEAD)"
 version=""
 
+cd $base_dir/src/Booski
+
+dotnet build
+
+if [[ $? != 0 ]]; then
+    exit $?
+fi
+
 if [[ -z $git_tag ]]; then
     version="git.$git_commit"
 else    
