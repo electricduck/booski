@@ -10,7 +10,7 @@ namespace Booski.Helpers;
 public interface IMastodonHelpers
 {
     Task DeleteFromMastodon(string statusId);
-    Task<Status> PostToMastodon(
+    Task<Status?> PostToMastodon(
         Post post,
         Embed? embed,
         string? replyId = null
@@ -41,18 +41,19 @@ internal sealed class MastodonHelpers : IMastodonHelpers
         await _mastodonContext.Client.DeleteStatus(statusId);
     }
 
-    public async Task<Status> PostToMastodon(
+    public async Task<Status?> PostToMastodon(
         Post post,
         Embed? embed,
         string? replyId = null
     )
     {
-        Status sentMessage = null;
+        Status? sentMessage = null;
         List<Attachment> messageAttachments = new List<Attachment>();
 
         if (
             embed != null && embed.Type == Enums.EmbedType.Gif ||
-            embed != null && embed.Type == Enums.EmbedType.Images
+            embed != null && embed.Type == Enums.EmbedType.Images ||
+            embed != null && embed.Type == Enums.EmbedType.Video
         )
         {
             if (embed.Items.Count() > 0)
@@ -60,6 +61,9 @@ internal sealed class MastodonHelpers : IMastodonHelpers
                 foreach (var embedItem in embed.Items)
                 {
                     var file = await _fileCacheContext.GetFileFromUri(embedItem.Uri);
+
+                    if(file == null)
+                        return null;
 
                     var mastodonMedia = new MediaDefinition(file, embedItem.Uri.ToString().Split('/').Last());
                     var messageAttachment = await _mastodonContext.Client.UploadMedia(mastodonMedia);
@@ -74,13 +78,13 @@ internal sealed class MastodonHelpers : IMastodonHelpers
         if(post.Sensitivity != Enums.Sensitivity.None)
             sensitive = true;
 
-        sentMessage = await _mastodonContext.Client.PublishStatus(
+        /*sentMessage = await _mastodonContext.Client.PublishStatus(
             mediaIds: messageAttachments.Select(ma => ma.Id).ToArray(),
             replyStatusId: replyId,
             sensitive: sensitive,
             status: await GenerateStatusText(post),
             visibility: Visibility.Public
-        );
+        );*/
 
         return sentMessage;
     }

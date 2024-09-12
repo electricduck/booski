@@ -82,6 +82,9 @@ internal sealed class XHelpers : IXHelpers
                 {
                     var fileByteArray = await _fileCacheContext.GetFileFromUriAsByteArray(embedItem.Uri);
 
+                    if(fileByteArray == null)
+                        return sentMessage;
+
                     var attachment = await _xContext.Client.UploadMediaAsync(
                         fileByteArray,
                         mediaCategory: mediaCategory,

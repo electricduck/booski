@@ -313,18 +313,19 @@ internal sealed class PostHelpers : IPostHelpers
             
             if(mastodonMessage != null)
             {
-                postLog = await PostLogs.UpdatePostLog(
+                /*postLog = await PostLogs.UpdatePostLog(
                     recordKey: postLog.RecordKey,
                     repository: _bskyContext.State.Did,
                     mastodonInstanceDomain: _mastodonContext.State.Domain,
                     mastodonStatusId: mastodonMessage.Id
-                );
+                );*/
 
                 Say.Success($"Posted to Mastodon: {postLog.RecordKey} ({postLog.Mastodon_InstanceDomain}/{postLog.Mastodon_StatusId})");
             }
         }
         catch (Exception e)
         {
+            throw;
             Say.Warning($"Unable to post to Mastodon: {post.RecordKey}", e.Message);
         }
     }
@@ -483,8 +484,7 @@ internal sealed class PostHelpers : IPostHelpers
         if (
             embed != null &&
             embed.Items.Count() == 0 &&
-            embed.Type != EmbedType.Unknown &&
-            embed.Type != EmbedType.Video
+            embed.Type != EmbedType.Unknown
         )
         {
             Say.Warning($"Ignoring: {postLog.RecordKey}", "Post has embeds but none are supported");

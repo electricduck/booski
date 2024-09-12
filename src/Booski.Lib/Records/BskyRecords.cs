@@ -13,7 +13,7 @@ namespace Booski.Lib.Records {
         ) {
             AppBskyPolymorphs.FeedPost post = new AppBskyPolymorphs.FeedPost();
 
-            createdAt = createdAt == null ? DateTime.Now : createdAt;
+            createdAt = createdAt == null ? DateTime.UtcNow : createdAt;
             text = text == null ? "" : text;
 
             post.CreatedAt = (DateTime)createdAt;
@@ -33,7 +33,7 @@ namespace Booski.Lib.Records {
         ) {
             AppBskyPolymorphs.FeedPost post = new AppBskyPolymorphs.FeedPost();
 
-            createdAt = createdAt == null ? DateTime.Now : createdAt;
+            createdAt = createdAt == null ? DateTime.UtcNow : createdAt;
             text = text == null ? "" : text;
 
             var imageEmbedPoly = new AppBskyPolymorphs.EmbedImages {
@@ -59,7 +59,7 @@ namespace Booski.Lib.Records {
         ) {
             AppBskyPolymorphs.FeedPost post = new AppBskyPolymorphs.FeedPost();
 
-            createdAt = createdAt == null ? DateTime.Now : createdAt;
+            createdAt = createdAt == null ? DateTime.UtcNow : createdAt;
             text = text == null ? "" : text;
 
             external.Thumb = externalThumb == null ? external.Thumb : externalThumb;

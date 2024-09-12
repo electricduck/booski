@@ -65,8 +65,6 @@ internal sealed class BskyHelpers : IBskyHelpers
 
         Type embedType = embed.GetType();
 
-        Console.WriteLine(embedType.ToString());
-
         switch (embedType)
         {
             case Type when embedType == typeof(EmbedExternal):

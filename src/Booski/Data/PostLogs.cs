@@ -29,7 +29,7 @@ public class PostLogs
                     Ignored = ignored,
                     RecordKey = recordKey,
                     Repository = repository,
-                    UpdatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.UtcNow,
                     Version = 1
                 };
 
@@ -204,7 +204,7 @@ public class PostLogs
                 if(!String.IsNullOrEmpty(xPostId))
                     postLog.X_PostId = xPostId;
 
-                postLog.UpdatedAt = DateTime.Now;
+                postLog.UpdatedAt = DateTime.UtcNow;
                 postLog.Version = postLog.Version + 1;
 
                 await db.SaveChangesAsync();

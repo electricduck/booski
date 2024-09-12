@@ -25,6 +25,7 @@ public class Program
     public static string? ConfigPath { get; set; }
     public static Process CurrentProcess { get; set; }
     public static string? DbPath { get; set; }
+    public static string? FileCacheDir { get; set; }
     public static bool NoSay { get; set; }
     public static string? PidPath { get; set; }
 
@@ -208,7 +209,8 @@ public class Program
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             appName = appName.ToLower().Replace(" ", "-");
 
-        try {
+        try
+        {
             if(
                 RuntimeInformation.IsOSPlatform(OSPlatform.Linux) &&
                 Directory.Exists("/etc/Booski")
@@ -263,11 +265,15 @@ public class Program
         ConfigDir = Path.GetFullPath(ConfigDir);
         ConfigPath = Path.Combine(ConfigDir, "booski.json");
         DbPath = Path.Combine(ConfigDir, "booski.db");
+        FileCacheDir = Path.Combine(ConfigDir, "file-cache");
         PidPath = Path.Combine(ConfigDir, "booski.pid");
         bool firstRun = false;
 
         if (!Directory.Exists(ConfigDir))
             Directory.CreateDirectory(ConfigDir);
+
+        if(!Directory.Exists(FileCacheDir))
+            Directory.CreateDirectory(FileCacheDir);
 
         if (File.Exists(ConfigPath))
         {

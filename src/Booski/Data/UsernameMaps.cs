@@ -38,8 +38,6 @@ public class UsernameMaps
             }
             else
             {
-                Console.WriteLine("updating!");
-
                 existingUsernameMap.Mastodon_Handle = String.IsNullOrEmpty(mastodonHandle) ? "" : mastodonHandle;
                 existingUsernameMap.Telegram_Handle = String.IsNullOrEmpty(telegramHandle) ? "" : telegramHandle;
                 existingUsernameMap.Threads_Handle = String.IsNullOrEmpty(threadsHandle) ? "" : threadsHandle;
