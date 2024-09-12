@@ -32,7 +32,6 @@
     
     <ImplicitUsings>enable</ImplicitUsings>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
-    <InvariantGlobalization>true</InvariantGlobalization>
     <Nullable>enable</Nullable>
     <OutputType>Exe</OutputType>
     <PublishSelfContained>true</PublishSelfContained>
