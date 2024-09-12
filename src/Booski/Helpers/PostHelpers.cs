@@ -325,7 +325,6 @@ internal sealed class PostHelpers : IPostHelpers
         }
         catch (Exception e)
         {
-            throw;
             Say.Warning($"Unable to post to Mastodon: {post.RecordKey}", e.Message);
         }
     }
@@ -362,7 +361,6 @@ internal sealed class PostHelpers : IPostHelpers
         }
         catch (Exception e)
         {
-            throw;
             Say.Warning($"Unable to post to Telegram: {post.RecordKey}", e.Message);
         }
     }
@@ -392,7 +390,6 @@ internal sealed class PostHelpers : IPostHelpers
         }
         catch (Exception e)
         {
-            throw;
             Say.Warning($"Unable to post to X: {post.RecordKey}", e.Message);
         }
     }

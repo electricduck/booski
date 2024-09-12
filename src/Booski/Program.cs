@@ -73,7 +73,6 @@ public class Program
         foreach(var arg in args)
             Arguments+= $"{arg} ";
 
-#pragma warning disable CS0168 // Variable is declared but never used
         try
         {
             HostApplicationBuilder builder = Host.CreateApplicationBuilder();
@@ -124,17 +123,23 @@ public class Program
         }
         catch (Exception e)
         {
-#if DEBUG
-                throw;
-#else
-            Say.Error(e);
-#endif
-
-#pragma warning disable CS0162 // Unreachable code detected
-            Exit(true);
-#pragma warning restore CS0162 // Unreachable code detected
+            HandleError(e);
         }
-#pragma warning restore CS0168 // Variable is declared but never used
+    }
+
+    public static void HandleError(Exception e, bool exit = true)
+    {
+        var throwError = Environment.GetEnvironmentVariable("BOOSKI_DEBUG");
+
+        if (throwError == "1" || throwError == "true")
+            throw e;
+        else
+        {
+            Say.Error(e);
+
+            if(exit)
+                Exit(true);
+        }
     }
 
     public static void Exit(bool notClean = false, bool kill = false)
@@ -224,6 +229,7 @@ public class Program
  * Or, set this location manually in $BOOSKI_YTDLP_PATH
     "
                 );
+                Exit(true);
         }
     }
 
