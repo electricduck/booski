@@ -10,16 +10,16 @@ platforms=(
     "osx-arm64"
     "win-x64"
     "win-arm64"
+    "net9.0"
 )
 
-if [[ ! -z $1 ]]; then
-    platforms=($1)
-fi
+#if [[ ! -z $1 ]]; then
+#    platforms=($1)
+#fi
 
 base_dir="$(realpath -s "$(dirname "$(realpath -s "$0")")/../..")"
 git_tag="$(git describe --exact-match --tags)"
 git_commit="$(git rev-parse --short HEAD)"
-web_dir_prefix="$(realpath -s ~/Mount/fi02~ducky/www)"
 version=""
 
 cd "$base_dir/src/Booski"
@@ -36,7 +36,9 @@ else
     version="$(echo $git_tag | sed 's:.*/::')"
 fi
 
-for platform in ${platforms[@]}; do
+function build {
+    platform="$1"
+
     out_dir="$base_dir/bin/$version/$platform"
     mkdir -p "$out_dir"
 
@@ -47,34 +49,63 @@ for platform in ${platforms[@]}; do
     fi
 
     echo "Publishing: $version ($platform)"
-    dotnet publish \
-        --configuration Release \
-        --output "$out_dir" \
-        --runtime $platform
 
-    if [[ $BOOSKI_PUBLISH_NO_POST_PUBLISH != 1 ]]; then
-        bin_name="Booski"
-        bin_ext="bin"
+    if [[ $platform == net* ]]; then
+        dotnet publish \
+            --configuration Release \
+            --output "$out_dir" \
+            -p:PublishSelfContained=false \
+            -p:PublishSingleFile=false
 
-        if [[ $platform == win* ]]; then
-            bin_name="$bin_name.exe"
-            bin_ext="exe"
-        fi
+        for runtime in "$out_dir/runtimes"/*; do
+            if [[ ! " ${platforms[@]} " =~ " $(basename "${runtime}") " ]]; then
+                if [[ ! -d "$runtime/lib" ]]; then
+                    rm -rf "$runtime"
+                fi
+            fi
+        done
 
-        out_filename="booski-$version-$platform.$bin_ext"
-        new_out_path="$(realpath -s "$out_dir/../$out_filename")"
+        if [[ $BOOSKI_PUBLISH_NO_POST != 1 ]]; then
+             zip_name="booski-$version-$platform"
+             zip_dir="$out_dir/../$zip_name"
 
-        mv "$out_dir/$bin_name" "$new_out_path"
-        rm -rf "$out_dir"
+             rm -rf "$zip_dir"
+             mkdir -p "$zip_dir"
+             mv "$out_dir"/* "$zip_dir"
 
-        if [[ -d "$web_dir_prefix" ]]; then
-            web_dir="$web_dir_prefix/apps/booski/$version"
+             (cd "$out_dir/.." && zip -r "$zip_name.zip" "$zip_name")
 
-            if [[ ! -d "$web_dir" ]]; then
-                mkdir -p "$web_dir"
+             rm -rf "$zip_dir"
+             rm -rf "$out_dir"
+         fi
+    else
+        dotnet publish \
+            --configuration Release \
+            --output "$out_dir" \
+            --runtime $platform
+        
+        if [[ $BOOSKI_PUBLISH_NO_POST != 1 ]]; then
+            bin_name="Booski"
+            bin_ext="bin"
+
+            if [[ $platform == win* ]]; then
+                bin_name="$bin_name.exe"
+                bin_ext="exe"
             fi
 
-            cp "$new_out_path" "$web_dir/$out_filename"
+            out_filename="booski-$version-$platform.$bin_ext"
+            new_out_path="$(realpath -s "$out_dir/../$out_filename")"
+
+            mv "$out_dir/$bin_name" "$new_out_path"
+            rm -rf "$out_dir"
         fi
     fi
-done
+}
+
+if [[ -z $1 ]]; then
+    for platform in ${platforms[@]}; do
+        build "$platform"
+    done
+else
+    build "$1"
+fi
