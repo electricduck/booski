@@ -84,7 +84,9 @@ internal sealed class StartCommand : IStartCommand
 
         while (true)
         {
-            Say.Info($"Fetching posts every {o.SleepTime} seconds", "Change this with --sleep-time/-s (in seconds)");
+            var sleepTimeSeconds = o.SleepTime / 1000;
+            var sleepTimeSecondsUnit = sleepTimeSeconds == 1 ? "second" : "seconds";
+            Say.Info($"Fetching posts every {sleepTimeSeconds} {sleepTimeSecondsUnit}", "Change this with --sleep-time/-s (in seconds)");
 
             _postHelpers.PostCache = await _postHelpers.BuildPostCache(o.SleepTimeFetch);
 
