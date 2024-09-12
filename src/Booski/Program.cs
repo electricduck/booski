@@ -169,6 +169,7 @@ public class Program
         return versionString;
     }
 
+    // BUG: Picks up on pre-release versions
     private static async Task CheckUpdates(IGitHubContext _githubContext)
     {
         var ignoreUpdates = Environment.GetEnvironmentVariable("BOOSKI_IGNORE_UPDATES");
