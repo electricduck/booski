@@ -21,16 +21,19 @@ public interface IMastodonHelpers
 
 internal sealed class MastodonHelpers : IMastodonHelpers
 {
+    private IBridgyFedHelpers _bridgyFedHelpers;
     private IBskyHelpers _bskyHelpers;
     private IFileCacheContext _fileCacheContext;
     private IMastodonContext _mastodonContext;
 
     public MastodonHelpers(
+        IBridgyFedHelpers bridgyFedHelpers,
         IBskyHelpers bskyHelpers,
         IFileCacheContext fileCacheContext,
         IMastodonContext mastodonContext
     )
     {
+        _bridgyFedHelpers = bridgyFedHelpers;
         _bskyHelpers = bskyHelpers;
         _fileCacheContext = fileCacheContext;
         _mastodonContext = mastodonContext;
@@ -163,7 +166,6 @@ internal sealed class MastodonHelpers : IMastodonHelpers
 
         return statusText;
     }
-
     async Task<string> ReplaceUsernames(string originalString)
     {
         string pattern = "(\\[@.*?\\]\\(https:\\/\\/bsky.app\\/profile\\/(.*?)\\))";
@@ -181,6 +183,22 @@ internal sealed class MastodonHelpers : IMastodonHelpers
                         href,
                         $"@{mastodonHandle}"
                     );
+                }
+                else
+                {
+                    // Last-ditch attempt to avoid ugly links: we'll see if the user is on Bridgy
+                    if(_mastodonContext.State.NoRichText)
+                    {
+                        var bskyBridgyHandle = await _bridgyFedHelpers.GetBridgyBskyHandle(did);
+
+                        if(!String.IsNullOrEmpty(bskyBridgyHandle))
+                        {
+                            originalString = originalString.Replace(
+                                href,
+                                $"@{bskyBridgyHandle}"
+                            );
+                        }
+                    }
                 }
             }
         }

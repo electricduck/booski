@@ -12,6 +12,7 @@ namespace Booski.Helpers;
 
 public interface IBskyHelpers
 {
+    Task<string?> GetHandleForDid(string did);
     string GetPostLink(Post post, string app = "bsky.app");
     Task<Lib.Internal.ComAtproto.Responses.ListRecordsResponse> GetProfileFeed(string cursor);
     Embed ParseEmbeds(Polymorph embed, string did);
@@ -31,15 +32,28 @@ public interface IBskyHelpers
 internal sealed class BskyHelpers : IBskyHelpers
 {
     private BskyApi.Com.Atproto.Repo _atprotoRepo;
+    private BskyApi.App.Bsky.Actor _bskyActor;
     private IBskyContext _bskyContext;
 
     public BskyHelpers(
         BskyApi.Com.Atproto.Repo atprotoRepo,
+        BskyApi.App.Bsky.Actor bskyActor,
         IBskyContext bskyContext
     )
     {
         _atprotoRepo = atprotoRepo;
+        _bskyActor = bskyActor;
         _bskyContext = bskyContext;
+    }
+
+    public async Task<string?> GetHandleForDid(string did)
+    {
+        var response = await _bskyActor.GetProfile(did);
+        
+        if(response.Data != null)
+            return response.Data.Handle;
+        else
+            return null;
     }
 
     public string GetPostLink(

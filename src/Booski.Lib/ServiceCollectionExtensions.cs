@@ -21,6 +21,7 @@ namespace Booski.Lib
             services.AddScoped<Lexicon.App.Bsky.Actor, ActorCommand>();
             services.AddScoped<Lexicon.App.Bsky.Feed, FeedCommand>();
             services.AddScoped<Lexicon.Com.Atproto.Admin, AdminCommand>();
+            services.AddScoped<Lexicon.Com.Atproto.Identity, IdentityCommand>();
             services.AddScoped<Lexicon.Com.Atproto.Repo, RepoCommand>();
             services.AddScoped<Lexicon.Com.Atproto.Server, ServerCommand>();
             services.AddScoped<Lexicon.Com.Atproto.Sync, SyncCommand>();

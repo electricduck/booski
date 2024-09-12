@@ -78,6 +78,7 @@ public class Program
             HostApplicationBuilder builder = Host.CreateApplicationBuilder();
 
             builder.Services.AddBooskiLib();
+            builder.Services.AddSingleton<IBridgyFedHelpers, BridgyFedHelpers>();
             builder.Services.AddSingleton<IBskyContext, BskyContext>();
             builder.Services.AddSingleton<IBskyHelpers, BskyHelpers>();
             builder.Services.AddSingleton<IFileCacheContext, FileCacheContext>();

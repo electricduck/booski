@@ -20,6 +20,7 @@ internal sealed class StartCommand : IStartCommand
     private IBskyContext _bskyContext;
     private IHttpContext _httpContext;
     private IMastodonContext _mastodonContext;
+    private IMastodonHelpers _mastodonHelpers;
     private IPostHelpers _postHelpers;
     private ITelegramContext _telegramContext;
     private IXContext _xContext;
@@ -28,6 +29,7 @@ internal sealed class StartCommand : IStartCommand
         IBskyContext bskyContext,
         IHttpContext httpContext,
         IMastodonContext mastodonContext,
+        IMastodonHelpers mastodonHelpers,
         IPostHelpers postHelpers,
         ITelegramContext telegramContext,
         IXContext xContext
@@ -36,6 +38,7 @@ internal sealed class StartCommand : IStartCommand
         _bskyContext = bskyContext;
         _httpContext = httpContext;
         _mastodonContext = mastodonContext;
+        _mastodonHelpers = mastodonHelpers;
         _postHelpers = postHelpers;
         _telegramContext = telegramContext;
         _xContext = xContext;
@@ -70,6 +73,9 @@ internal sealed class StartCommand : IStartCommand
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
         await CreateAdditionalClients(Program.Config.Clients, o);
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
+
+        await _mastodonHelpers.GetBridgyBskyAccount("astra.blue");
+        Program.Exit();
 
         if(o.ExitAfterConnecting)
             return;

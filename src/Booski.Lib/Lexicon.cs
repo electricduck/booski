@@ -50,6 +50,10 @@ namespace Booski.Lib.Lexicon {
                 public Task<AtProtoApiResponse<GetInviteCodesResponse>> GetInviteCodes(int limit = ComAtprotoConstants.DefaultInviteCodeLimit, InviteCodeSort sort = ComAtprotoConstants.DefaultInviteCodeSort);
             }
 
+            public interface Identity {
+                public Task<AtProtoApiResponse<ResolveHandleResponse>> ResolveHandle(string did);
+            }
+
             public interface Repo {
                 public Task<AtProtoApiResponse<ApplyWritesResponse>> ApplyWrites(string repo, List<Polymorph> writes, string swapCommit = "", bool validate = true);
                 public Task<AtProtoApiResponse<CreateRecordResponse>> CreateRecord(string collection, dynamic record, string repo, string rKey = "", string swapCommit = "", bool validate = true);
