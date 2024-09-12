@@ -105,7 +105,6 @@ public class Program
             var _stopCommand = host.Services.GetRequiredService<IStopCommand>();
             var _usernameMap = host.Services.GetRequiredService<IUsernameMapCommand>();
 
-            await CheckUpdates(host.Services.GetRequiredService<IGitHubContext>());
             Configure();
             CheckYtDlp(host.Services.GetRequiredService<IYtDlpContext>());
             Database.Migrate();
@@ -167,51 +166,6 @@ public class Program
         }
 
         return versionString;
-    }
-
-    // BUG: Handle when running version is RC
-    private static async Task CheckUpdates(IGitHubContext _githubContext)
-    {
-        var ignoreUpdates = Environment.GetEnvironmentVariable("BOOSKI_IGNORE_UPDATES");
-
-        if (ignoreUpdates == "1" || ignoreUpdates == "true")
-            return;
-
-        await _githubContext.CreateClient();
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-        var releases = await _githubContext.Client.Repository.Release.GetAll("electricduck", "booski");
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
-
-        if (releases != null)
-        {
-            Octokit.Release? latestRelease = null;
-
-            foreach(var release in releases)
-            {
-                if(!release.Prerelease)
-                {
-                    latestRelease = release;
-                    break;
-                }
-            }
-
-            if(latestRelease != null)
-            {
-                var latestTag = latestRelease.TagName;
-                var latestVersion = latestTag.Split('/').Last();
-                var latestVersionLink = $"https://github.com/electricduck/booski/releases/tag/{HttpUtility.UrlEncode(latestTag)}";
-                var runningVersion = GetVersion();
-
-                if (latestVersion != runningVersion)
-                {
-                    Say.Separate();
-                    Say.Warning("An update is available", $"Version {latestVersion} is available. Download from {latestVersionLink}");
-                    Say.Separate();
-                }
-            }
-        }
-
-        _githubContext.ResetClient();
     }
 
     // TODO: Download yt-dlp?
