@@ -7,7 +7,8 @@ public class FileCaches
 {
     public async static Task<FileCache> AddOrUpdateFileCache(
         string uri,
-        string filename
+        string filename,
+        long fileSize
     )
     {
         using (var db = new Database())
@@ -28,6 +29,7 @@ public class FileCaches
                     Available = true,
                     DownloadedAt = now,
                     Filename = filename,
+                    FileSize = fileSize,
                     Uri = uri
                 };
 
@@ -39,6 +41,7 @@ public class FileCaches
                 existingFileCache.Available = true;
                 existingFileCache.DownloadedAt = now;
                 existingFileCache.Filename = filename;
+                existingFileCache.FileSize = fileSize;
 
                 await db.SaveChangesAsync();
             }
@@ -62,6 +65,7 @@ public class FileCaches
             {
                 fileCache.Available = false;
                 fileCache.DownloadedAt = null;
+                fileCache.FileSize = null;
             }
 
             await db.SaveChangesAsync();

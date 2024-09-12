@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using Booski.Common;
 using Booski.Contexts;
 using Booski.Data;
+using Booski.Enums;
 using Booski.Utilities;
 using LinqToTwitter;
 
@@ -52,7 +53,8 @@ internal sealed class XHelpers : IXHelpers
     )
     {
         Tweet sentMessage = null;
-        List<Media> messageAttachments = new List<Media>();
+        List<Media>? messageAttachments = null;
+        bool hasEmbedsButFailed = false;
 
         if (
             embed != null && embed.Type == Enums.EmbedType.Gif ||
@@ -62,6 +64,8 @@ internal sealed class XHelpers : IXHelpers
         {
             if (embed.Items.Count() > 0)
             {
+                messageAttachments = new List<Media>();
+
                 string mediaCategory = "";
 
                 switch (embed.Type)
@@ -82,7 +86,10 @@ internal sealed class XHelpers : IXHelpers
                     var fileByteArray = await _fileCacheContext.GetFileFromUriAsByteArray(embedItem.Uri);
 
                     if(fileByteArray == null)
-                        return null;
+                    {
+                        hasEmbedsButFailed = true;
+                        break;
+                    }
 
                     var attachment = await _xContext.Client.UploadMediaAsync(
                         fileByteArray,
@@ -94,45 +101,58 @@ internal sealed class XHelpers : IXHelpers
                         messageAttachments.Add(attachment);
                 }
             }
+        }
 
-            if (messageAttachments != null)
+        if (
+            messageAttachments != null &&
+            messageAttachments.Count() > 0 &&
+            !hasEmbedsButFailed
+        )
+        {
+            List<string> mediaIds = new List<string>();
+
+            foreach (var messageAttachment in messageAttachments)
             {
-                List<string> mediaIds = new List<string>();
-
-                foreach (var messageAttachment in messageAttachments)
-                {
-                    mediaIds.Add(messageAttachment.MediaID.ToString());
-                }
-
-                // NOTE: There's no "ReplyMediaAsync" function so it will quote for replies
-                sentMessage = await _xContext.Client.TweetMediaAsync(
-                    mediaIds: mediaIds,
-                    quoteTweetID: replyId,
-                    text: await GeneratePostText(post)
-                );
+                mediaIds.Add(messageAttachment.MediaID.ToString());
             }
+
+            // NOTE: There's no "ReplyMediaAsync" function so it will quote for replies
+            sentMessage = await _xContext.Client.TweetMediaAsync(
+                mediaIds: mediaIds,
+                quoteTweetID: replyId,
+                text: await GeneratePostText(post)
+            );
+        }
+        else if (String.IsNullOrEmpty(replyId))
+        {
+            sentMessage = await _xContext.Client.TweetAsync(
+                text: await GeneratePostText(
+                    post,
+                    hasEmbedsButFailed,
+                    embed != null ? embed.Type : EmbedType.Unknown
+                )
+            );
         }
         else
         {
-            if (String.IsNullOrEmpty(replyId))
-            {
-                sentMessage = await _xContext.Client.TweetAsync(
-                    text: await GeneratePostText(post)
-                );
-            }
-            else
-            {
-                sentMessage = await _xContext.Client.ReplyAsync(
-                    replyTweetID: replyId,
-                    text: await GeneratePostText(post)
-                );
-            }
+            sentMessage = await _xContext.Client.ReplyAsync(
+                replyTweetID: replyId,
+                text: await GeneratePostText(
+                    post,
+                    hasEmbedsButFailed,
+                    embed != null ? embed.Type : EmbedType.Unknown
+                )
+            );
         }
 
         return sentMessage;
     }
 
-    async Task<string> GeneratePostText(Post post)
+    async Task<string> GeneratePostText(
+        Post post,
+        bool hasEmbedsButFailed = false,
+        EmbedType embedType = EmbedType.Unknown
+    )
     {
         // NOTE: We're parsing the mention facet just to make replacements easier
         string captionText = _bskyHelpers.ParseFacets(
@@ -147,13 +167,46 @@ internal sealed class XHelpers : IXHelpers
         );
         captionText = await ReplaceUsernames(captionText);
         captionText = UnTruncateLinks(captionText);
-        string readMoreLink = $"{Environment.NewLine}—{Environment.NewLine}➡️ https://bsky.app/profile/{post.Profile.Did}/post/{post.RecordKey}";
-        int captionTextLength = Encoding.UTF8.GetBytes(captionText).Length;
-        int readMoreLinkLength = Encoding.UTF8.GetBytes(readMoreLink).Length;
 
-        if(captionTextLength > XPostTextLimit)
+        bool forceReadMoreText = false;
+        string readMoreLink = _bskyHelpers.GetPostLink(post);
+        string readMoreSuffix = "";
+
+        if(!String.IsNullOrEmpty(captionText))
+            readMoreSuffix = $"{Environment.NewLine}—{Environment.NewLine}";
+        
+        if(hasEmbedsButFailed)
         {
-            captionText = StringUtilities.Truncate(captionText, XPostTextLimit - readMoreLinkLength) + readMoreLink;
+            forceReadMoreText = true;
+
+            switch(embedType)
+            {
+                case EmbedType.Images:
+                    readMoreSuffix += $"📷 See Photos:";
+                    break;
+                case EmbedType.Video:
+                    readMoreSuffix += $"▶️ Watch Video:";
+                    break;
+                default:
+                    readMoreSuffix += $"🔗 See Attachment:";
+                    break;
+            }
+        }
+        else
+        {
+            readMoreSuffix += $"➡️";
+        }
+
+        string readMoreText = $"{readMoreSuffix} {readMoreLink}";
+        int captionTextLength = Encoding.UTF8.GetBytes(captionText).Length;
+        int readMoreTextLength = Encoding.UTF8.GetBytes(readMoreText).Length;
+
+        if(
+            forceReadMoreText ||
+            captionTextLength > XPostTextLimit
+        )
+        {
+            captionText = StringUtilities.Truncate(captionText, XPostTextLimit - readMoreTextLength) + readMoreText;
         }
 
         return captionText;

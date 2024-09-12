@@ -391,6 +391,7 @@ internal sealed class PostHelpers : IPostHelpers
         }
         catch (Exception e)
         {
+            throw;
             Say.Warning($"Unable to post to X: {post.RecordKey}", e.Message);
         }
     }

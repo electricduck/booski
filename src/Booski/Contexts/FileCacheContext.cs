@@ -52,10 +52,16 @@ internal sealed class FileCacheContext : IFileCacheContext
     {
         var fileStream = await GetFileFromUri(uri);
 
-        MemoryStream memoryStream = new MemoryStream();
-        await fileStream.CopyToAsync(memoryStream);
-
-        return memoryStream;
+        if(fileStream != null)
+        {
+            MemoryStream memoryStream = new MemoryStream();
+            await fileStream.CopyToAsync(memoryStream);
+            return memoryStream;
+        }
+        else
+        {
+            return null;
+        }
     }
 
     async Task ClearCache()
@@ -90,7 +96,6 @@ internal sealed class FileCacheContext : IFileCacheContext
         if(uri.ToString().EndsWith(".m3u8"))
         {
             // HLS stream (woo boy)
-            Say.Warning("HLS stream (not downloading)");
         }
         else
         {
@@ -133,8 +138,10 @@ internal sealed class FileCacheContext : IFileCacheContext
 
             if(isFileDownloaded)
             {
+                var fileSize = new FileInfo(filePath).Length;
                 var newFileCache = await FileCaches.AddOrUpdateFileCache(
                     filename: filename,
+                    fileSize: fileSize,
                     uri: uri.ToString()
                 );
             }

@@ -2,6 +2,7 @@ using System.Text.RegularExpressions;
 using Booski.Common;
 using Booski.Contexts;
 using Booski.Data;
+using Booski.Enums;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
@@ -46,6 +47,7 @@ internal sealed class TelegramHelpers : ITelegramHelpers
         );
     }
 
+    // TODO: Refactor to use FileCache
     public async Task<List<Message>?> PostToTelegram(
         Post post,
         Embed? embed,
@@ -55,10 +57,13 @@ internal sealed class TelegramHelpers : ITelegramHelpers
     {
         List<Message> sentMessages = new List<Message>();
 
-        if(chatId == null)
+        if (chatId == null)
             chatId = _telegramContext.State.Channel;
 
-        if (embed != null && embed.Items != null && embed.Items.Count() > 0)
+        if (
+            embed != null && 
+            embed.Items.Count() > 0
+        )
         {
             if (embed.Type == Enums.EmbedType.Images)
             {
@@ -100,6 +105,18 @@ internal sealed class TelegramHelpers : ITelegramHelpers
                     )
                 );
             }
+            else if (embed.Type == Enums.EmbedType.Video)
+            {
+                sentMessages.Add(
+                    await _telegramContext.Client.SendTextMessageAsync(
+                        chatId: chatId,
+                        disableWebPagePreview: true,
+                        parseMode: Telegram.Bot.Types.Enums.ParseMode.Html,
+                        replyToMessageId: replyId,
+                        text: await GenerateCaption(post, true, embed.Type)
+                    )
+                );
+            }
             else
             {
                 string text = $"{await GenerateCaption(post)}<a href=\"{embed.Items.First().Uri}\"> </a>";
@@ -131,7 +148,11 @@ internal sealed class TelegramHelpers : ITelegramHelpers
         return sentMessages;
     }
 
-    async Task<string> GenerateCaption(Post post)
+    async Task<string> GenerateCaption(
+        Post post,
+        bool hasEmbedsButFailed = false,
+        EmbedType embedType = EmbedType.Unknown
+    )
     {
         string originalCaptionText = _bskyHelpers.ParseFacets(
             post.Record.Text,
@@ -142,6 +163,26 @@ internal sealed class TelegramHelpers : ITelegramHelpers
         string captionText = $"""
 <a href="https://bsky.app/profile/{post.Profile.Did}">🦋 @{post.Profile.Handle}</a>
 """;
+
+        if(hasEmbedsButFailed)
+        {
+            string attachmentLink = _bskyHelpers.GetPostLink(post);
+            
+            captionText = $"{Environment.NewLine}—{Environment.NewLine}{captionText}";
+
+            switch(embedType)
+            {
+                case EmbedType.Images:
+                    captionText = $"<a href=\"{attachmentLink}\">📷 See Photos on Bluesky</a>{captionText}";
+                    break;
+                case EmbedType.Video:
+                    captionText = $"<a href=\"{attachmentLink}\">▶️ Watch Video on Bluesky</a>{captionText}";
+                    break;
+                default:
+                    captionText = $"<a href=\"{attachmentLink}\">🔗 See Attachment on Bluesky</a>{captionText}";
+                    break;
+            }
+        }
 
         if (!String.IsNullOrEmpty(originalCaptionText))
         {
@@ -161,7 +202,7 @@ internal sealed class TelegramHelpers : ITelegramHelpers
         foreach (Match match in Regex.Matches(originalString, pattern, RegexOptions.IgnoreCase))
         {
             string href = match.Value;
-            if(match.Groups[2] != null)
+            if (match.Groups[2] != null)
             {
                 string did = match.Groups[2].Value;
                 string telegramHandle = await UsernameMaps.GetTelegramHandleForDid(did);

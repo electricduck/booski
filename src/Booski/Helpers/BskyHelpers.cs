@@ -12,6 +12,7 @@ namespace Booski.Helpers;
 
 public interface IBskyHelpers
 {
+    string GetPostLink(Post post, string app = "bsky.app");
     Task<Lib.Internal.ComAtproto.Responses.ListRecordsResponse> GetProfileFeed(string cursor);
     Embed ParseEmbeds(Polymorph embed, string did);
     string ParseFacets(
@@ -39,6 +40,14 @@ internal sealed class BskyHelpers : IBskyHelpers
     {
         _atprotoRepo = atprotoRepo;
         _bskyContext = bskyContext;
+    }
+
+    public string GetPostLink(
+        Post post,
+        string app = "bsky.app"
+    )
+    {
+        return $"https://{app}/profile/{post.Profile.Did}/post/{post.RecordKey}";
     }
 
     public async Task<Lib.Internal.ComAtproto.Responses.ListRecordsResponse> GetProfileFeed(
@@ -144,18 +153,6 @@ internal sealed class BskyHelpers : IBskyHelpers
         }
 
         return parsedEmbeds;
-    }
-
-    Uri BuildImageCdnUrl(string did, string link, string mimeType)
-    {
-        // TODO: Is this the right way to do this?
-        return new Uri($"https://cdn.bsky.app/img/feed_fullsize/plain/{did}/{link}@{mimeType.Split('/').Last()}");
-    }
-
-    Uri BuildVideoCdnUrl(string did, string link)
-    {
-        // TODO: Is this the right way to do this?
-        return new Uri($"https://video.bsky.app/watch/{HttpUtility.UrlEncode(did)}/{link}/playlist.m3u8");
     }
 
     public string ParseFacets(
@@ -293,5 +290,17 @@ internal sealed class BskyHelpers : IBskyHelpers
         }
 
         return contentWarning;
+    }
+
+    Uri BuildImageCdnUrl(string did, string link, string mimeType)
+    {
+        // TODO: Is this the right way to do this?
+        return new Uri($"https://cdn.bsky.app/img/feed_fullsize/plain/{did}/{link}@{mimeType.Split('/').Last()}");
+    }
+
+    Uri BuildVideoCdnUrl(string did, string link)
+    {
+        // TODO: Is this the right way to do this?
+        return new Uri($"https://video.bsky.app/watch/{HttpUtility.UrlEncode(did)}/{link}/playlist.m3u8");
     }
 }
