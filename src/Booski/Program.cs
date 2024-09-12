@@ -147,6 +147,7 @@ public class Program
             Environment.Exit(exitCode);
     }
 
+    // TODO: Get tag (-tag)
     public static string GetVersion()
     {
         string versionString = "?.?";
@@ -168,7 +169,6 @@ public class Program
         return versionString;
     }
 
-    // BUG: Picks up on pre-release versions
     private static async Task CheckUpdates(IGitHubContext _githubContext)
     {
         var ignoreUpdates = Environment.GetEnvironmentVariable("BOOSKI_IGNORE_UPDATES");
@@ -183,17 +183,30 @@ public class Program
 
         if (releases != null)
         {
-            var latestRelease = releases[0];
-            var latestTag = latestRelease.TagName;
-            var latestVersion = latestTag.Split('/').Last();
-            var latestVersionLink = $"https://github.com/electricduck/booski/releases/tag/{HttpUtility.UrlEncode(latestTag)}";
-            var runningVersion = GetVersion();
+            Octokit.Release? latestRelease = null;
 
-            if (latestVersion != runningVersion)
+            foreach(var release in releases)
             {
-                Say.Separate();
-                Say.Warning("An update is available", $"Version {latestVersion} is available. Download from {latestVersionLink}");
-                Say.Separate();
+                if(!release.Prerelease)
+                {
+                    latestRelease = release;
+                    break;
+                }
+            }
+
+            if(latestRelease != null)
+            {
+                var latestTag = latestRelease.TagName;
+                var latestVersion = latestTag.Split('/').Last();
+                var latestVersionLink = $"https://github.com/electricduck/booski/releases/tag/{HttpUtility.UrlEncode(latestTag)}";
+                var runningVersion = GetVersion();
+
+                if (latestVersion != runningVersion)
+                {
+                    Say.Separate();
+                    Say.Warning("An update is available", $"Version {latestVersion} is available. Download from {latestVersionLink}");
+                    Say.Separate();
+                }
             }
         }
 
