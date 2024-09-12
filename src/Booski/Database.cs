@@ -1,5 +1,6 @@
 using Booski.Common;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace Booski;
 
@@ -10,7 +11,11 @@ public class Database : DbContext
     public DbSet<UsernameMap> UsernameMaps { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseSqlite($"Data Source={Program.DbPath}");
+        => optionsBuilder
+            .UseSqlite($"Data Source={Program.DbPath}")
+            .ConfigureWarnings(w =>
+                w.Default(WarningBehavior.Ignore)
+                .Ignore(RelationalEventId.NonTransactionalMigrationOperationWarning));
 
     public static void Migrate() {
         var context = new Database();
