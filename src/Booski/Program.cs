@@ -14,6 +14,7 @@ using Booski.Common.Options;
 using Booski.Contexts;
 using Booski.Helpers;
 using Booski.Lib;
+using DotNetTools.SharpGrabber;
 
 namespace Booski;
 
@@ -28,6 +29,8 @@ public class Program
     public static string? FileCacheDir { get; set; }
     public static bool NoSay { get; set; }
     public static string? PidPath { get; set; }
+    public static bool YtDlpEnabled { get; set; }
+    public static string? YtDlpPath { get; set; } = "yt-dlp";
 
     private static readonly string DefaultConfigFileContent = """
 {
@@ -91,6 +94,7 @@ public class Program
             builder.Services.AddSingleton<ITelegramContext, TelegramContext>();
             builder.Services.AddSingleton<ITelegramHelpers, TelegramHelpers>();
             builder.Services.AddSingleton<IUsernameMapCommand, UsernameMapCommand>();
+            builder.Services.AddSingleton<IYtDlpContext, YtDlpContext>();
             builder.Services.AddSingleton<IXContext, XContext>();
             builder.Services.AddSingleton<IXHelpers, XHelpers>();
             builder.Services.RemoveAll<IHttpMessageHandlerBuilderFilter>();
@@ -104,6 +108,7 @@ public class Program
 
             await CheckUpdates(host.Services.GetRequiredService<IGitHubContext>());
             Configure();
+            CheckYtDlp(host.Services.GetRequiredService<IYtDlpContext>());
             Database.Migrate();
 
             await Parser.Default
@@ -194,6 +199,32 @@ public class Program
         }
 
         _githubContext.ResetClient();
+    }
+
+    // TODO: Download yt-dlp?
+    private static void CheckYtDlp(IYtDlpContext _ytDlpContext)
+    {
+        var ignoreYtDlp = Environment.GetEnvironmentVariable("BOOSKI_IGNORE_YTDLP");
+        var customYtDlpPath = Environment.GetEnvironmentVariable("BOOSKI_YTDLP_PATH");
+        if(!String.IsNullOrEmpty(customYtDlpPath))
+            YtDlpPath = customYtDlpPath;
+
+        YtDlpEnabled = _ytDlpContext.DoesYtDlpExist();
+
+        if(!YtDlpEnabled)
+        {
+            if (ignoreYtDlp == "1" || ignoreYtDlp == "true")
+                Say.Warning("yt-dlp not found");
+            else
+                Say.Error(
+                    "yt-dlp not found",
+                    @$"The ability to download videos from Bluesky depends on this. You must:
+* Download yt-dlp (from https://github.com/yt-dlp/yt-dlp)
+* Have the binary located in the PATH
+ * Or, set this location manually in $BOOSKI_YTDLP_PATH
+    "
+                );
+        }
     }
 
     static void Configure()

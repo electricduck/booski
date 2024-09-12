@@ -72,10 +72,20 @@ internal sealed class MastodonHelpers : IMastodonHelpers
                         break;
                     }
 
+                    Say.Info($"Uploading '{embedItem.Ref}' to Mastodon...");
                     var mastodonMedia = new MediaDefinition(file, embedItem.Uri.ToString().Split('/').Last());
                     var messageAttachment = await _mastodonContext.Client.UploadMedia(mastodonMedia);
 
-                    messageAttachments.Add(messageAttachment);
+                    if(messageAttachment != null)
+                    {
+                        messageAttachments.Add(messageAttachment);
+                    }
+                    else
+                    {
+                        Say.Warning($"Failed to upload '{embedItem.Ref}' to Mastodon");
+                        hasEmbedsButFailed = true;
+                        break;
+                    }
                 }
             }
         }

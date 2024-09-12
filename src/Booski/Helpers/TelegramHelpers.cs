@@ -25,14 +25,17 @@ public interface ITelegramHelpers
 internal sealed class TelegramHelpers : ITelegramHelpers
 {
     private IBskyHelpers _bskyHelpers;
+    private IFileCacheContext _fileCacheContext;
     private ITelegramContext _telegramContext;
 
     public TelegramHelpers(
         IBskyHelpers bskyHelpers,
+        IFileCacheContext fileCacheContext,
         ITelegramContext telegramContext
     )
     {
         _bskyHelpers = bskyHelpers;
+        _fileCacheContext = fileCacheContext;
         _telegramContext = telegramContext;
     }
 
@@ -47,7 +50,6 @@ internal sealed class TelegramHelpers : ITelegramHelpers
         );
     }
 
-    // TODO: Refactor to use FileCache
     public async Task<List<Message>?> PostToTelegram(
         Post post,
         Embed? embed,
@@ -56,6 +58,7 @@ internal sealed class TelegramHelpers : ITelegramHelpers
     )
     {
         List<Message> sentMessages = new List<Message>();
+         bool hasEmbedsButFailed = false;
 
         if (chatId == null)
             chatId = _telegramContext.State.Channel;
@@ -71,8 +74,16 @@ internal sealed class TelegramHelpers : ITelegramHelpers
                 bool firstMediaItem = true;
 
                 foreach (var embedItem in embed.Items)
-                {
-                    var telegramMediaPhoto = new InputMediaPhoto(new InputFileUrl(embedItem.Uri));
+                {                    
+                    var fileStream = await _fileCacheContext.GetFileFromUri(embedItem.Uri);
+
+                    if (fileStream == null)
+                    {
+                        hasEmbedsButFailed = true;
+                        break;
+                    }
+
+                    var telegramMediaPhoto = new InputMediaPhoto(new InputFileStream(fileStream, embedItem.Ref));
 
                     if (firstMediaItem)
                     {
@@ -82,40 +93,61 @@ internal sealed class TelegramHelpers : ITelegramHelpers
                         firstMediaItem = false;
                     }
 
+                    SayUploadMessage(embedItem.Ref);
                     telegramAlbum.Add(telegramMediaPhoto);
                 }
 
-                var sentMessagesArray = await _telegramContext.Client.SendMediaGroupAsync(
-                    chatId: chatId,
-                    media: telegramAlbum,
-                    replyToMessageId: replyId
-                );
-
-                sentMessages = sentMessagesArray.ToList();
-            }
-            else if (embed.Type == Enums.EmbedType.Gif)
-            {
-                sentMessages.Add(
-                    await _telegramContext.Client.SendAnimationAsync(
-                        animation: new InputFileUrl(embed.Items.First().Uri),
-                        caption: await GenerateCaption(post),
+                if(telegramAlbum.Count() > 0 && !hasEmbedsButFailed)
+                {
+                    var sentMessagesArray = await _telegramContext.Client.SendMediaGroupAsync(
                         chatId: chatId,
-                        parseMode: Telegram.Bot.Types.Enums.ParseMode.Html,
+                        media: telegramAlbum,
                         replyToMessageId: replyId
-                    )
-                );
+                    );
+
+                    sentMessages = sentMessagesArray.ToList();
+                }
             }
-            else if (embed.Type == Enums.EmbedType.Video)
+            else if (
+                embed.Type == Enums.EmbedType.Gif ||
+                embed.Type == Enums.EmbedType.Video
+            )
             {
-                sentMessages.Add(
-                    await _telegramContext.Client.SendTextMessageAsync(
-                        chatId: chatId,
-                        disableWebPagePreview: true,
-                        parseMode: Telegram.Bot.Types.Enums.ParseMode.Html,
-                        replyToMessageId: replyId,
-                        text: await GenerateCaption(post, true, embed.Type)
-                    )
-                );
+                var firstEmbedItem = embed.Items.First();
+                var fileStream = await _fileCacheContext.GetFileFromUri(firstEmbedItem.Uri);
+
+                if (fileStream == null)
+                    hasEmbedsButFailed = true;
+                else
+                {
+                    SayUploadMessage(firstEmbedItem.Ref);
+
+                    switch(embed.Type)
+                    {
+                        case Enums.EmbedType.Gif:
+                            sentMessages.Add(
+                                await _telegramContext.Client.SendAnimationAsync(
+                                    animation: new InputFileStream(fileStream),
+                                    caption: await GenerateCaption(post),
+                                    chatId: chatId,
+                                    parseMode: Telegram.Bot.Types.Enums.ParseMode.Html,
+                                    replyToMessageId: replyId
+                                )
+                            );
+                            break;
+                        case Enums.EmbedType.Video:
+                            sentMessages.Add(
+                                await _telegramContext.Client.SendVideoAsync(
+                                    caption: await GenerateCaption(post),
+                                    chatId: chatId,
+                                    parseMode: Telegram.Bot.Types.Enums.ParseMode.Html,
+                                    replyToMessageId: replyId,
+                                    video: new InputFileStream(fileStream)
+                                )
+                            );
+                            break;
+                    }
+                }
             }
             else
             {
@@ -132,7 +164,12 @@ internal sealed class TelegramHelpers : ITelegramHelpers
                 );
             }
         }
-        else
+        
+        if(
+            embed == null ||
+            embed != null && embed.Items.Count() == 0 ||
+            embed != null && embed.Items.Count() > 0 && hasEmbedsButFailed
+        )
         {
             sentMessages.Add(
                 await _telegramContext.Client.SendTextMessageAsync(
@@ -140,7 +177,7 @@ internal sealed class TelegramHelpers : ITelegramHelpers
                     disableWebPagePreview: true,
                     parseMode: Telegram.Bot.Types.Enums.ParseMode.Html,
                     replyToMessageId: replyId,
-                    text: await GenerateCaption(post)
+                    text: await GenerateCaption(post, hasEmbedsButFailed, (embed != null) ? embed.Type : EmbedType.Unknown)
                 )
             );
         }
@@ -218,5 +255,10 @@ internal sealed class TelegramHelpers : ITelegramHelpers
         }
 
         return originalString;
+    }
+
+    void SayUploadMessage(string embedRef)
+    {
+        Say.Info($"Uploading '{embedRef}' to Telegram...");
     }
 }

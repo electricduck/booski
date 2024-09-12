@@ -1,9 +1,8 @@
-using Booski.Common;
 using Booski.Data;
 
 namespace Booski.Contexts;
 
-// TODO: Actually cache stuff
+// Is this a Context or a Helper?
 public interface IFileCacheContext
 {
     Task<Stream?> GetFileFromUri(Uri uri);
@@ -14,12 +13,15 @@ public interface IFileCacheContext
 internal sealed class FileCacheContext : IFileCacheContext
 {
     private IHttpContext _httpContext;
+    private IYtDlpContext _ytDlpContext;
 
     public FileCacheContext(
-        IHttpContext httpContext
+        IHttpContext httpContext,
+        IYtDlpContext ytDlpContext
     )
     {
         _httpContext = httpContext;
+        _ytDlpContext = ytDlpContext;
     }
 
     public async Task<Stream?> GetFileFromUri(Uri uri)
@@ -95,7 +97,8 @@ internal sealed class FileCacheContext : IFileCacheContext
 
         if(uri.ToString().EndsWith(".m3u8"))
         {
-            // HLS stream (woo boy)
+            Say.Info($"Grabbing '{uri}'...");
+            _ytDlpContext.DownloadVideo(uri, filePath);
         }
         else
         {

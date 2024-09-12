@@ -42,7 +42,8 @@ internal sealed class XHelpers : IXHelpers
 
     public async Task DeleteFromX(
         string postId
-    ) {
+    )
+    {
         await _xContext.Client.DeleteTweetAsync(postId);
     }
 
@@ -85,11 +86,13 @@ internal sealed class XHelpers : IXHelpers
                 {
                     var fileByteArray = await _fileCacheContext.GetFileFromUriAsByteArray(embedItem.Uri);
 
-                    if(fileByteArray == null)
+                    if (fileByteArray == null)
                     {
                         hasEmbedsButFailed = true;
                         break;
                     }
+
+                    Say.Info($"Uploading '{embedItem.Ref}' to X...");
 
                     var attachment = await _xContext.Client.UploadMediaAsync(
                         fileByteArray,
@@ -97,8 +100,36 @@ internal sealed class XHelpers : IXHelpers
                         mediaType: embedItem.MimeType
                     );
 
+                    do
+                    {
+                        if (attachment != null)
+                        {
+                            int checkAfterSeconds = attachment?.ProcessingInfo?.CheckAfterSeconds ?? 0;
+                            await Task.Delay(checkAfterSeconds * 1000);
+                        }
+
+                        attachment =
+                            await
+                            (from stat in _xContext.Client.Media
+                             where stat.Type == MediaType.Status &&
+                                 stat.MediaID == attachment.MediaID
+                             select stat)
+                            .SingleOrDefaultAsync();
+                    } while (attachment?.ProcessingInfo?.State == MediaProcessingInfo.InProgress);
+
                     if (attachment != null)
-                        messageAttachments.Add(attachment);
+                    {
+                        if (attachment?.ProcessingInfo?.State == MediaProcessingInfo.Succeeded)
+                        {
+                            messageAttachments.Add(attachment);
+                        }
+                        else
+                        {
+                            Say.Warning($"Failed to upload '{embedItem.Ref}' to X");
+                            hasEmbedsButFailed = true;
+                            break;
+                        }
+                    }
                 }
             }
         }
@@ -172,14 +203,14 @@ internal sealed class XHelpers : IXHelpers
         string readMoreLink = _bskyHelpers.GetPostLink(post);
         string readMoreSuffix = "";
 
-        if(!String.IsNullOrEmpty(captionText))
+        if (!String.IsNullOrEmpty(captionText))
             readMoreSuffix = $"{Environment.NewLine}—{Environment.NewLine}";
-        
-        if(hasEmbedsButFailed)
+
+        if (hasEmbedsButFailed)
         {
             forceReadMoreText = true;
 
-            switch(embedType)
+            switch (embedType)
             {
                 case EmbedType.Images:
                     readMoreSuffix += $"📷 See Photos:";
@@ -201,7 +232,7 @@ internal sealed class XHelpers : IXHelpers
         int captionTextLength = Encoding.UTF8.GetBytes(captionText).Length;
         int readMoreTextLength = Encoding.UTF8.GetBytes(readMoreText).Length;
 
-        if(
+        if (
             forceReadMoreText ||
             captionTextLength > XPostTextLimit
         )
@@ -218,7 +249,7 @@ internal sealed class XHelpers : IXHelpers
         foreach (Match match in Regex.Matches(originalString, pattern, RegexOptions.IgnoreCase))
         {
             string originalLink = match.Value;
-            if(match.Groups[2] != null)
+            if (match.Groups[2] != null)
             {
                 string originalUrl = match.Groups[2].Value;
 
@@ -238,7 +269,7 @@ internal sealed class XHelpers : IXHelpers
         foreach (Match match in Regex.Matches(originalString, pattern, RegexOptions.IgnoreCase))
         {
             string href = match.Value;
-            if(match.Groups[2] != null)
+            if (match.Groups[2] != null)
             {
                 string did = match.Groups[2].Value;
                 string xHandle = await UsernameMaps.GetXHandleForDid(did);
