@@ -153,10 +153,8 @@ internal sealed class XHelpers : IXHelpers
                 mediaIds.Add(messageAttachment.MediaID.ToString());
             }
 
-            Console.WriteLine("??");
-
-            // NOTE: There's no "ReplyMediaAsync" function so it will quote for replies
             if (replyId != null)
+                // NOTE: There's no "ReplyMediaAsync" function so it will quote for replies
                 sentMessage = await _xContext.Client.TweetMediaAsync(
                     mediaIds: mediaIds,
                     quoteTweetID: replyId,
