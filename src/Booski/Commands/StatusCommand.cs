@@ -28,8 +28,9 @@ internal sealed class StatusCommand : IStatusCommand
 
         if(allPosts != null)
         {
+            // BUG: This includes posts that haven't actually posted anywhere
             posts = allPosts
-                .Where(p => p.Deleted == true)
+                .Where(p => p.Deleted == false)
                 .Where(p => p.Ignored != Enums.IgnoredReason.None)
                 .ToList()
                 .Count();
