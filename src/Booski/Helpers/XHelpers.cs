@@ -100,26 +100,36 @@ internal sealed class XHelpers : IXHelpers
                         mediaType: embedItem.MimeType
                     );
 
-                    do
-                    {
-                        if (attachment != null)
-                        {
-                            int checkAfterSeconds = attachment?.ProcessingInfo?.CheckAfterSeconds ?? 0;
-                            await Task.Delay(checkAfterSeconds * 1000);
-                        }
+                    Console.WriteLine("3");
 
-                        attachment =
-                            await
-                            (from stat in _xContext.Client.Media
-                             where stat.Type == MediaType.Status &&
-                                 stat.MediaID == attachment.MediaID
-                             select stat)
-                            .SingleOrDefaultAsync();
-                    } while (attachment?.ProcessingInfo?.State == MediaProcessingInfo.InProgress);
+                    if (mediaCategory == "twitter_video")
+                    {
+                        do
+                        {
+                            if (attachment != null)
+                            {
+                                int checkAfterSeconds = attachment?.ProcessingInfo?.CheckAfterSeconds ?? 0;
+                                await Task.Delay(checkAfterSeconds * 1000);
+                            }
+
+                            attachment =
+                                await
+                                (from stat in _xContext.Client.Media
+                                 where stat.Type == MediaType.Status &&
+                                     stat.MediaID == attachment.MediaID
+                                 select stat)
+                                .SingleOrDefaultAsync();
+                        } while (attachment?.ProcessingInfo?.State == MediaProcessingInfo.InProgress);
+                    }
+
+                    Console.WriteLine("2");
 
                     if (attachment != null)
                     {
-                        if (attachment?.ProcessingInfo?.State == MediaProcessingInfo.Succeeded)
+                        if (
+                            mediaCategory != "twitter_video" ||
+                            mediaCategory == "twitter_video" && attachment?.ProcessingInfo?.State == MediaProcessingInfo.Succeeded
+                        )
                         {
                             messageAttachments.Add(attachment);
                         }
@@ -134,6 +144,8 @@ internal sealed class XHelpers : IXHelpers
             }
         }
 
+        Console.WriteLine(hasEmbedsButFailed);
+
         if (
             messageAttachments != null &&
             messageAttachments.Count() > 0 &&
@@ -147,6 +159,8 @@ internal sealed class XHelpers : IXHelpers
                 mediaIds.Add(messageAttachment.MediaID.ToString());
             }
 
+            Console.WriteLine("??");
+
             // NOTE: There's no "ReplyMediaAsync" function so it will quote for replies
             sentMessage = await _xContext.Client.TweetMediaAsync(
                 mediaIds: mediaIds,
@@ -154,26 +168,29 @@ internal sealed class XHelpers : IXHelpers
                 text: await GeneratePostText(post)
             );
         }
-        else if (String.IsNullOrEmpty(replyId))
-        {
-            sentMessage = await _xContext.Client.TweetAsync(
-                text: await GeneratePostText(
-                    post,
-                    hasEmbedsButFailed,
-                    embed != null ? embed.Type : EmbedType.Unknown
-                )
-            );
-        }
         else
         {
-            sentMessage = await _xContext.Client.ReplyAsync(
-                replyTweetID: replyId,
-                text: await GeneratePostText(
-                    post,
-                    hasEmbedsButFailed,
-                    embed != null ? embed.Type : EmbedType.Unknown
-                )
-            );
+            if (String.IsNullOrEmpty(replyId))
+            {
+                sentMessage = await _xContext.Client.TweetAsync(
+                    text: await GeneratePostText(
+                        post,
+                        hasEmbedsButFailed,
+                        embed != null ? embed.Type : EmbedType.Unknown
+                    )
+                );
+            }
+            else
+            {
+                sentMessage = await _xContext.Client.ReplyAsync(
+                    replyTweetID: replyId,
+                    text: await GeneratePostText(
+                        post,
+                        hasEmbedsButFailed,
+                        embed != null ? embed.Type : EmbedType.Unknown
+                    )
+                );
+            }
         }
 
         return sentMessage;
