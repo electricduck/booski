@@ -8,9 +8,8 @@ namespace Booski.Helpers;
 public interface IPostHelpers
 {
     bool HornyOnlyOnX { get; set; }
-    List<Post> PostCache { get; set; }
 
-    Task<List<Post>> BuildPostCache(int fetchSleep);
+    Task BuildPostCache(int fetchSleep);
     Task SyncAddedPosts(int syncSleep, bool retryIgnored);
     Task SyncDeletedPosts(int syncSleep);
 }
@@ -18,7 +17,8 @@ public interface IPostHelpers
 internal sealed class PostHelpers : IPostHelpers
 {
     public bool HornyOnlyOnX { get; set; } // HACK: Until we have a central config context
-    public List<Post> PostCache { get; set; } // TODO: Move this to Data; it makes no sense in a Helper!
+
+    private List<Post> PostCache { get; set; }
 
     private IBskyContext _bskyContext;
     private IBskyHelpers _bskyHelpers;
@@ -50,7 +50,7 @@ internal sealed class PostHelpers : IPostHelpers
         _xHelpers = xHelpers;
     }
 
-    public async Task<List<Post>> BuildPostCache(int fetchSleep)
+    public async Task BuildPostCache(int fetchSleep)
     {
         Say.Debug("[PostHelpers.BuildPostCache] Fetching posts...");
 
@@ -97,7 +97,7 @@ internal sealed class PostHelpers : IPostHelpers
         }
 
         posts = posts.OrderByDescending(p => p.RecordKey).ToList();
-        return posts;
+        PostCache = posts;
     }
 
     public async Task SyncAddedPosts(int syncSleep, bool retryIgnored)

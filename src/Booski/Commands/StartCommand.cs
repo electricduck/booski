@@ -88,8 +88,7 @@ internal sealed class StartCommand : IStartCommand
 
         while (true)
         {
-            _postHelpers.PostCache = await _postHelpers.BuildPostCache(o.SleepTimeFetch);
-
+            await _postHelpers.BuildPostCache(o.SleepTimeFetch);
             await _postHelpers.SyncDeletedPosts(o.SleepTimeSync);
             await _postHelpers.SyncAddedPosts(o.SleepTimeSync, o.RetryIgnoredPosts);
 
