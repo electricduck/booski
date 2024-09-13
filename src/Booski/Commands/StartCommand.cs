@@ -143,12 +143,6 @@ internal sealed class StartCommand : IStartCommand
                 Say.Warning("Unable to connect to Telegram");
         }
 
-        if(
-            !o.NoConnectThreads
-        )
-        {
-        }
-
         if (
             !o.NoConnectX&&
             clientsConfig.X != null &&

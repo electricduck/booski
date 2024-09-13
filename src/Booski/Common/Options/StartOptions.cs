@@ -15,8 +15,6 @@ public class StartOptions : GlobalOptions
     public bool NoConnectMastodon { get; set; }
     [Option("no-connect-telegram", HelpText = "Do not connect to Telegram.")]
     public bool NoConnectTelegram { get; set; }
-    [Option("no-connect-threads", HelpText = "Do not connect to Threads.")]
-    public bool NoConnectThreads { get; set; }
     [Option("no-connect-x", HelpText = "Do not connect to X.")]
     public bool NoConnectX { get; set; }
     [Option("exit-connect", HelpText = "Exit after connecting to services.")]
