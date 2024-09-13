@@ -100,9 +100,7 @@ internal sealed class XHelpers : IXHelpers
                         mediaType: embedItem.MimeType
                     );
 
-                    Console.WriteLine("3");
-
-                    if (mediaCategory == "twitter_video")
+                    if (mediaCategory == "tweet_video")
                     {
                         do
                         {
@@ -122,13 +120,11 @@ internal sealed class XHelpers : IXHelpers
                         } while (attachment?.ProcessingInfo?.State == MediaProcessingInfo.InProgress);
                     }
 
-                    Console.WriteLine("2");
-
                     if (attachment != null)
                     {
                         if (
-                            mediaCategory != "twitter_video" ||
-                            mediaCategory == "twitter_video" && attachment?.ProcessingInfo?.State == MediaProcessingInfo.Succeeded
+                            mediaCategory != "tweet_video" ||
+                            mediaCategory == "tweet_video" && attachment?.ProcessingInfo?.State == MediaProcessingInfo.Succeeded
                         )
                         {
                             messageAttachments.Add(attachment);
@@ -143,8 +139,6 @@ internal sealed class XHelpers : IXHelpers
                 }
             }
         }
-
-        Console.WriteLine(hasEmbedsButFailed);
 
         if (
             messageAttachments != null &&
@@ -162,11 +156,17 @@ internal sealed class XHelpers : IXHelpers
             Console.WriteLine("??");
 
             // NOTE: There's no "ReplyMediaAsync" function so it will quote for replies
-            sentMessage = await _xContext.Client.TweetMediaAsync(
-                mediaIds: mediaIds,
-                quoteTweetID: replyId,
-                text: await GeneratePostText(post)
-            );
+            if (replyId != null)
+                sentMessage = await _xContext.Client.TweetMediaAsync(
+                    mediaIds: mediaIds,
+                    quoteTweetID: replyId,
+                    text: await GeneratePostText(post)
+                );
+            else
+                sentMessage = await _xContext.Client.TweetMediaAsync(
+                    mediaIds: mediaIds,
+                    text: await GeneratePostText(post)
+                );
         }
         else
         {
