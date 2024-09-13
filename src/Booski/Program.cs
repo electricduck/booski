@@ -267,7 +267,7 @@ public class Program
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                var windowsLocalAppData = Environment.SpecialFolder.LocalApplicationData.ToString();
+                var windowsLocalAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
                 if (!String.IsNullOrEmpty(windowsLocalAppData))
                     ConfigDir = Path.Combine(windowsLocalAppData, appName);
             }
