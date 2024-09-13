@@ -109,7 +109,9 @@ internal sealed class PostHelpers : IPostHelpers
 
         foreach(var post in PostCache)
         {
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             var postLog = await PostLogs.GetPostLog(post.RecordKey, _bskyContext.State.Did);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
 
             if (postLog == null)
             {
@@ -136,10 +138,12 @@ internal sealed class PostHelpers : IPostHelpers
                 );
             }
 
-            postLog = await UpdatePostLogIgnored(post, postLog);
-
-            if (postLog.Ignored != IgnoredReason.None)
-                continue;
+            if(postLog != null)
+            {
+                postLog = await UpdatePostLogIgnored(post, postLog);
+                if (postLog.Ignored != IgnoredReason.None)
+                    continue;
+            }
 
             Embed? embed = await GetEmbedForPost(post);
             PostLog? replyParentPostLog = await GetReplyParentForPost(post);
@@ -149,6 +153,7 @@ internal sealed class PostHelpers : IPostHelpers
         
             if(
                 _mastodonContext.IsConnected &&
+                postLog != null &&
                 postLog.Mastodon_InstanceDomain == null &&
                 postLog.Mastodon_StatusId == null
             )
@@ -156,6 +161,7 @@ internal sealed class PostHelpers : IPostHelpers
 
             if(
                 _telegramContext.IsConnected &&
+                postLog != null &&
                 postLog.Telegram_ChatId == null &&
                 postLog.Telegram_MessageCount == null &&
                 postLog.Telegram_MessageId == null
@@ -164,6 +170,7 @@ internal sealed class PostHelpers : IPostHelpers
         
             if(
                 _xContext.IsConnected &&
+                postLog != null &&
                 postLog.X_PostId == null
             )
             {
@@ -182,9 +189,11 @@ internal sealed class PostHelpers : IPostHelpers
     {
         if(!await IsFirstRun())
         {
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             List<PostLog> postLogs = await PostLogs.GetPostLogs(_bskyContext.State.Did);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
 
-            foreach(var postLog in postLogs)
+            foreach (var postLog in postLogs)
             {
                 var foundPost = PostCache
                     .Where(p => p.RecordKey == postLog.RecordKey)
@@ -226,7 +235,9 @@ internal sealed class PostHelpers : IPostHelpers
         }
     }
 
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     async Task<Embed?> GetEmbedForPost(Post post)
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     {
         Embed? embed = null;
 
@@ -246,15 +257,26 @@ internal sealed class PostHelpers : IPostHelpers
                 {
                     case Type when embedType == typeof(Lib.Polymorphs.AppBsky.EmbedRecord):
                         var recordEmbed = post.Record.Embed as Lib.Polymorphs.AppBsky.EmbedRecord;
-                        recordEmbedCid = recordEmbed.Record.Cid;
-                        recordEmbedUri = recordEmbed.Record.Uri;
+                        if(recordEmbed != null)
+                        {
+                            recordEmbedCid = recordEmbed.Record.Cid;
+                            recordEmbedUri = recordEmbed.Record.Uri;
+                        }
                         break;
                     case Type when embedType == typeof(Lib.Polymorphs.AppBsky.EmbedRecordWithMedia):
                         var recordEmbedWithMedia = post.Record.Embed as Lib.Polymorphs.AppBsky.EmbedRecordWithMedia;
-                        var recordEmbedWithMediaRecord = recordEmbedWithMedia.Record as Lib.Polymorphs.AppBsky.EmbedRecord;
-                        recordEmbedCid = recordEmbedWithMediaRecord.Record.Cid;
-                        recordEmbedUri = recordEmbedWithMediaRecord.Record.Uri;
-                        embed = _bskyHelpers.ParseEmbeds(recordEmbedWithMedia.Media, _bskyContext.State.Did);
+                        if(recordEmbedWithMedia != null)
+                        {
+                            var recordEmbedWithMediaRecord = recordEmbedWithMedia.Record as Lib.Polymorphs.AppBsky.EmbedRecord;
+                            if(recordEmbedWithMediaRecord != null)
+                            {
+                                recordEmbedCid = recordEmbedWithMediaRecord.Record.Cid;
+                                recordEmbedUri = recordEmbedWithMediaRecord.Record.Uri;
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+                                embed = _bskyHelpers.ParseEmbeds(recordEmbedWithMedia.Media, _bskyContext.State.Did);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
+                            }
+                        }
                         break;
                 }
 
@@ -269,7 +291,9 @@ internal sealed class PostHelpers : IPostHelpers
             }
             else
             {
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
                 embed = _bskyHelpers.ParseEmbeds(post.Record.Embed, _bskyContext.State.Did);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
             }
         }
 
@@ -283,9 +307,11 @@ internal sealed class PostHelpers : IPostHelpers
         if (post.Record.Reply != null)
         {
             var parentRecordKey = post.Record.Reply.Parent.Uri.Split('/').Last();
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             var parentPostLog = await PostLogs.GetPostLog(parentRecordKey, _bskyContext.State.Did);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
 
-            if(parentPostLog != null)
+            if (parentPostLog != null)
                 replyParentPostLog = parentPostLog;
         }
 
@@ -294,7 +320,9 @@ internal sealed class PostHelpers : IPostHelpers
 
     async Task<bool> IsFirstRun()
     {
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
         int postLogsCount = await PostLogs.CountPostLogs(_bskyContext.State.Did);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
         return postLogsCount == 0;
     }
 
@@ -312,19 +340,23 @@ internal sealed class PostHelpers : IPostHelpers
             
             if(mastodonMessage != null)
             {
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
                 postLog = await PostLogs.UpdatePostLog(
                     recordKey: postLog.RecordKey,
                     repository: _bskyContext.State.Did,
                     mastodonInstanceDomain: _mastodonContext.State.Domain,
                     mastodonStatusId: mastodonMessage.Id
                 );
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
 
                 Say.Success($"Posted to {_mastodonContext.State.InstanceSoftware}: {postLog.RecordKey} ({postLog.Mastodon_InstanceDomain}/{postLog.Mastodon_StatusId})");
             }
         }
         catch (Exception e)
         {
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             Say.Warning($"Unable to post to {_mastodonContext.State.InstanceSoftware}: {post.RecordKey}", e.Message);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
         }
     }
 
@@ -347,6 +379,7 @@ internal sealed class PostHelpers : IPostHelpers
             {
                 var firstTelegramMessage = telegramMessage.FirstOrDefault();
 
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
                 postLog = await PostLogs.UpdatePostLog(
                     recordKey: postLog.RecordKey,
                     repository: _bskyContext.State.Did,
@@ -354,6 +387,7 @@ internal sealed class PostHelpers : IPostHelpers
                     telegramMessageCount: telegramMessage.Count(),
                     telegramMessageId: firstTelegramMessage.MessageId
                 );
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
 
                 Say.Success($"Posted to Telegram: {postLog.RecordKey} ({postLog.Telegram_ChatId}/{postLog.Telegram_MessageId})");
             }
@@ -376,13 +410,18 @@ internal sealed class PostHelpers : IPostHelpers
         {
             var xMessage = await _xHelpers.PostToX(post, embed, replyToPostId);
             
-            if(xMessage != null)
+            if(
+                xMessage != null &&
+                xMessage.ID != null
+            )
             {
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
                 postLog = await PostLogs.UpdatePostLog(
                     recordKey: postLog.RecordKey,
                     repository: _bskyContext.State.Did,
                     xPostId: xMessage.ID
                 );
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
 
                 Say.Success($"Posted to X: {postLog.RecordKey} ({postLog.X_PostId})");
             }
@@ -398,7 +437,8 @@ internal sealed class PostHelpers : IPostHelpers
         bool deletedFromMastodon = true;
 
         string consoleMessageSuffix = $"{postLog.RecordKey} ({postLog.Mastodon_InstanceDomain}/{postLog.Mastodon_StatusId})";
-    
+
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
         if (postLog.Mastodon_InstanceDomain != _mastodonContext.State.Domain)
         {
             deletedFromMastodon = false;
@@ -408,7 +448,8 @@ internal sealed class PostHelpers : IPostHelpers
         {
             try
             {
-                await _mastodonHelpers.DeleteFromMastodon(postLog.Mastodon_StatusId);
+                if(postLog.Mastodon_StatusId != null)
+                    await _mastodonHelpers.DeleteFromMastodon(postLog.Mastodon_StatusId);
                 Say.Success($"Deleted from {_mastodonContext.State.InstanceSoftware}: {consoleMessageSuffix}");
             }
             catch (Exception e)
@@ -417,6 +458,7 @@ internal sealed class PostHelpers : IPostHelpers
                 Say.Warning($"Unable to delete from {_mastodonContext.State.InstanceSoftware}: {consoleMessageSuffix}", e.Message);
             }
         }
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
 
         return deletedFromMastodon;
     }
@@ -426,6 +468,7 @@ internal sealed class PostHelpers : IPostHelpers
         bool deletedFromTelegram = true;
 
         string consoleMessageSuffix = $"{postLog.RecordKey} ({postLog.Telegram_ChatId}/{postLog.Telegram_MessageId})";
+
         int currentMessageId = (int)postLog.Telegram_MessageId;
         int lastMessageId = (int)postLog.Telegram_MessageId + (int)postLog.Telegram_MessageCount;
     
