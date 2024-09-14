@@ -186,18 +186,14 @@ internal sealed class MastodonHelpers : IMastodonHelpers
                 }
                 else
                 {
-                    // Last-ditch attempt to avoid ugly links: we'll see if the user is on Bridgy
-                    if(_mastodonContext.State.NoRichText)
-                    {
-                        var bskyBridgyHandle = await _bridgyFedHelpers.GetBridgyBskyHandle(did);
+                    var bskyBridgyHandle = await _bridgyFedHelpers.GetBridgyBskyHandle(did);
 
-                        if(!String.IsNullOrEmpty(bskyBridgyHandle))
-                        {
-                            originalString = originalString.Replace(
-                                href,
-                                $"@{bskyBridgyHandle}"
-                            );
-                        }
+                    if(!String.IsNullOrEmpty(bskyBridgyHandle))
+                    {
+                        originalString = originalString.Replace(
+                            href,
+                            $"@{bskyBridgyHandle}"
+                        );
                     }
                 }
             }
