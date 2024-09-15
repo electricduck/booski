@@ -24,7 +24,7 @@ public class Program
     public static ConfigRoot? Config { get; set; }
     public static string? ConfigDir { get; set; }
     public static string? ConfigPath { get; set; }
-    public static Process CurrentProcess { get; set; }
+    public static Process? CurrentProcess { get; set; }
     public static string? DbPath { get; set; }
     public static string? FileCacheDir { get; set; }
     public static bool NoSay { get; set; }

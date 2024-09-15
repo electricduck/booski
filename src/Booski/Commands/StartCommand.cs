@@ -8,14 +8,14 @@ namespace Booski.Commands;
 
 public interface IStartCommand
 {
-    StartOptions Options { get; set; }
+    StartOptions? Options { get; set; }
 
     Task Invoke(StartOptions o);
 }
 
 internal sealed class StartCommand : IStartCommand
 {
-    public StartOptions Options { get; set; }
+    public StartOptions? Options { get; set; }
 
     private DateTime? CacheLastCleared { get; set; }
 
@@ -50,7 +50,22 @@ internal sealed class StartCommand : IStartCommand
     {
         if(!o.NoDaemon)
         {
-            string currentProcessPath = Program.CurrentProcess.MainModule.FileName;
+            Process? currentProcess = Program.CurrentProcess;
+            ProcessModule? currentProcessModule;
+            string currentProcessPath = String.Empty;
+
+            if(currentProcess != null)
+            {
+                currentProcessModule = currentProcess.MainModule;
+                if(currentProcessModule != null)
+                    currentProcessPath = currentProcessModule.FileName;
+            }
+
+            if(String.IsNullOrEmpty(currentProcessPath))
+            {
+                Say.Error("Unable to run as daemon");
+                Program.Exit();
+            }
 
             if(Pid.GetPid() != null)
             {
@@ -71,7 +86,9 @@ internal sealed class StartCommand : IStartCommand
         if(o.NoSay)
             Program.NoSay = true;
 
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
         await CreateBskyClient(Program.Config.Clients);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
         await CreateAdditionalClients(Program.Config.Clients, o);
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
@@ -180,7 +197,7 @@ internal sealed class StartCommand : IStartCommand
     {
         await _bskyContext.CreateSession(clientsConfig);
 
-        if (_bskyContext.IsConnected)
+        if (_bskyContext.IsConnected && _bskyContext.State != null)
         {
             Say.Success($"Connected to Bluesky: {_bskyContext.State.Handle} ({_bskyContext.State.Did})");
         }
