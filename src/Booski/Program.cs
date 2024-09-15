@@ -324,6 +324,7 @@ public class Program
         {
             using StreamReader configFileReader = new(ConfigPath);
             string configFileText = configFileReader.ReadToEnd();
+            configFileReader.Close();
 
             if (configFileText == DefaultConfigFileContent)
                 firstRun = true;

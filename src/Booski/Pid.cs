@@ -36,11 +36,11 @@ public static class Pid
         )
         {
             using StreamReader pidFileReader = new(Program.PidPath);
-            string pidPathText = pidFileReader.ReadToEnd();
+            string pidFileText = pidFileReader.ReadToEnd();
 
-            if(!String.IsNullOrEmpty(pidPathText))
+            if(!String.IsNullOrEmpty(pidFileText))
             {
-                pid = Convert.ToInt32(pidPathText);
+                pid = Convert.ToInt32(pidFileText);
 
                 try
                 {
@@ -51,6 +51,8 @@ public static class Pid
                     pid = null;
                 }
             }
+
+            pidFileReader.Close();
 
             if(pid == null)
                 DeletePid();
