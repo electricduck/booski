@@ -8,10 +8,10 @@
 
 <p align="center">
     <strong>
-        <a href="https://github.com/electricduck/booski/releases/latest">⬇️ Download</a> &nbsp;|&nbsp;
-        <a href="https://github.com/electricduck/booski/wiki/Getting-Started">✨ Getting Started</a> &nbsp;|&nbsp;
-        <a href="https://github.com/electricduck/booski/wiki">📖 Docs</a> &nbsp;|&nbsp;
-        <a href="https://github.com/electricduck/booski/issues/new">💣 Submit Issue</a>
+        <a href="https://github.com/electricduck/booski/releases/latest">⬇️ Get Booski</a> &nbsp;|&nbsp;
+        <a href="https://github.com/electricduck/booski/wiki">📖 Read Docs</a> &nbsp;|&nbsp;
+        <a href="https://github.com/electricduck/booski/issues/new">💣 Submit Issue</a> &nbsp;|&nbsp;
+        <a href="https://bsky.app/proifle/booski.github.io">🦋 @booski.github.io</a>
     </strong>
 </p>
 
@@ -19,7 +19,7 @@
 
 ## ✨ Quick Start
 
->  This Quick Start makes general assumptions about your environment, such as using Linux (x86_64). For a more comprehensive guide, see [Getting Started](https://github.com/electricduck/booski/wiki/Getting-Started).
+>  This Quick Start makes general assumptions about your environment, such as using Linux (x86_64). For a more comprehensive guide, see [Docs](https://github.com/electricduck/booski/wiki).
 
 ```sh
 cd ~/.local/bin
