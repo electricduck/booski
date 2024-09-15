@@ -5,6 +5,7 @@ namespace Booski.Contexts;
 // Is this a Context or a Helper?
 public interface IFileCacheContext
 {
+    Task ClearCache();
     Task<Stream?> GetFileFromUri(Uri uri);
     Task<byte[]?> GetFileFromUriAsByteArray(Uri uri);
     Task<MemoryStream?> GetFileFromUriAsMemoryStream(Uri uri);
@@ -22,6 +23,32 @@ internal sealed class FileCacheContext : IFileCacheContext
     {
         _httpContext = httpContext;
         _ytDlpContext = ytDlpContext;
+    }
+
+    public async Task ClearCache()
+    {
+        Say.Debug("[FileCacheContext.ClearCache] Clearing cache...");
+
+        var availableFileCaches = await FileCaches.GetFileCaches();
+
+        foreach(var availableFileCache in availableFileCaches)
+        {
+            var downloadedAt = availableFileCache.DownloadedAt;
+            var filePath = GetFilePath(availableFileCache.Filename);
+
+            if(
+                availableFileCache.Available &&
+                downloadedAt != null &&
+                DateTime.UtcNow > downloadedAt.Value.Date.AddHours(24) &&
+                File.Exists(filePath)
+            )
+            {
+                Console.WriteLine($"Deleting '{filePath}'");
+
+                File.Delete(filePath);
+                await FileCaches.DeleteFileCache(availableFileCache.Uri);
+            }
+        }
     }
 
     public async Task<Stream?> GetFileFromUri(Uri uri)
@@ -66,30 +93,6 @@ internal sealed class FileCacheContext : IFileCacheContext
         }
     }
 
-    async Task ClearCache()
-    {
-        var availableFileCaches = await FileCaches.GetFileCaches();
-
-        foreach(var availableFileCache in availableFileCaches)
-        {
-            var downloadedAt = availableFileCache.DownloadedAt;
-            var filePath = GetFilePath(availableFileCache.Filename);
-
-            if(
-                availableFileCache.Available &&
-                downloadedAt != null &&
-                DateTime.UtcNow > downloadedAt.Value.Date.AddHours(24) &&
-                File.Exists(filePath)
-            )
-            {
-                Console.WriteLine($"Deleting {filePath}");
-
-                File.Delete(filePath);
-                await FileCaches.DeleteFileCache(availableFileCache.Uri);
-            }
-        }
-    }
-
     async Task<bool> DownloadFile(Uri uri, string filePath)
     {
         if(_httpContext.Client == null)
@@ -121,8 +124,6 @@ internal sealed class FileCacheContext : IFileCacheContext
     {
         var foundFileCache = await FileCaches.GetFileCache(uri.ToString());
         string filePath;
-
-        await ClearCache();
 
         if(
             foundFileCache != null &&

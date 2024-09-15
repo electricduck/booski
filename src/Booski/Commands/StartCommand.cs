@@ -17,28 +17,30 @@ internal sealed class StartCommand : IStartCommand
 {
     public StartOptions Options { get; set; }
 
+    private DateTime? CacheLastCleared { get; set; }
+
     private IBskyContext _bskyContext;
+    private IFileCacheContext _fileCacheContext;
     private IHttpContext _httpContext;
     private IMastodonContext _mastodonContext;
-    private IMastodonHelpers _mastodonHelpers;
     private IPostHelpers _postHelpers;
     private ITelegramContext _telegramContext;
     private IXContext _xContext;
 
     public StartCommand(
         IBskyContext bskyContext,
+        IFileCacheContext fileCacheContext,
         IHttpContext httpContext,
         IMastodonContext mastodonContext,
-        IMastodonHelpers mastodonHelpers,
         IPostHelpers postHelpers,
         ITelegramContext telegramContext,
         IXContext xContext
     )
     {
         _bskyContext = bskyContext;
+        _fileCacheContext = fileCacheContext;
         _httpContext = httpContext;
         _mastodonContext = mastodonContext;
-        _mastodonHelpers = mastodonHelpers;
         _postHelpers = postHelpers;
         _telegramContext = telegramContext;
         _xContext = xContext;
@@ -91,6 +93,15 @@ internal sealed class StartCommand : IStartCommand
             await _postHelpers.BuildPostCache(o.SleepTimeFetch);
             await _postHelpers.SyncDeletedPosts(o.SleepTimeSync);
             await _postHelpers.SyncAddedPosts(o.SleepTimeSync, o.RetryIgnoredPosts);
+
+            if(
+                CacheLastCleared != null &&
+                DateTime.UtcNow > CacheLastCleared.Value.Date.AddHours(1)
+            )
+            {
+                await _fileCacheContext.ClearCache();
+                CacheLastCleared = DateTime.UtcNow;
+            }
 
             if (o.ExitAfterRunOnce)
                 Program.Exit();
