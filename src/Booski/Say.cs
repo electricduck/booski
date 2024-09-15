@@ -91,7 +91,7 @@ public class Say
                     {
                         paddedReason += Environment.NewLine;
                         if(!String.IsNullOrEmpty(emojiPaddingString))
-                            paddedReason += $"{emojiPaddingString} ";
+                            paddedReason += $"{emojiPaddingString}  ";
                         paddedReason += line;
                     }
 
