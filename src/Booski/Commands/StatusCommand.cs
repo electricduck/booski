@@ -26,12 +26,17 @@ internal sealed class StatusCommand : IStatusCommand
         int postsIgnored = 0;
         int postsTotal = 0;
 
-        if(allPosts != null)
+        if (allPosts != null)
         {
-            // BUG: This includes posts that haven't actually posted anywhere
             posts = allPosts
                 .Where(p => p.Deleted == false)
-                .Where(p => p.Ignored != Enums.IgnoredReason.None)
+                .Where(p => p.Ignored == Enums.IgnoredReason.None)
+                .Where(
+                    p =>
+                        p.Mastodon_StatusId != null ||
+                        p.Telegram_MessageId != null ||
+                        p.X_PostId != null
+                )
                 .ToList()
                 .Count();
             postsDeleted = allPosts
@@ -51,7 +56,7 @@ internal sealed class StatusCommand : IStatusCommand
 ↳ Ignored: {postsIgnored}
 ";
 
-        if(pid != null)
+        if (pid != null)
         {
             Say.Info($"Running ({pid})", outputBody);
         }
