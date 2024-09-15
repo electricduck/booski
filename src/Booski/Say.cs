@@ -69,7 +69,6 @@ public class Say
         bool separate = false
     )
     {
-        var emojiByteLength = Encoding.UTF8.GetBytes(emoji).Length;
         var emojiPadding = 1;
 
         var emojiPaddingString = new String(' ', emojiPadding);
