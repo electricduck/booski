@@ -70,7 +70,6 @@ public class Say
     )
     {
         var emojiPadding = 1;
-
         var emojiPaddingString = new String(' ', emojiPadding);
 
         if(!String.IsNullOrEmpty(emoji))

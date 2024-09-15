@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Web;
 using CommandLine;
 using Microsoft.Extensions.Configuration;
@@ -59,6 +60,7 @@ public class Program
 
     public static async Task Main(string[] args)
     {
+        Console.OutputEncoding = Encoding.UTF8;
         CurrentProcess = Process.GetCurrentProcess();
 
         if(
@@ -169,7 +171,7 @@ public class Program
         return versionString;
     }
 
-    // BUG: Handle when running version is RC
+    // BUG: Using a tagged version triggers this
     private static async Task CheckUpdates(IGitHubContext _githubContext)
     {
         var ignoreUpdates = Environment.GetEnvironmentVariable("BOOSKI_IGNORE_UPDATES");
