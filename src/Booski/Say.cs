@@ -70,20 +70,7 @@ public class Say
     )
     {
         var emojiByteLength = Encoding.UTF8.GetBytes(emoji).Length;
-        var emojiPadding = 0;
-
-        // i don't fuckin understand unicode
-        switch(emojiByteLength)
-        {
-            case 3:
-            case 4:
-                emojiPadding = 1;
-                break;
-            case 5:
-            case 6:
-                emojiPadding = 2;
-                break;
-        }
+        var emojiPadding = 1;
 
         var emojiPaddingString = new String(' ', emojiPadding);
 
