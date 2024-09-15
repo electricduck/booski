@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Booski;
@@ -69,11 +70,21 @@ public class Say
         bool separate = false
     )
     {
-        var emojiPadding = 1;
-        var emojiPaddingString = new String(' ', emojiPadding);
-
         if(!String.IsNullOrEmpty(emoji))
-            message = $"{emoji}{emojiPaddingString}{message}";
+        {
+            // BUG: If you're SSH'd into Windows from macOS/Linux,
+            //      this won't trigger and the emoji padding will still be borked
+            if(!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                var emojiByteLength = Encoding.UTF8.GetBytes(emoji).Length;
+                if(emojiByteLength > 4)
+                {
+                    message = $" {message}";
+                }
+            }
+
+            message = $"{emoji} {message}";
+        }
 
         if(!String.IsNullOrEmpty(reason))
         {
@@ -90,8 +101,8 @@ public class Say
                     if (line != null)
                     {
                         paddedReason += Environment.NewLine;
-                        if(!String.IsNullOrEmpty(emojiPaddingString))
-                            paddedReason += $"{emojiPaddingString}  ";
+                        if(!String.IsNullOrEmpty(emoji))
+                            paddedReason += $"   ";
                         paddedReason += line;
                     }
 
@@ -100,7 +111,7 @@ public class Say
 
             message += paddedReason;
         }
-
+        
         if(!Program.NoSay)
         {
             if(separate)
