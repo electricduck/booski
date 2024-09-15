@@ -11,7 +11,7 @@
         <a href="https://github.com/electricduck/booski/releases/latest">⬇️ Get Booski</a> &nbsp;|&nbsp;
         <a href="https://github.com/electricduck/booski/wiki">📖 Read Docs</a> &nbsp;|&nbsp;
         <a href="https://github.com/electricduck/booski/issues/new">💣 Submit Issue</a> &nbsp;|&nbsp;
-        <a href="https://bsky.app/profile/booski.github.io">🦋 @booski.github.io</a>
+        <a href="https://bsky.app/profile/booski.zio.blue">🦋 @booski.zio.blue</a>
     </strong>
 </p>
 
