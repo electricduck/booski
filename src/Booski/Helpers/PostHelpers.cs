@@ -18,7 +18,7 @@ internal sealed class PostHelpers : IPostHelpers
 {
     public bool HornyOnlyOnX { get; set; } // HACK: Until we have a central config context
 
-    private List<Post> PostCache { get; set; }
+    private List<Post>? PostCache { get; set; }
 
     private IBskyContext _bskyContext;
     private IBskyHelpers _bskyHelpers;
@@ -107,6 +107,9 @@ internal sealed class PostHelpers : IPostHelpers
         if (firstRun)
             Say.Warning($"First run. Caching and ignoring all previous posts");
 
+        if(PostCache == null)
+            return;
+
         foreach(var post in PostCache)
         {
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
@@ -141,8 +144,10 @@ internal sealed class PostHelpers : IPostHelpers
             if(postLog != null)
             {
                 postLog = await UpdatePostLogIgnored(post, postLog);
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
                 if (postLog.Ignored != IgnoredReason.None)
                     continue;
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
             }
 
             Embed? embed = await GetEmbedForPost(post);
@@ -195,9 +200,11 @@ internal sealed class PostHelpers : IPostHelpers
 
             foreach (var postLog in postLogs)
             {
+#pragma warning disable CS8604 // Possible null reference argument.
                 var foundPost = PostCache
                     .Where(p => p.RecordKey == postLog.RecordKey)
                     .FirstOrDefault();
+#pragma warning restore CS8604 // Possible null reference argument.
 
                 if (foundPost == null)
                 {
@@ -465,21 +472,29 @@ internal sealed class PostHelpers : IPostHelpers
 
     async Task<bool> SyncDeletedPostWithTelegram(PostLog postLog)
     {
-        bool deletedFromTelegram = true;
+        if(postLog == null)
+            return false;
 
+        bool deletedFromTelegram = true;
         string consoleMessageSuffix = $"{postLog.RecordKey} ({postLog.Telegram_ChatId}/{postLog.Telegram_MessageId})";
 
+#pragma warning disable CS8629 // Nullable value type may be null.
         int currentMessageId = (int)postLog.Telegram_MessageId;
+#pragma warning restore CS8629 // Nullable value type may be null.
+#pragma warning disable CS8629 // Nullable value type may be null.
         int lastMessageId = (int)postLog.Telegram_MessageId + (int)postLog.Telegram_MessageCount;
-    
+#pragma warning restore CS8629 // Nullable value type may be null.
+
         while (currentMessageId != lastMessageId)
         {
             try
             {
+#pragma warning disable CS8629 // Nullable value type may be null.
                 await _telegramHelpers.DeleteFromTelegram(
                     chatId: (long)postLog.Telegram_ChatId,
                     messageId: currentMessageId
                 );
+#pragma warning restore CS8629 // Nullable value type may be null.
                 Say.Success($"Deleted from Telegram: {consoleMessageSuffix}");
             }
             catch (Exception e)
@@ -496,13 +511,17 @@ internal sealed class PostHelpers : IPostHelpers
 
     async Task<bool> SyncDeletedPostWithX(PostLog postLog)
     {
-        bool deletedFromX = true;
+        if(postLog == null)
+            return false;
 
+        bool deletedFromX = true;
         string consoleMessageSuffix = $"{postLog.RecordKey} ({postLog.X_PostId})";
 
         try
         {
+#pragma warning disable CS8604 // Possible null reference argument.
             await _xHelpers.DeleteFromX(postLog.X_PostId);
+#pragma warning restore CS8604 // Possible null reference argument.
             Say.Success($"Deleted from X: {consoleMessageSuffix}");
         }
         catch (Exception e)
@@ -514,9 +533,12 @@ internal sealed class PostHelpers : IPostHelpers
         return deletedFromX;
     }
 
-    async Task<PostLog> UpdatePostLogIgnored(Post post, PostLog postLog)
+    async Task<PostLog?> UpdatePostLogIgnored(Post post, PostLog? postLog)
     {
-        if(postLog.Ignored != IgnoredReason.None)
+        if(
+            postLog == null ||
+            postLog != null && postLog.Ignored != IgnoredReason.None
+        )
             return postLog;
 
         Embed? embed = await GetEmbedForPost(post);
@@ -528,8 +550,12 @@ internal sealed class PostHelpers : IPostHelpers
             embed.Type != EmbedType.Unknown
         )
         {
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             Say.Warning($"Ignoring: {postLog.RecordKey}", "Post has embeds but none are supported");
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             postLog = await PostLogs.IgnorePostLog(postLog.RecordKey, _bskyContext.State.Did, IgnoredReason.EmbedsButNotSupported);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
         }
 
         if (
@@ -540,14 +566,22 @@ internal sealed class PostHelpers : IPostHelpers
             // BUG: If you start Booski after a long period and an un-synced post is a reply
             //      to an un-synced parent it will be inadvertidly ignored.
             //      --retry-ignored can be passed by the user to attempt to repair these.
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             Say.Warning($"Ignoring: {postLog.RecordKey}", "Post is a reply, but parent doesn't exist (either deleted or not ours)");
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             postLog = await PostLogs.IgnorePostLog(postLog.RecordKey, _bskyContext.State.Did, IgnoredReason.ReplyButNoParent);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
         }
 
         if (post.Record.Text.StartsWith("@")) // TODO: Check if this is a real mention?
         {
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             Say.Warning($"Ignoring: {postLog.RecordKey}", "Post starts with \"@\"");
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             postLog = await PostLogs.IgnorePostLog(postLog.RecordKey, _bskyContext.State.Did, IgnoredReason.StartsWithMention);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
         }
 
         return postLog;
