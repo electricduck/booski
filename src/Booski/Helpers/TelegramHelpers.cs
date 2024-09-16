@@ -58,7 +58,15 @@ internal sealed class TelegramHelpers : ITelegramHelpers
     )
     {
         List<Message> sentMessages = new List<Message>();
-         bool hasEmbedsButFailed = false;
+        bool hasEmbedsButFailed = false;
+        ReplyParameters telegramReply = new ReplyParameters();
+        LinkPreviewOptions telegramLinkPreviewDisabled = new LinkPreviewOptions
+        {
+            IsDisabled = true
+        };
+
+        if(replyId != null)
+            telegramReply.MessageId = (int)replyId;
 
         if (chatId == null)
             chatId = _telegramContext.State.Channel;
@@ -102,7 +110,7 @@ internal sealed class TelegramHelpers : ITelegramHelpers
                     var sentMessagesArray = await _telegramContext.Client.SendMediaGroupAsync(
                         chatId: chatId,
                         media: telegramAlbum,
-                        replyToMessageId: replyId
+                        replyParameters: telegramReply
                     );
 
                     sentMessages = sentMessagesArray.ToList();
@@ -131,7 +139,7 @@ internal sealed class TelegramHelpers : ITelegramHelpers
                                     caption: await GenerateCaption(post),
                                     chatId: chatId,
                                     parseMode: Telegram.Bot.Types.Enums.ParseMode.Html,
-                                    replyToMessageId: replyId
+                                    replyParameters: telegramReply
                                 )
                             );
                             break;
@@ -141,7 +149,7 @@ internal sealed class TelegramHelpers : ITelegramHelpers
                                     caption: await GenerateCaption(post),
                                     chatId: chatId,
                                     parseMode: Telegram.Bot.Types.Enums.ParseMode.Html,
-                                    replyToMessageId: replyId,
+                                    replyParameters: telegramReply,
                                     video: new InputFileStream(fileStream, firstEmbedItem.GenerateFilename())
                                 )
                             );
@@ -156,9 +164,9 @@ internal sealed class TelegramHelpers : ITelegramHelpers
                 sentMessages.Add(
                     await _telegramContext.Client.SendTextMessageAsync(
                         chatId: chatId,
-                        disableWebPagePreview: false,
+                        linkPreviewOptions: telegramLinkPreviewDisabled,
                         parseMode: Telegram.Bot.Types.Enums.ParseMode.Html,
-                        replyToMessageId: replyId,
+                        replyParameters: telegramReply,
                         text: text
                     )
                 );
@@ -174,9 +182,9 @@ internal sealed class TelegramHelpers : ITelegramHelpers
             sentMessages.Add(
                 await _telegramContext.Client.SendTextMessageAsync(
                     chatId: chatId,
-                    disableWebPagePreview: true,
+                    linkPreviewOptions: telegramLinkPreviewDisabled,
                     parseMode: Telegram.Bot.Types.Enums.ParseMode.Html,
-                    replyToMessageId: replyId,
+                    replyParameters: telegramReply,
                     text: await GenerateCaption(post, hasEmbedsButFailed, (embed != null) ? embed.Type : EmbedType.Unknown)
                 )
             );

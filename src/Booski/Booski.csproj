@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Booski.Lib\Booski.Lib.csproj" />
+    <ProjectReference Include="..\..\lib\Telegram.Bot\src\Telegram.Bot\Telegram.Bot.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -17,7 +18,6 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.0-rc.1.24431.7" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0-rc.1.24431.7" />
     <PackageReference Include="Octokit" Version="13.0.1" />
-    <PackageReference Include="Telegram.Bot" Version="19.0.0" />
   </ItemGroup>
 
   <PropertyGroup>
