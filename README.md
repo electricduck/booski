@@ -44,14 +44,26 @@ This repository currently houses two tangenically related projects (under `./src
    * [Version 9.0](https://dotnet.microsoft.com/en-us/download/dotnet/9.0) (and above) required. Due to [dotnet/runtime#72604](https://github.com/dotnet/runtime/issues/72604#issuecomment-1440708052), older versions are not supported.
 * **Linux**, **Windows**, or **macOS**
 * **Bash**
-   * Scripts under `tools/` require this shell. There are currently no native scripts for Windows.
+   * Scripts under `tools/bash/` require this shell. There are currently no native scripts for Windows/PowerShell.
 
-#### Fetching the Repository
+#### Getting
 
 ```sh
 git clone https://github.com/electricduck/booski.git
 cd booski
+git submodule sync
+git submodule update --init --recursive
 ```
+
+##### Future Pulls
+
+When updating in the future, don't forget to update submodules with:
+
+```
+git submodule update --recursive
+```
+
+**Do not** use `git submodule foreach git pull`: this blindly updates all submodules to their latest version, not the commit this parent repo has checked out. This is important for some submodules that are checked out at specific tags/commits (such as `./lib/Telegram.Bot`).
 
 ### Building
 
