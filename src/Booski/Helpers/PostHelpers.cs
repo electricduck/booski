@@ -313,13 +313,19 @@ internal sealed class PostHelpers : IPostHelpers
         
         if (post.Record.Reply != null)
         {
-            var parentRecordKey = post.Record.Reply.Parent.Uri.Split('/').Last();
+            var parentReplyKey = post.Record.Reply.Parent.Uri.Split('/').Last();
+            var rootReplyKey = post.Record.Reply.Root.Uri.Split('/').Last();
+
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
-            var parentPostLog = await PostLogs.GetPostLog(parentRecordKey, _bskyContext.State.Did);
+            var parentReplyPostLog = await PostLogs.GetPostLog(parentReplyKey, _bskyContext.State.Did);
+            var rootReplyPostLog = await PostLogs.GetPostLog(rootReplyKey, _bskyContext.State.Did);
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
 
-            if (parentPostLog != null)
-                replyParentPostLog = parentPostLog;
+            if (
+                parentReplyPostLog != null &&
+                rootReplyPostLog != null
+            )
+                replyParentPostLog = parentReplyPostLog;
         }
 
         return replyParentPostLog;
