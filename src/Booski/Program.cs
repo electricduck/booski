@@ -128,6 +128,10 @@ public class Program
         {
             var throwError = Environment.GetEnvironmentVariable("BOOSKI_DEBUG");
 
+#if DEBUG
+            throwError = "true";
+#endif
+
             if (throwError == "1" || throwError == "true")
                 throw;
             else
