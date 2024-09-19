@@ -2,10 +2,11 @@
 namespace Booski.Enums {
     public enum IgnoredReason {
         None = 0,
-        FirstRun = 1,
-        ReplyButNoParent = 2,
+        Manual = Int32.MaxValue,
         EmbedsButNotSupported = 3,
-        StartsWithMention = 4,
-        OldCreatedAtDate = 5
+        FirstRun = 1,
+        OldCreatedAtDate = 5,
+        ReplyButNoParent = 2,
+        StartsWithMention = 4
     }
 }
