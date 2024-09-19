@@ -287,13 +287,16 @@ internal sealed class PostHelpers : IPostHelpers
                         break;
                 }
 
+                var replyMeta = new Booski.Lib.Internal.AppBsky.Common.ReplyMeta
+                {
+                    Cid = recordEmbedCid,
+                    Uri = recordEmbedUri
+                };
+
                 post.Record.Reply = new Booski.Lib.Internal.AppBsky.Common.Reply
                 {
-                    Parent = new Booski.Lib.Internal.AppBsky.Common.ReplyMeta
-                    {
-                        Cid = recordEmbedCid,
-                        Uri = recordEmbedUri
-                    }
+                    Parent = replyMeta,
+                    Root = replyMeta
                 };
             }
             else
