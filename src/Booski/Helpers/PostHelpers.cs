@@ -557,16 +557,7 @@ internal sealed class PostHelpers : IPostHelpers
 
         if (postLog != null)
         {
-            if (
-                embed != null &&
-                embed.Items.Count() == 0 &&
-                embed.Type != EmbedType.Unknown
-            )
-            {
-                Say.Warning($"Ignoring: {postLog.RecordKey}", "Post has embeds but none are supported");
-                ignoredReason = IgnoredReason.EmbedsButNotSupported;
-            }
-
+            // ReplyButNoParent (2)
             if (
                 post.Record.Reply != null && replyParentPostLog == null ||
                 post.Record.Reply != null && replyParentPostLog != null && replyParentPostLog.Ignored != IgnoredReason.None
@@ -579,12 +570,18 @@ internal sealed class PostHelpers : IPostHelpers
                 ignoredReason = IgnoredReason.ReplyButNoParent;
             }
 
-            if (post.Record.Text.StartsWith("@")) // TODO: Check if this is a real mention?
+            // EmbedsButNotSupported (3)
+            if (
+                embed != null &&
+                embed.Items.Count() == 0 &&
+                embed.Type != EmbedType.Unknown
+            )
             {
-                Say.Warning($"Ignoring: {postLog.RecordKey}", "Post starts with \"@\"");
-                ignoredReason = IgnoredReason.StartsWithMention;
+                Say.Warning($"Ignoring: {postLog.RecordKey}", "Post has embeds but none are supported");
+                ignoredReason = IgnoredReason.EmbedsButNotSupported;
             }
 
+            // OldCreatedDate (5)
             if (post.Record.CreatedAt.AddHours(OldPostHours) < DateTime.UtcNow)
             {
                 var hoursUnit = "hours";
@@ -593,6 +590,13 @@ internal sealed class PostHelpers : IPostHelpers
 
                 Say.Warning($"Ignoring: {postLog.RecordKey}", $"Post is older than {OldPostHours} {hoursUnit}");
                 ignoredReason = IgnoredReason.OldCreatedAtDate;
+            }
+
+            // StartsWithMention (4)
+            if (post.Record.Text.StartsWith("@")) // TODO: Check if this is a real mention?
+            {
+                Say.Warning($"Ignoring: {postLog.RecordKey}", "Post starts with \"@\"");
+                ignoredReason = IgnoredReason.StartsWithMention;
             }
 
             if (ignoredReason != null)
