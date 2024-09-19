@@ -53,7 +53,7 @@ internal sealed class MastodonHelpers : IMastodonHelpers
     )
     {
         Status? sentMessage = null;
-        List<Attachment> messageAttachments = null;
+        List<Attachment>? messageAttachments = null;
         bool hasEmbedsButFailed = false;
 
         if (
@@ -76,7 +76,7 @@ internal sealed class MastodonHelpers : IMastodonHelpers
                         break;
                     }
 
-                    Say.Info($"Uploading '{embedItem.Ref}' to Mastodon...");
+                    Say.Info($"Uploading '{embedItem.Ref}' to {_mastodonContext.State.InstanceSoftware}...");
                     var mastodonMedia = new MediaDefinition(file, embedItem.Uri.ToString().Split('/').Last());
                     var messageAttachment = await _mastodonContext.Client.UploadMedia(mastodonMedia);
 
@@ -86,7 +86,7 @@ internal sealed class MastodonHelpers : IMastodonHelpers
                     }
                     else
                     {
-                        Say.Warning($"Failed to upload '{embedItem.Ref}' to Mastodon");
+                        Say.Warning($"Failed to upload '{embedItem.Ref}' to {_mastodonContext.State.InstanceSoftware}");
                         hasEmbedsButFailed = true;
                         break;
                     }
