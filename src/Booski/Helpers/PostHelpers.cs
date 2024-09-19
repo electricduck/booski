@@ -568,15 +568,15 @@ internal sealed class PostHelpers : IPostHelpers
         }
 
         if (
-            post.Record.Reply != null &&
-            replyParentPostLog == null
+            post.Record.Reply != null && replyParentPostLog == null ||
+            post.Record.Reply != null && replyParentPostLog != null && replyParentPostLog.Ignored != IgnoredReason.None
         )
         {
             // BUG: If you start Booski after a long period and an un-synced post is a reply
             //      to an un-synced parent it will be inadvertidly ignored.
             //      --retry-ignored can be passed by the user to attempt to repair these.
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
-            Say.Warning($"Ignoring: {postLog.RecordKey}", "Post is a reply, but parent doesn't exist (either deleted or not ours)");
+            Say.Warning($"Ignoring: {postLog.RecordKey}", "Post is a reply, but parent doesn't exist (either deleted, ignored or not ours)");
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
             postLog = await PostLogs.IgnorePostLog(postLog.RecordKey, _bskyContext.State.Did, IgnoredReason.ReplyButNoParent);
