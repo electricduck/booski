@@ -16,8 +16,9 @@ public interface IPostHelpers
 
 internal sealed class PostHelpers : IPostHelpers
 {
-    public bool HornyOnlyOnX { get; set; } // HACK: Until we have a central config context
+    public bool HornyOnlyOnX { get; set; } // HACK: Until we have filters
 
+    private int OldPostHours { get; set; } = 24;
     private List<Post>? PostCache { get; set; }
 
     private IBskyContext _bskyContext;
@@ -107,10 +108,10 @@ internal sealed class PostHelpers : IPostHelpers
         if (firstRun)
             Say.Warning($"First run. Caching and ignoring all previous posts");
 
-        if(PostCache == null)
+        if (PostCache == null)
             return;
 
-        foreach(var post in PostCache)
+        foreach (var post in PostCache)
         {
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
             var postLog = await PostLogs.GetPostLog(post.RecordKey, _bskyContext.State.Did);
@@ -128,7 +129,7 @@ internal sealed class PostHelpers : IPostHelpers
                     Say.Success($"Added: {postLog.RecordKey}");
             }
 
-            if(
+            if (
                 retryIgnored &&
                 postLog.Ignored != IgnoredReason.None &&
                 postLog.Ignored != IgnoredReason.FirstRun
@@ -141,7 +142,7 @@ internal sealed class PostHelpers : IPostHelpers
                 );
             }
 
-            if(postLog != null)
+            if (postLog != null)
             {
                 postLog = await UpdatePostLogIgnored(post, postLog);
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
@@ -155,8 +156,8 @@ internal sealed class PostHelpers : IPostHelpers
 
             if (post.Record.Labels != null)
                 post.Sensitivity = _bskyHelpers.ParseLabels(post.Record.Labels);
-        
-            if(
+
+            if (
                 _mastodonContext.IsConnected &&
                 postLog != null &&
                 postLog.Mastodon_InstanceDomain == null &&
@@ -164,7 +165,7 @@ internal sealed class PostHelpers : IPostHelpers
             )
                 await SyncAddedPostWithMastodon(postLog, post, embed, replyParentPostLog);
 
-            if(
+            if (
                 _telegramContext.IsConnected &&
                 postLog != null &&
                 postLog.Telegram_ChatId == null &&
@@ -172,15 +173,15 @@ internal sealed class PostHelpers : IPostHelpers
                 postLog.Telegram_MessageId == null
             )
                 await SyncAddedPostWithTelegram(postLog, post, embed, replyParentPostLog);
-        
-            if(
+
+            if (
                 _xContext.IsConnected &&
                 postLog != null &&
                 postLog.X_PostId == null
             )
             {
                 // BUG: If the user forgets to pass --horny-only-x, their X will be irreversibly flooded
-                if(HornyOnlyOnX && post.Sensitivity == Enums.Sensitivity.None)
+                if (HornyOnlyOnX && post.Sensitivity == Enums.Sensitivity.None)
                     continue;
 
                 await SyncAddedPostWithX(postLog, post, embed, replyParentPostLog);
@@ -192,7 +193,7 @@ internal sealed class PostHelpers : IPostHelpers
 
     public async Task SyncDeletedPosts(int syncSleep)
     {
-        if(!await IsFirstRun())
+        if (!await IsFirstRun())
         {
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
             List<PostLog> postLogs = await PostLogs.GetPostLogs(_bskyContext.State.Did);
@@ -210,14 +211,14 @@ internal sealed class PostHelpers : IPostHelpers
                 {
                     bool deleteSuccess = true;
 
-                    if(
+                    if (
                         _mastodonContext.IsConnected &&
                         postLog.Mastodon_InstanceDomain != null &&
                         postLog.Mastodon_StatusId != null
                     )
                         deleteSuccess = await SyncDeletedPostWithMastodon(postLog);
 
-                    if(
+                    if (
                         _telegramContext.IsConnected &&
                         postLog.Telegram_ChatId != null &&
                         postLog.Telegram_MessageCount != null &&
@@ -225,12 +226,12 @@ internal sealed class PostHelpers : IPostHelpers
                     )
                         deleteSuccess = await SyncDeletedPostWithTelegram(postLog);
 
-                    if(
+                    if (
                         _xContext.IsConnected &&
                         postLog.X_PostId != null
                     )
                         deleteSuccess = await SyncDeletedPostWithX(postLog);
-                
+
                     if (deleteSuccess)
                     {
                         Say.Success($"Deleted: {postLog.RecordKey}");
@@ -264,7 +265,7 @@ internal sealed class PostHelpers : IPostHelpers
                 {
                     case Type when embedType == typeof(Lib.Polymorphs.AppBsky.EmbedRecord):
                         var recordEmbed = post.Record.Embed as Lib.Polymorphs.AppBsky.EmbedRecord;
-                        if(recordEmbed != null)
+                        if (recordEmbed != null)
                         {
                             recordEmbedCid = recordEmbed.Record.Cid;
                             recordEmbedUri = recordEmbed.Record.Uri;
@@ -272,10 +273,10 @@ internal sealed class PostHelpers : IPostHelpers
                         break;
                     case Type when embedType == typeof(Lib.Polymorphs.AppBsky.EmbedRecordWithMedia):
                         var recordEmbedWithMedia = post.Record.Embed as Lib.Polymorphs.AppBsky.EmbedRecordWithMedia;
-                        if(recordEmbedWithMedia != null)
+                        if (recordEmbedWithMedia != null)
                         {
                             var recordEmbedWithMediaRecord = recordEmbedWithMedia.Record as Lib.Polymorphs.AppBsky.EmbedRecord;
-                            if(recordEmbedWithMediaRecord != null)
+                            if (recordEmbedWithMediaRecord != null)
                             {
                                 recordEmbedCid = recordEmbedWithMediaRecord.Record.Cid;
                                 recordEmbedUri = recordEmbedWithMediaRecord.Record.Uri;
@@ -313,7 +314,7 @@ internal sealed class PostHelpers : IPostHelpers
     async Task<PostLog?> GetReplyParentForPost(Post post)
     {
         PostLog? replyParentPostLog = null;
-        
+
         if (post.Record.Reply != null)
         {
             var parentReplyKey = post.Record.Reply.Parent.Uri.Split('/').Last();
@@ -353,8 +354,8 @@ internal sealed class PostHelpers : IPostHelpers
         try
         {
             var mastodonMessage = await _mastodonHelpers.PostToMastodon(post, embed, replyToStatusId);
-            
-            if(mastodonMessage != null)
+
+            if (mastodonMessage != null)
             {
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
                 postLog = await PostLogs.UpdatePostLog(
@@ -391,7 +392,7 @@ internal sealed class PostHelpers : IPostHelpers
                 replyId: replyToMessageId
             );
 
-            if(telegramMessage != null)
+            if (telegramMessage != null)
             {
                 var firstTelegramMessage = telegramMessage.FirstOrDefault();
 
@@ -425,8 +426,8 @@ internal sealed class PostHelpers : IPostHelpers
         try
         {
             var xMessage = await _xHelpers.PostToX(post, embed, replyToPostId);
-            
-            if(
+
+            if (
                 xMessage != null &&
                 xMessage.ID != null
             )
@@ -464,7 +465,7 @@ internal sealed class PostHelpers : IPostHelpers
         {
             try
             {
-                if(postLog.Mastodon_StatusId != null)
+                if (postLog.Mastodon_StatusId != null)
                     await _mastodonHelpers.DeleteFromMastodon(postLog.Mastodon_StatusId);
                 Say.Success($"Deleted from {_mastodonContext.State.InstanceSoftware}: {consoleMessageSuffix}");
             }
@@ -481,7 +482,7 @@ internal sealed class PostHelpers : IPostHelpers
 
     async Task<bool> SyncDeletedPostWithTelegram(PostLog postLog)
     {
-        if(postLog == null)
+        if (postLog == null)
             return false;
 
         bool deletedFromTelegram = true;
@@ -520,7 +521,7 @@ internal sealed class PostHelpers : IPostHelpers
 
     async Task<bool> SyncDeletedPostWithX(PostLog postLog)
     {
-        if(postLog == null)
+        if (postLog == null)
             return false;
 
         bool deletedFromX = true;
@@ -544,7 +545,7 @@ internal sealed class PostHelpers : IPostHelpers
 
     async Task<PostLog?> UpdatePostLogIgnored(Post post, PostLog? postLog)
     {
-        if(
+        if (
             postLog == null ||
             postLog != null && postLog.Ignored != IgnoredReason.None
         )
@@ -552,44 +553,51 @@ internal sealed class PostHelpers : IPostHelpers
 
         Embed? embed = await GetEmbedForPost(post);
         PostLog? replyParentPostLog = await GetReplyParentForPost(post);
+        IgnoredReason? ignoredReason = null;
 
-        if (
-            embed != null &&
-            embed.Items.Count() == 0 &&
-            embed.Type != EmbedType.Unknown
-        )
+        if (postLog != null)
         {
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-            Say.Warning($"Ignoring: {postLog.RecordKey}", "Post has embeds but none are supported");
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-            postLog = await PostLogs.IgnorePostLog(postLog.RecordKey, _bskyContext.State.Did, IgnoredReason.EmbedsButNotSupported);
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
-        }
+            if (
+                embed != null &&
+                embed.Items.Count() == 0 &&
+                embed.Type != EmbedType.Unknown
+            )
+            {
+                Say.Warning($"Ignoring: {postLog.RecordKey}", "Post has embeds but none are supported");
+                ignoredReason = IgnoredReason.EmbedsButNotSupported;
+            }
 
-        if (
-            post.Record.Reply != null && replyParentPostLog == null ||
-            post.Record.Reply != null && replyParentPostLog != null && replyParentPostLog.Ignored != IgnoredReason.None
-        )
-        {
-            // BUG: If you start Booski after a long period and an un-synced post is a reply
-            //      to an un-synced parent it will be inadvertidly ignored.
-            //      --retry-ignored can be passed by the user to attempt to repair these.
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-            Say.Warning($"Ignoring: {postLog.RecordKey}", "Post is a reply, but parent doesn't exist (either deleted, ignored or not ours)");
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-            postLog = await PostLogs.IgnorePostLog(postLog.RecordKey, _bskyContext.State.Did, IgnoredReason.ReplyButNoParent);
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
-        }
+            if (
+                post.Record.Reply != null && replyParentPostLog == null ||
+                post.Record.Reply != null && replyParentPostLog != null && replyParentPostLog.Ignored != IgnoredReason.None
+            )
+            {
+                // BUG: If you start Booski after a long period and an un-synced post is a reply
+                //      to an un-synced parent it will be inadvertently ignored.
+                //      --retry-ignored can be passed by the user to attempt to repair these.
+                Say.Warning($"Ignoring: {postLog.RecordKey}", "Post is a reply, but parent doesn't exist (either deleted, ignored or not ours)");
+                ignoredReason = IgnoredReason.ReplyButNoParent;
+            }
 
-        if (post.Record.Text.StartsWith("@")) // TODO: Check if this is a real mention?
-        {
+            if (post.Record.Text.StartsWith("@")) // TODO: Check if this is a real mention?
+            {
+                Say.Warning($"Ignoring: {postLog.RecordKey}", "Post starts with \"@\"");
+                ignoredReason = IgnoredReason.StartsWithMention;
+            }
+
+            if (post.Record.CreatedAt.AddHours(OldPostHours) < DateTime.UtcNow)
+            {
+                var hoursUnit = "hours";
+                if (OldPostHours == 1)
+                    hoursUnit = "hour";
+
+                Say.Warning($"Ignoring: {postLog.RecordKey}", $"Post is older than {OldPostHours} {hoursUnit}");
+                ignoredReason = IgnoredReason.OldCreatedAtDate;
+            }
+
+            if (ignoredReason != null)
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
-            Say.Warning($"Ignoring: {postLog.RecordKey}", "Post starts with \"@\"");
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-            postLog = await PostLogs.IgnorePostLog(postLog.RecordKey, _bskyContext.State.Did, IgnoredReason.StartsWithMention);
+                postLog = await PostLogs.IgnorePostLog(postLog.RecordKey, _bskyContext.State.Did, (IgnoredReason)ignoredReason);
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
         }
 

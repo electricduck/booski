@@ -5,6 +5,7 @@ namespace Booski.Enums {
         FirstRun = 1,
         ReplyButNoParent = 2,
         EmbedsButNotSupported = 3,
-        StartsWithMention = 4
+        StartsWithMention = 4,
+        OldCreatedAtDate = 5
     }
 }
