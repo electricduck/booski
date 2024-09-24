@@ -48,26 +48,26 @@ internal sealed class StartCommand : IStartCommand
 
     public async Task Invoke(StartOptions o)
     {
-        if(!o.NoDaemon)
+        if (!o.NoDaemon)
         {
             Process? currentProcess = Program.CurrentProcess;
             ProcessModule? currentProcessModule;
             string currentProcessPath = String.Empty;
 
-            if(currentProcess != null)
+            if (currentProcess != null)
             {
                 currentProcessModule = currentProcess.MainModule;
-                if(currentProcessModule != null)
+                if (currentProcessModule != null)
                     currentProcessPath = currentProcessModule.FileName;
             }
 
-            if(String.IsNullOrEmpty(currentProcessPath))
+            if (String.IsNullOrEmpty(currentProcessPath))
             {
                 Say.Error("Unable to run as daemon");
                 Program.Exit();
             }
 
-            if(Pid.GetPid() != null)
+            if (Pid.GetPid() != null)
             {
                 Say.Error("Already running daemon");
             }
@@ -83,7 +83,7 @@ internal sealed class StartCommand : IStartCommand
             Program.Exit(kill: true);
         }
 
-        if(o.NoSay)
+        if (o.NoSay)
             Program.NoSay = true;
 
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
@@ -93,7 +93,7 @@ internal sealed class StartCommand : IStartCommand
         await CreateAdditionalClients(Program.Config.Clients, o);
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
 
-        if(o.ExitAfterConnecting)
+        if (o.ExitAfterConnecting)
             return;
 
         o.SleepTime = o.SleepTime * 1000;
@@ -107,11 +107,22 @@ internal sealed class StartCommand : IStartCommand
 
         while (true)
         {
-            await _postHelpers.BuildPostCache(o.SleepTimeFetch);
-            await _postHelpers.SyncDeletedPosts(o.SleepTimeSync);
-            await _postHelpers.SyncAddedPosts(o.SleepTimeSync, o.RetryIgnoredPosts);
+            try
+            {
+                await _postHelpers.BuildPostCache(o.SleepTimeFetch);
+            }
+            catch (Exception e)
+            {
+                // TODO: Handle different exceptions appropriately
+                Say.Warning("Unable to cache posts", e.Message);
+            }
+            finally
+            {
+                await _postHelpers.SyncDeletedPosts(o.SleepTimeSync);
+                await _postHelpers.SyncAddedPosts(o.SleepTimeSync, o.RetryIgnoredPosts);
+            }
 
-            if(
+            if (
                 CacheLastCleared != null &&
                 DateTime.UtcNow > CacheLastCleared.Value.Date.AddHours(1)
             )
@@ -171,7 +182,7 @@ internal sealed class StartCommand : IStartCommand
         }
 
         if (
-            !o.NoConnectX&&
+            !o.NoConnectX &&
             clientsConfig.X != null &&
             !String.IsNullOrEmpty(clientsConfig.X.AccessToken) &&
             !String.IsNullOrEmpty(clientsConfig.X.AccessSecret) &&
@@ -181,7 +192,7 @@ internal sealed class StartCommand : IStartCommand
         {
             await _xContext.CreateClient(
                 clientsConfig.X.ApiKey,
-                clientsConfig.X.ApiSecret, 
+                clientsConfig.X.ApiSecret,
                 clientsConfig.X.AccessToken,
                 clientsConfig.X.AccessSecret
             );
