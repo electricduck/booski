@@ -40,11 +40,11 @@ internal sealed class MastodonContext : IMastodonContext
 
         try
         {
-            var authClient = new AuthenticationClient(instance, _httpContext.Client);
             Client = new MastodonClient(instance, token, _httpContext.Client);
 
             State.Instance = await Client.GetInstanceV2();
             State.Account = await Client.GetCurrentUser();
+
             if (
                 State.Account != null &&
                 State.Instance != null &&
