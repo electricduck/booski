@@ -13,7 +13,7 @@ public class StartOptions : GlobalOptions
     public bool RetryIgnoredPosts { get; set; }
     [Option("no-connect-mastodon", HelpText = "Do not connect to Mastodon.")]
     public bool NoConnectMastodon { get; set; }
-    [Option("no-connect-nostr", HelpText = "Do not connect to Nostr.")]
+    [Option("no-connect-nostr", Hidden = true, HelpText = "Do not connect to Nostr.")]
     public bool NoConnectNostr { get; set; }
     [Option("no-connect-telegram", HelpText = "Do not connect to Telegram.")]
     public bool NoConnectTelegram { get; set; }
