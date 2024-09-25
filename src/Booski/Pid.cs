@@ -10,9 +10,10 @@ public static class Pid
             pid = Program.CurrentProcess.Id;
 
         if(!String.IsNullOrEmpty(Program.PidPath))
-        {
             File.WriteAllText(Program.PidPath, pid.ToString());
-        }
+        
+        if(!String.IsNullOrEmpty(Program.PidLogPath))
+            File.Create(Program.PidLogPath);
         
         return pid;
     }
@@ -24,6 +25,12 @@ public static class Pid
             File.Exists(Program.PidPath)
         )
             File.Delete(Program.PidPath);
+
+        if(
+            !String.IsNullOrEmpty(Program.PidLogPath) &&
+            File.Exists(Program.PidLogPath)
+        )
+            File.Delete(Program.PidLogPath);
     }
 
     public static int? GetPid()

@@ -46,7 +46,7 @@ public class Say
 
     public static void Separate(int length = 80, char separator = '-')
     {
-        if(!IsLastSaySeparate)
+        if(!IsLastSaySeparate && !Program.NoSay)
         {
             Console.WriteLine(new String(separator, length));
             IsLastSaySeparate = true;
@@ -116,12 +116,22 @@ public class Say
         {
             if(separate)
                 Separate();
-            
             Console.WriteLine(message);
             IsLastSaySeparate = false;
-
             if(separate)
                 Separate();
         }
+        else
+        {
+            int? pid = Pid.GetPid();
+            if(pid != null && pid > 0)
+                LogMessage(message);
+        }
+    }
+
+    static void LogMessage(string message)
+    {
+        if(File.Exists(Program.PidLogPath))
+            File.AppendAllText(Program.PidLogPath, $"{message}\n");
     }
 }

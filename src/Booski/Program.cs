@@ -29,6 +29,7 @@ public class Program
     public static string? FileCacheDir { get; set; }
     public static bool NoSay { get; set; }
     public static string? PidPath { get; set; }
+    public static string? PidLogPath { get; set; }
     public static bool YtDlpEnabled { get; set; }
     public static string? YtDlpPath { get; set; } = "yt-dlp";
 
@@ -340,6 +341,7 @@ public class Program
         DbPath = Path.Combine(ConfigDir, "booski.db");
         FileCacheDir = Path.Combine(ConfigDir, "file-cache");
         PidPath = Path.Combine(ConfigDir, "booski.pid");
+        PidLogPath = Path.Combine(ConfigDir, "booski.log");
         bool firstRun = false;
 
         if (!Directory.Exists(ConfigDir))
