@@ -100,6 +100,7 @@ public class Program
             builder.Services.AddSingleton<IMastodonContext, MastodonContext>();
             builder.Services.AddSingleton<IMastodonHelpers, MastodonHelpers>();
             builder.Services.AddSingleton<INostrContext, NostrContext>();
+            builder.Services.AddSingleton<INostrHelpers, NostrHelpers>();
             builder.Services.AddSingleton<IPostHelpers, PostHelpers>();
             builder.Services.AddSingleton<IStartCommand, StartCommand>();
             builder.Services.AddSingleton<IStatusCommand, StatusCommand>();
