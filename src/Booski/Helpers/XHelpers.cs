@@ -47,7 +47,9 @@ internal sealed class XHelpers : IXHelpers
         string postId
     )
     {
-        await _xContext.Client.DeleteTweetAsync(postId);
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+        _ = await _xContext.Client.DeleteTweetAsync(postId);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
     }
 
     public async Task<Tweet?> PostToX(
@@ -56,7 +58,7 @@ internal sealed class XHelpers : IXHelpers
         string? replyId = null
     )
     {
-        Tweet sentMessage = null;
+        Tweet? sentMessage;
         List<Media>? messageAttachments = null;
         bool hasEmbedsButFailed = false;
 
@@ -97,11 +99,13 @@ internal sealed class XHelpers : IXHelpers
 
                     Say.Info($"Uploading '{embedItem.Ref}' to X...");
 
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
                     var attachment = await _xContext.Client.UploadMediaAsync(
                         fileByteArray,
                         mediaCategory: mediaCategory,
                         mediaType: embedItem.MimeType
                     );
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
 
                     if (mediaCategory == "tweet_video")
                     {
@@ -113,6 +117,7 @@ internal sealed class XHelpers : IXHelpers
                                 await Task.Delay(checkAfterSeconds * 1000);
                             }
 
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
                             attachment =
                                 await
                                 (from stat in _xContext.Client.Media
@@ -120,6 +125,7 @@ internal sealed class XHelpers : IXHelpers
                                      stat.MediaID == attachment.MediaID
                                  select stat)
                                 .SingleOrDefaultAsync();
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
                         } while (attachment?.ProcessingInfo?.State == MediaProcessingInfo.InProgress);
                     }
 
@@ -158,21 +164,26 @@ internal sealed class XHelpers : IXHelpers
 
             if (replyId != null)
                 // NOTE: There's no "ReplyMediaAsync" function so we'll quote for replies
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
                 sentMessage = await _xContext.Client.TweetMediaAsync(
                     mediaIds: mediaIds,
                     quoteTweetID: replyId,
                     text: await GeneratePostText(post)
                 );
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
             else
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
                 sentMessage = await _xContext.Client.TweetMediaAsync(
                     mediaIds: mediaIds,
                     text: await GeneratePostText(post)
                 );
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
         }
         else
         {
             if (String.IsNullOrEmpty(replyId))
             {
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
                 sentMessage = await _xContext.Client.TweetAsync(
                     text: await GeneratePostText(
                         post,
@@ -180,9 +191,11 @@ internal sealed class XHelpers : IXHelpers
                         embed != null ? embed.Type : EmbedType.Unknown
                     )
                 );
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
             }
             else
             {
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
                 sentMessage = await _xContext.Client.ReplyAsync(
                     replyTweetID: replyId,
                     text: await GeneratePostText(
@@ -191,6 +204,7 @@ internal sealed class XHelpers : IXHelpers
                         embed != null ? embed.Type : EmbedType.Unknown
                     )
                 );
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
             }
         }
 

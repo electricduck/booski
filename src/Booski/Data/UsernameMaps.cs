@@ -7,11 +7,11 @@ public class UsernameMaps
 {
     public async static Task<UsernameMap> AddOrUpdateUsernameMap(
         string did,
-        string mastodonHandle,
-        string nostrHandle,
-        string telegramHandle,
-        string threadsHandle,
-        string xHandle
+        string? mastodonHandle,
+        string? nostrHandle,
+        string? telegramHandle,
+        string? threadsHandle,
+        string? xHandle
     )
     {
         using (var db = new Database())
@@ -71,13 +71,13 @@ public class UsernameMaps
         }
     }
 
-    public async static Task<string> GetMastodonHandleForDid(
+    public async static Task<string?> GetMastodonHandleForDid(
         string did
     )
     {
         using (var db = new Database())
         {
-            string mastodonHandle = "";
+            string? mastodonHandle = String.Empty;
 
             var foundDid = await db
                 .UsernameMaps
@@ -91,13 +91,13 @@ public class UsernameMaps
         }
     }
 
-    public async static Task<string> GetNostrHandleForDid(
+    public async static Task<string?> GetNostrHandleForDid(
         string did
     )
     {
         using (var db = new Database())
         {
-            string nostrHandle = "";
+            string? nostrHandle = String.Empty;
 
             var foundDid = await db
                 .UsernameMaps
@@ -111,13 +111,13 @@ public class UsernameMaps
         }
     }
 
-    public async static Task<string> GetTelegramHandleForDid(
+    public async static Task<string?> GetTelegramHandleForDid(
         string did
     )
     {
         using (var db = new Database())
         {
-            string telegramHandle = "";
+            string? telegramHandle = String.Empty;
 
             var foundDid = await db
                 .UsernameMaps
@@ -131,13 +131,13 @@ public class UsernameMaps
         }
     }
 
-    public async static Task<string> GetThreadsHandleForDid(
+    public async static Task<string?> GetThreadsHandleForDid(
         string did
     )
     {
         using (var db = new Database())
         {
-            string threadsHandle = "";
+            string? threadsHandle = String.Empty;
 
             var foundDid = await db
                 .UsernameMaps
@@ -151,13 +151,13 @@ public class UsernameMaps
         }
     }
 
-    public async static Task<string> GetXHandleForDid(
+    public async static Task<string?> GetXHandleForDid(
         string did
     )
     {
         using (var db = new Database())
         {
-            string xHandle = "";
+            string? xHandle = String.Empty;
 
             var foundDid = await db
                 .UsernameMaps

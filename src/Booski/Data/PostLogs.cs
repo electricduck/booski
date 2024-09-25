@@ -95,7 +95,7 @@ public class PostLogs
         }
     }
 
-    public async static Task<PostLog> GetPostLogByRecordKey(
+    public async static Task<PostLog?> GetPostLogByRecordKey(
         string recordKey,
         string repository
     )
@@ -111,7 +111,7 @@ public class PostLogs
         }
     }
 
-    public async static Task<PostLog> GetPostLog(
+    public async static Task<PostLog?> GetPostLog(
         string recordKey,
         string repository
     )
@@ -168,7 +168,7 @@ public class PostLogs
         }
     }
 
-    public async static Task<PostLog> UpdatePostLog(
+    public async static Task<PostLog?> UpdatePostLog(
         string recordKey,
         string repository,
         string mastodonInstanceDomain = "",
@@ -183,7 +183,7 @@ public class PostLogs
     {
         using (var db = new Database())
         {
-            PostLog postLog = new PostLog();
+            PostLog? postLog;
 
             postLog = await db
                 .PostLogs

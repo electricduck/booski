@@ -14,7 +14,7 @@ public interface ITelegramHelpers
         long chatId,
         int messageId
     );
-    Task<List<Message>> PostToTelegram(
+    Task<List<Message>?> PostToTelegram(
         Post post,
         Embed? embed,
         string? chatId = null,
@@ -47,10 +47,12 @@ internal sealed class TelegramHelpers : ITelegramHelpers
         int messageId
     )
     {
+#pragma warning disable CS8604 // Possible null reference argument.
         await _telegramContext.Client.DeleteMessageAsync(
             chatId: chatId,
             messageId: messageId
         );
+#pragma warning restore CS8604 // Possible null reference argument.
     }
 
     public async Task<List<Message>?> PostToTelegram(
@@ -72,10 +74,13 @@ internal sealed class TelegramHelpers : ITelegramHelpers
             telegramReply.MessageId = (int)replyId;
 
         if (chatId == null)
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             chatId = _telegramContext.State.Channel;
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
 
         if (
-            embed != null && 
+            embed != null &&
+            embed.Items != null &&
             embed.Items.Count() > 0
         )
         {
@@ -85,7 +90,10 @@ internal sealed class TelegramHelpers : ITelegramHelpers
                 bool firstMediaItem = true;
 
                 foreach (var embedItem in embed.Items)
-                {                    
+                {
+                    if(embedItem.Ref == null || embedItem.Uri == null)
+                        break;
+
                     var fileStream = await _fileCacheContext.GetFileFromUri(embedItem.Uri);
 
                     if (fileStream == null)
@@ -110,11 +118,13 @@ internal sealed class TelegramHelpers : ITelegramHelpers
 
                 if(telegramAlbum.Count() > 0 && !hasEmbedsButFailed)
                 {
+#pragma warning disable CS8604 // Possible null reference argument.
                     var sentMessagesArray = await _telegramContext.Client.SendMediaGroupAsync(
                         chatId: chatId,
                         media: telegramAlbum,
                         replyParameters: telegramReply
                     );
+#pragma warning restore CS8604 // Possible null reference argument.
 
                     sentMessages = sentMessagesArray.ToList();
                 }
@@ -125,6 +135,9 @@ internal sealed class TelegramHelpers : ITelegramHelpers
             )
             {
                 var firstEmbedItem = embed.Items.First();
+                if(firstEmbedItem.Ref == null || firstEmbedItem.Uri == null)
+                    break;
+                    
                 var fileStream = await _fileCacheContext.GetFileFromUri(firstEmbedItem.Uri);
 
                 if (fileStream == null)
@@ -136,6 +149,7 @@ internal sealed class TelegramHelpers : ITelegramHelpers
                     switch(embed.Type)
                     {
                         case Enums.EmbedType.Gif:
+#pragma warning disable CS8604 // Possible null reference argument.
                             sentMessages.Add(
                                 await _telegramContext.Client.SendAnimationAsync(
                                     animation: new InputFileStream(fileStream, firstEmbedItem.GenerateFilename()),
@@ -145,8 +159,10 @@ internal sealed class TelegramHelpers : ITelegramHelpers
                                     replyParameters: telegramReply
                                 )
                             );
+#pragma warning restore CS8604 // Possible null reference argument.
                             break;
                         case Enums.EmbedType.Video:
+#pragma warning disable CS8604 // Possible null reference argument.
                             sentMessages.Add(
                                 await _telegramContext.Client.SendVideoAsync(
                                     caption: await GenerateCaption(post),
@@ -156,6 +172,7 @@ internal sealed class TelegramHelpers : ITelegramHelpers
                                     video: new InputFileStream(fileStream, firstEmbedItem.GenerateFilename())
                                 )
                             );
+#pragma warning restore CS8604 // Possible null reference argument.
                             break;
                     }
                 }
@@ -164,6 +181,7 @@ internal sealed class TelegramHelpers : ITelegramHelpers
             {
                 string text = $"{await GenerateCaption(post)}<a href=\"{embed.Items.First().Uri}\"> </a>";
 
+#pragma warning disable CS8604 // Possible null reference argument.
                 sentMessages.Add(
                     await _telegramContext.Client.SendTextMessageAsync(
                         chatId: chatId,
@@ -173,15 +191,17 @@ internal sealed class TelegramHelpers : ITelegramHelpers
                         text: text
                     )
                 );
+#pragma warning restore CS8604 // Possible null reference argument.
             }
         }
         
         if(
             embed == null ||
-            embed != null && embed.Items.Count() == 0 ||
-            embed != null && embed.Items.Count() > 0 && hasEmbedsButFailed
+            embed != null && embed.Items != null && embed.Items.Count() == 0 ||
+            embed != null && embed.Items != null && embed.Items.Count() > 0 && hasEmbedsButFailed
         )
         {
+#pragma warning disable CS8604 // Possible null reference argument.
             sentMessages.Add(
                 await _telegramContext.Client.SendTextMessageAsync(
                     chatId: chatId,
@@ -191,6 +211,7 @@ internal sealed class TelegramHelpers : ITelegramHelpers
                     text: await GenerateCaption(post, hasEmbedsButFailed, (embed != null) ? embed.Type : EmbedType.Unknown)
                 )
             );
+#pragma warning restore CS8604 // Possible null reference argument.
         }
 
         return sentMessages;
@@ -246,7 +267,9 @@ internal sealed class TelegramHelpers : ITelegramHelpers
             if (match.Groups[2] != null)
             {
                 string did = match.Groups[2].Value;
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
                 string telegramHandle = await UsernameMaps.GetTelegramHandleForDid(did);
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
 
                 if (!String.IsNullOrEmpty(telegramHandle))
                 {

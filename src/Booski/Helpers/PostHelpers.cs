@@ -376,15 +376,19 @@ internal sealed class PostHelpers : IPostHelpers
             if (mastodonMessage != null)
             {
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
                 postLog = await PostLogs.UpdatePostLog(
                     recordKey: postLog.RecordKey,
                     repository: _bskyContext.State.Did,
                     mastodonInstanceDomain: _mastodonContext.State.Domain,
                     mastodonStatusId: mastodonMessage.Id
                 );
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
 
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
                 Say.Success($"Posted to {_mastodonContext.State.InstanceSoftware}: {postLog.RecordKey} ({postLog.Mastodon_InstanceDomain}/{postLog.Mastodon_StatusId})");
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
             }
         }
         catch (Exception e)
@@ -415,6 +419,7 @@ internal sealed class PostHelpers : IPostHelpers
                 var firstTelegramMessage = telegramMessage.FirstOrDefault();
 
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
                 postLog = await PostLogs.UpdatePostLog(
                     recordKey: postLog.RecordKey,
                     repository: _bskyContext.State.Did,
@@ -422,9 +427,12 @@ internal sealed class PostHelpers : IPostHelpers
                     telegramMessageCount: telegramMessage.Count(),
                     telegramMessageId: firstTelegramMessage.MessageId
                 );
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
 
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
                 Say.Success($"Posted to Telegram: {postLog.RecordKey} ({postLog.Telegram_ChatId}/{postLog.Telegram_MessageId})");
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
             }
         }
         catch (Exception e)
@@ -451,14 +459,18 @@ internal sealed class PostHelpers : IPostHelpers
             )
             {
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
                 postLog = await PostLogs.UpdatePostLog(
                     recordKey: postLog.RecordKey,
                     repository: _bskyContext.State.Did,
                     xPostId: xMessage.ID
                 );
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
 
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
                 Say.Success($"Posted to X: {postLog.RecordKey} ({postLog.X_PostId})");
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
             }
         }
         catch (Exception e)

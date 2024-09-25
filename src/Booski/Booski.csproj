@@ -1,8 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\Booski.Lib\Booski.Lib.csproj" />
-    <ProjectReference Include="..\..\lib\Telegram.Bot\src\Telegram.Bot\Telegram.Bot.csproj" />
+    <ProjectReference Include="..\Booski.Lib\Booski.Lib.csproj">
+      <NoWarn>*</NoWarn>
+    </ProjectReference>
+    <ProjectReference Include="..\..\lib\Telegram.Bot\src\Telegram.Bot\Telegram.Bot.csproj">
+      <NoWarn>*</NoWarn>
+    </ProjectReference>
   </ItemGroup>
 
   <ItemGroup>

@@ -40,9 +40,11 @@ internal sealed class NostrHelpers : INostrHelpers
             };
 
             var signed = ev.Sign(nostrPrv);
-            _nostrContext.Client.Send(new NostrEventRequest(signed));
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+        _nostrContext.Client.Send(new NostrEventRequest(signed));
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
 
-            Console.WriteLine(signed.Id);
+        Console.WriteLine(signed.Id);
             Console.WriteLine(signed.Sig);
             Console.WriteLine(signed.Pubkey);
     }

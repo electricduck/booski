@@ -46,7 +46,9 @@ internal sealed class MastodonHelpers : IMastodonHelpers
         string statusId
     )
     {
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
         await _mastodonContext.Client.DeleteStatus(statusId);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
     }
 
     public async Task<Status?> PostToMastodon(
@@ -79,11 +81,15 @@ internal sealed class MastodonHelpers : IMastodonHelpers
                         break;
                     }
 
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
                     Say.Info($"Uploading '{embedItem.Ref}' to {_mastodonContext.State.InstanceSoftware}...");
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
                     var mastodonMedia = new MediaDefinition(file, embedItem.Uri.ToString().Split('/').Last());
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
                     var messageAttachment = await _mastodonContext.Client.UploadMedia(mastodonMedia);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
 
-                    if(messageAttachment != null)
+                    if (messageAttachment != null)
                     {
                         messageAttachments.Add(messageAttachment);
                     }
@@ -123,6 +129,7 @@ internal sealed class MastodonHelpers : IMastodonHelpers
                 spoiler = $"🔞 {spoiler}";
         }
 
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
         sentMessage = await _mastodonContext.Client.PublishStatus(
             language: _i18nHelpers.GetLangForLanguage(post.Language),
             mediaIds: mediaIds,
@@ -136,6 +143,7 @@ internal sealed class MastodonHelpers : IMastodonHelpers
             ),
             visibility: Visibility.Public
         );
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
 
         return sentMessage;
     }
@@ -158,10 +166,12 @@ internal sealed class MastodonHelpers : IMastodonHelpers
         );
         statusText = await ReplaceUsernames(statusText);
 
-        if(_mastodonContext.State.NoRichText)
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+        if (_mastodonContext.State.NoRichText)
             statusText = RichTextUtilities.UnTruncateMarkdownLinks(statusText);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
 
-        if(hasEmbedsButFailed)
+        if (hasEmbedsButFailed)
         {
             string attachmentLink = _bskyHelpers.GetPostLink(post);
             

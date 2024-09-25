@@ -5,7 +5,7 @@ namespace Booski.Common;
 
 public class PostLog {
     [Key]
-    public string RecordKey { get; set; }
+    public string RecordKey { get; set; } = "";
 
     public string? Repository { get; set; }
 

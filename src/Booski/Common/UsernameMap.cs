@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 public class UsernameMap {
     [Key]
-    public string Bluesky_Did { get; set; }
+    public string Bluesky_Did { get; set; } = "";
 
     public string? Mastodon_Handle { get; set; }
     public string? Nostr_Handle { get; set; }

@@ -64,13 +64,19 @@ internal sealed class UsernameMapCommand : IUsernameMapCommand
             switch(action)
             {
                 case Enums.UsernameMapCommandAction.Add:
+#pragma warning disable CS8604 // Possible null reference argument.
                     await AddOrUpdateMapEntry(o, bskyProfile);
+#pragma warning restore CS8604 // Possible null reference argument.
                     break;
                 case Enums.UsernameMapCommandAction.Get:
+#pragma warning disable CS8604 // Possible null reference argument.
                     await GetMapEntry(bskyProfile);
+#pragma warning restore CS8604 // Possible null reference argument.
                     break;
                 case Enums.UsernameMapCommandAction.Remove:
+#pragma warning disable CS8604 // Possible null reference argument.
                     await RemoveMapEntry(bskyProfile);
+#pragma warning restore CS8604 // Possible null reference argument.
                     break;
             }
         }
@@ -147,11 +153,11 @@ internal sealed class UsernameMapCommand : IUsernameMapCommand
     {
         var bskyDid = bskyProfile.Did;
 
-        string mastodonHandle = await UsernameMaps.GetMastodonHandleForDid(bskyDid);
-        string nostrHandle = await UsernameMaps.GetNostrHandleForDid(bskyDid);
-        string telegramHandle = await UsernameMaps.GetTelegramHandleForDid(bskyDid);
-        string threadsHandle = await UsernameMaps.GetThreadsHandleForDid(bskyDid);
-        string xHandle = await UsernameMaps.GetXHandleForDid(bskyDid);
+        string? mastodonHandle = await UsernameMaps.GetMastodonHandleForDid(bskyDid);
+        string? nostrHandle = await UsernameMaps.GetNostrHandleForDid(bskyDid);
+        string? telegramHandle = await UsernameMaps.GetTelegramHandleForDid(bskyDid);
+        string? threadsHandle = await UsernameMaps.GetThreadsHandleForDid(bskyDid);
+        string? xHandle = await UsernameMaps.GetXHandleForDid(bskyDid);
 
         mastodonHandle = String.IsNullOrEmpty(mastodonHandle) ? "(None)" : $"@{mastodonHandle}";
         nostrHandle = String.IsNullOrEmpty(nostrHandle) ? "(None)" : $"@{nostrHandle}";
@@ -186,14 +192,16 @@ string outputBody = $@"↳ Mastodon: {mastodonHandle}
         Say.Success($"Removed maps for @{bskyProfile.Handle} ({bskyDid})");
     }
 
-    async Task<AppBskyResponses.GetProfileResponse> ResolveBskyProfileFromHandle(string handle)
+    async Task<AppBskyResponses.GetProfileResponse?> ResolveBskyProfileFromHandle(string handle)
     {
-        AppBskyResponses.GetProfileResponse resolvedProfile = null;
+        AppBskyResponses.GetProfileResponse? resolvedProfile = null;
 
-        if (!_bskyContext.IsConnected)
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
+        if (
+            !_bskyContext.IsConnected &&
+            Program.Config != null &&
+            Program.Config.Clients != null
+        )
             await _bskyContext.CreateSession(Program.Config.Clients);
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
 
         if (!_bskyContext.IsConnected)
         {
@@ -210,11 +218,9 @@ string outputBody = $@"↳ Mastodon: {mastodonHandle}
             var resolvedProfileResponse = await _bskyActorApi.GetProfile(handle);
             resolvedProfile = resolvedProfileResponse.Data;
         }
-        catch (Exception e)
+        catch
         {
-            // TODO: Throw exception
-            Say.Error($"Unable to find profile for '{handle}'");
-            Program.Exit(true);
+            throw new Exception($"Unable to find profile for '{handle}'");
         }
 
         return resolvedProfile;

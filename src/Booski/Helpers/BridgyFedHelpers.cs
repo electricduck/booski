@@ -7,7 +7,7 @@ namespace Booski.Helpers;
 public interface IBridgyFedHelpers
 {
     Task<string?> GetBridgyBskyHandle(string did);
-    Task<WebFinger> GetResource(string resource);
+    Task<WebFinger?> GetResource(string resource);
 }
 
 internal sealed class BridgyFedHelpers : IBridgyFedHelpers
@@ -28,7 +28,9 @@ internal sealed class BridgyFedHelpers : IBridgyFedHelpers
 
     public async Task<string?> GetBridgyBskyHandle(string did)
     {
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
         string bskyHandle = await _bskyHelpers.GetHandleForDid(did);
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
         string bskyBridgyHandle = null;
 
         if(bskyHandle != null)
@@ -43,10 +45,12 @@ internal sealed class BridgyFedHelpers : IBridgyFedHelpers
 
     public async Task<WebFinger?> GetResource(string resource)
     {
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
         var httpResponse = await
             _httpContext.Client.GetAsync($"{BridgyFedEndpoint}/.well-known/webfinger?resource={resource}");
-        
-        if(
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
+
+        if (
             httpResponse != null &&
             httpResponse.IsSuccessStatusCode
         )
