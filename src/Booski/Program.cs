@@ -89,10 +89,12 @@ public class Program
 
         try
         {
-            Say.Debug("Building services...");
+            Say.Debug("Creating host...");
             HostApplicationBuilder builder = Host.CreateApplicationBuilder();
 
+            Say.Debug("Adding Booski.Lib service...");
             builder.Services.AddBooskiLib();
+            Say.Debug("Adding internal services...");
             builder.Services.AddSingleton<II18nHelpers, I18nHelpers>();
             builder.Services.AddSingleton<IBridgyFedHelpers, BridgyFedHelpers>();
             builder.Services.AddSingleton<IBskyContext, BskyContext>();
@@ -115,6 +117,7 @@ public class Program
             builder.Services.AddSingleton<IXHelpers, XHelpers>();
             builder.Services.RemoveAll<IHttpMessageHandlerBuilderFilter>();
 
+            Say.Debug("Building host...");
             using IHost host = builder.Build();
 
             Say.Debug("Resolving command services...");
