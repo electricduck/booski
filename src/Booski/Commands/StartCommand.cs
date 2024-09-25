@@ -130,22 +130,6 @@ internal sealed class StartCommand : IStartCommand
                 await _postHelpers.SyncAddedPosts(o.SleepTimeSync, o.RetryIgnoredPosts);
             }
 
-            var nostrPrv = NostrPrivateKey.FromBech32("lolno");
-
-            var ev = new NostrEvent
-            {
-                CreatedAt = DateTime.UtcNow,
-                Content = $"Hello ({DateTime.UtcNow})",
-                Kind = NostrKind.ShortTextNote
-            };
-
-            var signed = ev.Sign(nostrPrv);
-            _nostrContext.Client.Send(new NostrEventRequest(signed));
-
-            Console.WriteLine(signed.Id);
-            Console.WriteLine(signed.Sig);
-            Console.WriteLine(signed.Pubkey);
-
             if (
                 CacheLastCleared != null &&
                 DateTime.UtcNow > CacheLastCleared.Value.Date.AddHours(1)

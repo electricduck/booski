@@ -44,10 +44,6 @@ public class Program
             "Instance": "",
             "Token": ""
         },
-        "Nostr": {
-            "PrivateKey": "",
-            "Relay": "",
-        },
         "Telegram": {
             "Channel": "",
             "Token": ""
@@ -61,6 +57,13 @@ public class Program
     }
 } 
 """;
+
+/*
+    "Nostr": {
+        "PrivateKey": "",
+        "Relay": "",
+    },
+*/
 
     public static async Task Main(string[] args)
     {
