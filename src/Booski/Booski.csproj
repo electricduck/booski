@@ -23,7 +23,7 @@
 
   <PropertyGroup>
     <Version Condition="'$(RELEASE_VERSION)' != ''">$(RELEASE_VERSION)</Version>
-    <VersionPrefix Condition="'$(RELEASE_VERSION)' == ''">0.5-rc5</VersionPrefix>
+    <VersionPrefix Condition="'$(RELEASE_VERSION)' == ''">0.5-rc6</VersionPrefix>
     <!--VersionSuffix Condition="'$(RELEASE_VERSION)' == ''">$([System.DateTime]::UtcNow.ToString(`yyyyMMdd-HHmm`))</VersionSuffix-->
 
     <Authors>Ducky</Authors>
