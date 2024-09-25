@@ -23,9 +23,9 @@
 
 ```sh
 cd ~/.local/bin
-wget https://github.com/electricduck/booski/releases/download/v%2F0.x%2F0.5-rc1/booski-0.5-rc1-linux-x64.bin
-chmod +x booski-0.5-rc1-linux-x64.bin
-./booski-0.5-rc1-linux-x64.bin start --no-daemon
+wget https://github.com/electricduck/booski/releases/download/v%2F0.x%2F0.5-rc2/booski-0.5-rc2-linux-x64.bin
+chmod +x booski-0.5-rc2-linux-x64.bin
+./booski-0.5-rc2-linux-x64.bin start --no-daemon
 ```
 
 ## 🏗️ Building
