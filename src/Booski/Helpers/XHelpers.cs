@@ -262,7 +262,7 @@ internal sealed class XHelpers : IXHelpers
         return captionText;
     }
 
-    static async Task<string> ReplaceUsernames(string originalString)
+    async Task<string> ReplaceUsernames(string originalString)
     {
         string pattern = "(\\[@.*?\\]\\(https:\\/\\/bsky.app\\/profile\\/(.*?)\\))";
         foreach (Match match in Regex.Matches(originalString, pattern, RegexOptions.IgnoreCase))
@@ -271,7 +271,7 @@ internal sealed class XHelpers : IXHelpers
             if (match.Groups[2] != null)
             {
                 string did = match.Groups[2].Value;
-                string xHandle = await UsernameMaps.GetXHandleForDid(did);
+                string? xHandle = await UsernameMaps.GetXHandleForDid(did);
 
                 if (!String.IsNullOrEmpty(xHandle))
                 {
@@ -279,6 +279,19 @@ internal sealed class XHelpers : IXHelpers
                         href,
                         $"@{xHandle}"
                     );
+                }
+                else
+                {
+                    string? bskyDisplayName = await _bskyHelpers.GetDisplayNameForDid(did);
+
+                    if(!String.IsNullOrEmpty(bskyDisplayName))
+                    {
+                        // TODO: Attempt to clean name up (e.g. 🔜's)
+                        originalString = originalString.Replace(
+                            href,
+                            bskyDisplayName
+                        );
+                    }
                 }
             }
         }
