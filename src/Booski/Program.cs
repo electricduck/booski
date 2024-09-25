@@ -344,6 +344,15 @@ public class Program
         PidLogPath = Path.Combine(ConfigDir, "booski.log");
         bool firstRun = false;
 
+        string debugOutputBody = $@"↳ Config:     {ConfigPath}
+↳ Database:   {DbPath}
+↳ File Cache: {FileCacheDir}/
+↳ Log:        {PidLogPath}
+↳ PID:        {PidPath}
+";
+
+        Say.Debug("Computed paths", debugOutputBody);
+
         if (!Directory.Exists(ConfigDir))
             Directory.CreateDirectory(ConfigDir);
 
