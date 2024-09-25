@@ -80,8 +80,9 @@ public class Program
         foreach(var arg in args)
         {
             Arguments+= $"{arg} ";
-            Say.Debug($"Args: {Arguments}");
         }
+
+        Say.Debug($"Args: {Arguments}");
 
         Say.Debug("Getting process...");
         CurrentProcess = Process.GetCurrentProcess();
