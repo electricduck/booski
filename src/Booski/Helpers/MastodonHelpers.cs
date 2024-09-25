@@ -161,9 +161,6 @@ internal sealed class MastodonHelpers : IMastodonHelpers
         if(_mastodonContext.State.NoRichText)
             statusText = RichTextUtilities.UnTruncateMarkdownLinks(statusText);
 
-        hasEmbedsButFailed = true;
-        _mastodonContext.State.NoRichText = true;
-
         if(hasEmbedsButFailed)
         {
             string attachmentLink = _bskyHelpers.GetPostLink(post);
