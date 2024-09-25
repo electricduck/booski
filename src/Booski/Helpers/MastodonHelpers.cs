@@ -96,6 +96,7 @@ internal sealed class MastodonHelpers : IMastodonHelpers
 
         string[]? mediaIds = null;
         bool sensitive = false;
+        string? spoiler = "";
 
         if (
             messageAttachments != null &&
@@ -105,12 +106,22 @@ internal sealed class MastodonHelpers : IMastodonHelpers
             mediaIds = messageAttachments.Select(ma => ma.Id).ToArray();
 
         if(post.Sensitivity != Enums.Sensitivity.None)
+        {
             sensitive = true;
+            spoiler = post.Sensitivity switch
+            {
+                Sensitivity.Suggestive => "🔞 Suggestive",
+                Sensitivity.Nudity => "🔞 Nudity",
+                Sensitivity.Porn => "🔞 Porn",
+                _ => String.Empty
+            };
+        }
 
         sentMessage = await _mastodonContext.Client.PublishStatus(
             mediaIds: mediaIds,
             replyStatusId: replyId,
             sensitive: sensitive,
+            spoilerText: spoiler,
             status: await GenerateStatusText(
                 post,
                 hasEmbedsButFailed,
