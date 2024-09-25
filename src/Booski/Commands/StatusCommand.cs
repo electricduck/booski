@@ -65,5 +65,22 @@ internal sealed class StatusCommand : IStatusCommand
             Say.Warning($"Not Running", outputBody);
             Program.Exit(true);
         }
+
+        if(!o.NoLog)
+        {
+            Say.Separate();
+
+            if(File.Exists(Program.PidLogPath))
+            {
+                // BUG: Performance issues if the logfile is huge
+                var log = File.ReadLines(Program.PidLogPath).Reverse().Take(o.LogLines).ToList();
+                foreach(var line in log)
+                    Console.WriteLine(line);
+            }
+            else
+            {
+                Say.Warning("No log output");
+            }
+        }
     }
 }
