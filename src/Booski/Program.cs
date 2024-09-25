@@ -44,6 +44,10 @@ public class Program
             "Instance": "",
             "Token": ""
         },
+        "Nostr": {
+            "PrivateKey": "",
+            "PublicKey": ""
+        },
         "Telegram": {
             "Channel": "",
             "Token": ""
