@@ -9,7 +9,9 @@ public class EnvUtilities
         variable = prefix ? $"{EnvPrefix}_{variable}".ToUpper() : variable.ToUpper();
         string? output = Environment.GetEnvironmentVariable(variable);
         
-        Say.Debug($"{variable}: {(String.IsNullOrEmpty(output) ? "(Empty)" : output)}");
+        if(variable != "BOOSKI_DEBUG")
+            Say.Debug($"{variable}: {(String.IsNullOrEmpty(output) ? "(Empty)" : output)}");
+        
         return output;
     }
 
