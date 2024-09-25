@@ -64,8 +64,8 @@ public class Program
 
     public static async Task Main(string[] args)
     {
-        Console.OutputEncoding = Encoding.UTF8;
-        CurrentProcess = Process.GetCurrentProcess();
+        Console.OutputEncoding = Encoding.UTF8; // NOTE: This *always* needs to be first
+        Say.Debug("Cranking up ol' reliable...");
 
         if(
             args.Length > 0 &&
@@ -79,8 +79,11 @@ public class Program
         foreach(var arg in args)
             Arguments+= $"{arg} ";
 
+        CurrentProcess = Process.GetCurrentProcess();
+
         try
         {
+            Say.Debug("Building services...");
             HostApplicationBuilder builder = Host.CreateApplicationBuilder();
 
             builder.Services.AddBooskiLib();
@@ -107,16 +110,25 @@ public class Program
 
             using IHost host = builder.Build();
 
+            Say.Debug("Resolving command services...");
             var _startCommand = host.Services.GetRequiredService<IStartCommand>();
             var _statusCommand = host.Services.GetRequiredService<IStatusCommand>();
             var _stopCommand = host.Services.GetRequiredService<IStopCommand>();
             var _usernameMap = host.Services.GetRequiredService<IUsernameMapCommand>();
 
+            Say.Debug("Checking for updates...");
             await CheckUpdates(host.Services.GetRequiredService<IGitHubContext>());
+
+            Say.Debug("Configuring...");
             Configure();
+
+            Say.Debug("Checking yt-dlp is installed...");
             CheckYtDlp(host.Services.GetRequiredService<IYtDlpContext>());
+
+            Say.Debug("Migrating database...");
             Database.Migrate();
 
+            Say.Debug("Parsing arguments...");
             await Parser.Default
                 .ParseArguments<StartOptions, StopOptions, StatusOptions, UsernameMapOptions>(args)
                 .MapResult(
