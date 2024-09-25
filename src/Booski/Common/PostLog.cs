@@ -12,6 +12,9 @@ public class PostLog {
     public string? Mastodon_InstanceDomain { get; set; }
     public string? Mastodon_StatusId { get; set; }
 
+    public string? Nostr_Author { get; set;}
+    public string? Nostr_Id { get; set; }
+
     public long? Telegram_ChatId { get; set; }
     public int? Telegram_MessageCount { get; set; }
     public int? Telegram_MessageId { get; set; }

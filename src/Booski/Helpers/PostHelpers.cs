@@ -26,6 +26,7 @@ internal sealed class PostHelpers : IPostHelpers
     private II18nHelpers _i18nHelpers;
     private IMastodonContext _mastodonContext;
     private IMastodonHelpers _mastodonHelpers;
+    private INostrContext _nostrContext;
     private ITelegramContext _telegramContext;
     private ITelegramHelpers _telegramHelpers;
     private IXContext _xContext;
@@ -37,6 +38,7 @@ internal sealed class PostHelpers : IPostHelpers
         II18nHelpers i18nHelpers,
         IMastodonContext mastodonContext,
         IMastodonHelpers mastodonHelpers,
+        INostrContext nostrContext,
         ITelegramContext telegramContext,
         ITelegramHelpers telegramHelpers,
         IXContext xContext,
@@ -48,6 +50,7 @@ internal sealed class PostHelpers : IPostHelpers
         _i18nHelpers = i18nHelpers;
         _mastodonContext = mastodonContext;
         _mastodonHelpers = mastodonHelpers;
+        _nostrContext = nostrContext;
         _telegramContext = telegramContext;
         _telegramHelpers = telegramHelpers;
         _xContext = xContext;
@@ -225,6 +228,13 @@ internal sealed class PostHelpers : IPostHelpers
                         postLog.Mastodon_StatusId != null
                     )
                         deleteSuccess = await SyncDeletedPostWithMastodon(postLog);
+
+                    if (
+                        _nostrContext.IsConnected &&
+                        postLog.Nostr_Author != null &&
+                        postLog.Nostr_Id != null
+                    )
+                        deleteSuccess = true;
 
                     if (
                         _telegramContext.IsConnected &&

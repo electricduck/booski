@@ -46,7 +46,7 @@ public class Program
         },
         "Nostr": {
             "PrivateKey": "",
-            "PublicKey": ""
+            "Relay": "",
         },
         "Telegram": {
             "Channel": "",
@@ -96,6 +96,7 @@ public class Program
             builder.Services.AddSingleton<IHttpContext, HttpContext>();
             builder.Services.AddSingleton<IMastodonContext, MastodonContext>();
             builder.Services.AddSingleton<IMastodonHelpers, MastodonHelpers>();
+            builder.Services.AddSingleton<INostrContext, NostrContext>();
             builder.Services.AddSingleton<IPostHelpers, PostHelpers>();
             builder.Services.AddSingleton<IStartCommand, StartCommand>();
             builder.Services.AddSingleton<IStatusCommand, StatusCommand>();
