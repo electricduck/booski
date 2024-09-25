@@ -5,7 +5,7 @@ namespace Booski.Common.Options;
 [Verb("start", HelpText = "Start the service.\nUse --no-daemon to not run as a daemon.")]
 public class StartOptions : GlobalOptions
 {
-    [Option('s', "sleep-time", Default = 1, HelpText = "Interval (in seconds) between checking for new posts on Bluesky.")]
+    [Option('s', "sleep-time", Default = 5, HelpText = "Interval (in seconds) between checking for new posts on Bluesky.")]
     public int SleepTime { get; set; }
     [Option('n', "no-daemon", HelpText = "Do not run service as daemon.")]
     public bool NoDaemon { get; set; }
