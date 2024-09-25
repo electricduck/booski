@@ -150,7 +150,7 @@ public class Program
         }
         catch (Exception e)
         {
-            var throwError = StringUtilities.ConvertToBool(Environment.GetEnvironmentVariable("BOOSKI_DEBUG"));
+            var throwError = EnvUtilities.GetEnvBool("Debug");
 
 #if DEBUG
             throwError = true;
@@ -202,7 +202,7 @@ public class Program
     // BUG: Using a tagged version triggers this
     private static async Task CheckUpdates(IGitHubContext _githubContext)
     {
-        var ignoreUpdates = StringUtilities.ConvertToBool(Environment.GetEnvironmentVariable("BOOSKI_IGNORE_UPDATES"));
+        var ignoreUpdates = EnvUtilities.GetEnvBool("Ignore_Updates");
         if (ignoreUpdates)
             return;
 
@@ -245,11 +245,11 @@ public class Program
 
     static void Configure()
     {
-        ConfigDir = !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("BOOSKI_CONFIG_DIR")) ?
-            Environment.GetEnvironmentVariable("BOOSKI_CONFIG_DIR") :
-            Environment.GetEnvironmentVariable("BOOSKI_CONFIG_PATH");
+        ConfigDir = !String.IsNullOrEmpty(EnvUtilities.GetEnvString("CONFIG_DIR")) ?
+            EnvUtilities.GetEnvString("CONFIG_DIR") :
+            EnvUtilities.GetEnvString("CONFIG_PATH");
 
-        var configDirSuffix = Environment.GetEnvironmentVariable("BOOSKI_CONFIG_DIR_SUFFIX");
+        var configDirSuffix = EnvUtilities.GetEnvString("CONFIG_DIR_SUFFIX");
 
         string appName = "Booski"; // TODO: Get programatically
 
@@ -275,7 +275,7 @@ public class Program
             }
             else
             {
-                var user = Environment.GetEnvironmentVariable("USER");
+                var user = EnvUtilities.GetEnvString("USER", false);
 
                 if (user == "root")
                 {
@@ -292,7 +292,7 @@ public class Program
                     }
                     else
                     {
-                        var homeDir = Environment.GetEnvironmentVariable("HOME");
+                        var homeDir = EnvUtilities.GetEnvString("HOME", false);
                         if (!String.IsNullOrEmpty(homeDir))
                             homeConfDir = Path.Combine(homeDir, ".config");
                     }

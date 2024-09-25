@@ -20,7 +20,7 @@ public class Say
 #if DEBUG
         say = true;
 #else
-        say = StringUtilities.ConvertToBool(Environment.GetEnvironmentVariable("BOOSKI_DEBUG"));
+        say = EnvUtilities.GetEnvBool("Debug");
 #endif
 
         if(say)
