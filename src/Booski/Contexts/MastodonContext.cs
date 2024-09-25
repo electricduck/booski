@@ -1,5 +1,6 @@
 using Booski.Common;
 using Mastonet;
+using Mastonet.Entities;
 
 namespace Booski.Contexts;
 
@@ -10,6 +11,7 @@ public interface IMastodonContext
     MastodonState? State { get; set; }
 
     Task CreateClient(string instance, string token);
+    Task CreateClient(string instance, string username, string password);
     void ResetClient();
 }
 
@@ -61,6 +63,24 @@ internal sealed class MastodonContext : IMastodonContext
         {
             ResetClient();
         }
+    }
+
+    public async Task CreateClient(
+        string instance,
+        string username,
+        string password
+    )
+    {
+        var authClient = new AuthenticationClient(instance, _httpContext.Client);
+        
+        await authClient.CreateApp(
+            "Booski",
+            scope: new GranularScope[] {GranularScope.Read, GranularScope.Write},
+            website: "https://github.com/electricduck/booski"
+        );
+        var auth = await authClient.ConnectWithPassword(username, password);
+
+        await CreateClient(auth.AccessToken, instance);
     }
 
     public void ResetClient()

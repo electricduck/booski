@@ -163,15 +163,29 @@ internal sealed class StartCommand : IStartCommand
         if (
             !o.NoConnectMastodon &&
             clientsConfig.Mastodon != null &&
-            !String.IsNullOrEmpty(clientsConfig.Mastodon.Instance) &&
-            !String.IsNullOrEmpty(clientsConfig.Mastodon.Token)
+            !String.IsNullOrEmpty(clientsConfig.Mastodon.Instance)
         )
         {
-            Say.Debug("Connecting to Mastodon (Mastonet)...");
-            await _mastodonContext.CreateClient(
-                clientsConfig.Mastodon.Instance,
-                clientsConfig.Mastodon.Token
-            );
+            if(!String.IsNullOrEmpty(clientsConfig.Mastodon.Token))
+            {
+                Say.Debug("Connecting to Mastodon (Mastonet) (with token)...");
+                await _mastodonContext.CreateClient(
+                    clientsConfig.Mastodon.Instance,
+                    clientsConfig.Mastodon.Token
+                );
+            }
+            else if(
+                !String.IsNullOrEmpty(clientsConfig.Mastodon.Password) &&
+                !String.IsNullOrEmpty(clientsConfig.Mastodon.Username)
+            )
+            {
+                Say.Debug("Connecting to Mastodon (Mastonet) (with username/password)...");
+                await _mastodonContext.CreateClient(
+                    clientsConfig.Mastodon.Instance,
+                    clientsConfig.Mastodon.Password,
+                    clientsConfig.Mastodon.Username
+                );
+            }
 
             if (_mastodonContext.IsConnected && _mastodonContext.State != null)
                 Say.Success($"Connected to {_mastodonContext.State.InstanceSoftware}: {_mastodonContext.State.Username} ({_mastodonContext.State.UserId})");
