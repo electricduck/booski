@@ -6,6 +6,7 @@ public class BskyState
 {
     public string Did { get; set; }
     public string Handle { get; set; }
+    public string PdsHost { get; set; }
     public AppBskyResponses.GetProfileResponse Profile { get; set; }
 
     public void SetAdditionalFields()

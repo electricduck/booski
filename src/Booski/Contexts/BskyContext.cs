@@ -76,6 +76,7 @@ internal sealed class BskyContext : IBskyContext
         if (_atProto.GetSession() != null)
         {
             var bskyProfileResponse = await _bskyActorApi.GetProfile(username);
+            State.PdsHost = host;
             State.Profile = bskyProfileResponse.Data;
             State.SetAdditionalFields();
             IsConnected = true;

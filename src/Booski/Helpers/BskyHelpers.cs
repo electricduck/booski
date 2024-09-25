@@ -127,7 +127,7 @@ internal sealed class BskyHelpers : IBskyHelpers
 
                         if(imageFile != null)
                         {
-                            var imageUri = BuildImageCdnUrl(did, imageFile.Ref.Link, imageFile.MimeType);
+                            var imageUri = BuildBlobUrl(did, imageFile.Ref.Link);
 
                             parsedEmbeds.Items.Add(
                                 new EmbedItem {
@@ -153,7 +153,7 @@ internal sealed class BskyHelpers : IBskyHelpers
 
                     if(videoFile != null)
                     {
-                        var videoUri = BuildVideoCdnUrl(did, videoFile.Ref.Link);
+                        var videoUri = BuildBlobUrl(did, videoFile.Ref.Link);
 
                         parsedEmbeds.Items.Add(
                             new EmbedItem {
@@ -307,15 +307,23 @@ internal sealed class BskyHelpers : IBskyHelpers
         return contentWarning;
     }
 
+    Uri BuildBlobUrl(string did, string link)
+    {
+        var host = "bsky.social";
+
+        if(_bskyContext.State != null)
+            host = _bskyContext.State.PdsHost;
+
+        return new Uri($"https://{host}/xrpc/com.atproto.sync.getBlob?did={did}&cid={link}");
+    }
+
     Uri BuildImageCdnUrl(string did, string link, string mimeType)
     {
-        // TODO: Is this the right way to do this?
         return new Uri($"https://cdn.bsky.app/img/feed_fullsize/plain/{did}/{link}@{mimeType.Split('/').Last()}");
     }
 
     Uri BuildVideoCdnUrl(string did, string link)
     {
-        // TODO: Is this the right way to do this?
         return new Uri($"https://video.bsky.app/watch/{HttpUtility.UrlEncode(did)}/{link}/playlist.m3u8");
     }
 }

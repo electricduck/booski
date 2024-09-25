@@ -14,15 +14,12 @@ public interface IFileCacheContext
 internal sealed class FileCacheContext : IFileCacheContext
 {
     private IHttpContext _httpContext;
-    private IYtDlpContext _ytDlpContext;
 
     public FileCacheContext(
-        IHttpContext httpContext,
-        IYtDlpContext ytDlpContext
+        IHttpContext httpContext
     )
     {
         _httpContext = httpContext;
-        _ytDlpContext = ytDlpContext;
     }
 
     public async Task ClearCache()
@@ -98,21 +95,13 @@ internal sealed class FileCacheContext : IFileCacheContext
         if(_httpContext.Client == null)
             _httpContext.CreateClient();
 
-        if(uri.ToString().EndsWith(".m3u8"))
-        {
-            Say.Info($"Grabbing '{uri}'...");
-            _ytDlpContext.DownloadVideo(uri, filePath);
-        }
-        else
-        {
             Say.Info($"Downloading '{uri}'...");
 
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
-            using (var stream = await _httpContext.Client.GetStreamAsync(uri))
-                using (var fs = new FileStream(filePath, FileMode.OpenOrCreate))
-                    await stream.CopyToAsync(fs);
+        using (var stream = await _httpContext.Client.GetStreamAsync(uri))
+            using (var fs = new FileStream(filePath, FileMode.OpenOrCreate))
+                await stream.CopyToAsync(fs);
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
-        }
 
         if(File.Exists(filePath))
             return true;
