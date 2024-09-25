@@ -20,6 +20,8 @@ internal sealed class UsernameMapCommand : IUsernameMapCommand
     private BskyApi.App.Bsky.Actor _bskyActorApi;
     private IBskyContext _bskyContext;
 
+    private readonly int NostrNpubLength = 63;
+
     public UsernameMapCommand(
         BskyApi.App.Bsky.Actor bskyActorApi,
         IBskyContext bskyContext
@@ -96,8 +98,28 @@ internal sealed class UsernameMapCommand : IUsernameMapCommand
         if(o.XHandle != null && o.XHandle.StartsWith("@"))
             o.XHandle = o.XHandle.TrimStart('@');
 
+        // > "Nostr is easy"
+        // > also Nostr:
+        if(o.NostrHandle != null)
+        {
+            if(o.NostrHandle.StartsWith("npub"))
+            {
+                if(o.NostrHandle.Length != NostrNpubLength)
+                    Say.Warning("Nostr Public Key (--nostr) is invalid", $"Expected {NostrNpubLength} characters, got {o.NostrHandle.Length}", separate: true);
+            }
+            else
+            {
+                if(!o.NostrHandle.Contains("@"))
+                    Say.Warning("Nostr NIP-05 (--nostr) is invalid", $"Expected either '@user.com' or 'user@provider.com'", separate: true);
+                else
+                    if(o.NostrHandle.StartsWith("@"))
+                        o.NostrHandle.TrimStart('@');
+            }
+        }
+
         if(
             o.MastodonHandle == null &&
+            o.NostrHandle == null &&
             o.TelegramHandle == null &&
             o.ThreadsHandle == null &&
             o.XHandle == null
@@ -110,6 +132,7 @@ internal sealed class UsernameMapCommand : IUsernameMapCommand
         var usernameMap = await UsernameMaps.AddOrUpdateUsernameMap(
             did: bskyDid,
             mastodonHandle: o.MastodonHandle,
+            nostrHandle: o.NostrHandle,
             telegramHandle: o.TelegramHandle,
             threadsHandle: o.ThreadsHandle,
             xHandle: o.XHandle
@@ -125,11 +148,13 @@ internal sealed class UsernameMapCommand : IUsernameMapCommand
         var bskyDid = bskyProfile.Did;
 
         string mastodonHandle = await UsernameMaps.GetMastodonHandleForDid(bskyDid);
+        string nostrHandle = await UsernameMaps.GetNostrHandleForDid(bskyDid);
         string telegramHandle = await UsernameMaps.GetTelegramHandleForDid(bskyDid);
         string threadsHandle = await UsernameMaps.GetThreadsHandleForDid(bskyDid);
         string xHandle = await UsernameMaps.GetXHandleForDid(bskyDid);
 
         mastodonHandle = String.IsNullOrEmpty(mastodonHandle) ? "(None)" : $"@{mastodonHandle}";
+        nostrHandle = String.IsNullOrEmpty(nostrHandle) ? "(None)" : $"@{nostrHandle}";
         telegramHandle = String.IsNullOrEmpty(telegramHandle) ? "(None)" : $"@{telegramHandle}";
         threadsHandle = String.IsNullOrEmpty(threadsHandle) ? "(None)" : $"@{threadsHandle}";
         xHandle = String.IsNullOrEmpty(xHandle) ? "(None)" : $"@{xHandle}";
@@ -137,6 +162,7 @@ internal sealed class UsernameMapCommand : IUsernameMapCommand
         string outputHeader = $"@{bskyProfile.Handle} ({bskyDid})";
 
 string outputBody = $@"↳ Mastodon: {mastodonHandle}
+↳ Nostr:    {nostrHandle}
 ↳ Telegram: {telegramHandle}
 ↳ Threads:  {threadsHandle}
 ↳ X:        {xHandle}";
@@ -151,6 +177,7 @@ string outputBody = $@"↳ Mastodon: {mastodonHandle}
         await UsernameMaps.AddOrUpdateUsernameMap(
             did: bskyDid,
             mastodonHandle: null,
+            nostrHandle: null,
             telegramHandle: null,
             threadsHandle: null,
             xHandle: null

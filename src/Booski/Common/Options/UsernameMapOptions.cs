@@ -18,6 +18,8 @@ public class UsernameMapOptions : GlobalOptions
 
     [Option("mastodon", HelpText = "Handle of Mastodon/ActivityPub user to map Bluesky user to.\nExample: @Gargron@mastodon.social.")]
     public string? MastodonHandle { get; set; }
+    [Option("nostr", HelpText = "Handle (Public Key or NIP-05) of Nostr user to map Bluesky user to.\nExample: npub1sn0wdenkukak0d9dfczzeacvhkrgz92ak56egt7vdgzn8pv2wfqqhrjdv9, @fiatjaf.com, mina@zaps.lol.\nNote: Nostr is currently not supported; this option is intended for futureproofing.")]
+    public string? NostrHandle { get; set; }
     [Option("telegram", HelpText = "Handle of Telegram user to map Bluesky user to.\nExample: @durov.\nNote: Instead of mentioning the user themselves it is more appropriate — and potentially less spammy — to use their Personal Channel instead.")]
     public string? TelegramHandle { get; set; }
     [Option("threads", HelpText = "Handle of Threads user to map Bluesky user to.\nExample: @mosseri.\nNote: Threads is currently not supported; this option is intended for futureproofing.")]

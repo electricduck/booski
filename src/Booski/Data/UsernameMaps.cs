@@ -8,6 +8,7 @@ public class UsernameMaps
     public async static Task<UsernameMap> AddOrUpdateUsernameMap(
         string did,
         string mastodonHandle,
+        string nostrHandle,
         string telegramHandle,
         string threadsHandle,
         string xHandle
@@ -28,6 +29,7 @@ public class UsernameMaps
                 {
                     Bluesky_Did = did,
                     Mastodon_Handle = mastodonHandle,
+                    Nostr_Handle = nostrHandle,
                     Telegram_Handle = telegramHandle,
                     Threads_Handle = threadsHandle,
                     X_Handle = xHandle
@@ -39,6 +41,7 @@ public class UsernameMaps
             else
             {
                 existingUsernameMap.Mastodon_Handle = String.IsNullOrEmpty(mastodonHandle) ? "" : mastodonHandle;
+                existingUsernameMap.Nostr_Handle = String.IsNullOrEmpty(nostrHandle) ? "" : nostrHandle;
                 existingUsernameMap.Telegram_Handle = String.IsNullOrEmpty(telegramHandle) ? "" : telegramHandle;
                 existingUsernameMap.Threads_Handle = String.IsNullOrEmpty(threadsHandle) ? "" : threadsHandle;
                 existingUsernameMap.X_Handle = String.IsNullOrEmpty(xHandle) ? "" : xHandle;
@@ -85,6 +88,26 @@ public class UsernameMaps
                 mastodonHandle = foundDid.Mastodon_Handle;
 
             return mastodonHandle;
+        }
+    }
+
+    public async static Task<string> GetNostrHandleForDid(
+        string did
+    )
+    {
+        using (var db = new Database())
+        {
+            string nostrHandle = "";
+
+            var foundDid = await db
+                .UsernameMaps
+                .Where(um => um.Bluesky_Did == did)
+                .FirstOrDefaultAsync();
+
+            if(foundDid != null)
+                nostrHandle = foundDid.Nostr_Handle;
+
+            return nostrHandle;
         }
     }
 
