@@ -69,7 +69,6 @@ public class Program
 
     public static async Task Main(string[] args)
     {
-        Console.OutputEncoding = Encoding.UTF8; // NOTE: This *always* needs to be first
         Say.Debug("Cranking up ol' reliable...");
 
         if(

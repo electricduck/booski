@@ -67,6 +67,8 @@ public class Say
         bool separate = false
     )
     {
+        Console.OutputEncoding = Encoding.UTF8;
+
         if(!String.IsNullOrEmpty(emoji))
         {
             // BUG: If you're SSH'd into Windows from macOS/Linux,
