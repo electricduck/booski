@@ -2,6 +2,14 @@ namespace Booski.Utilities;
 
 public class StringUtilities
 {
+    public static bool ConvertToBool(string? boolString)
+    {
+        if(boolString == "true" || boolString == "1")
+            return true;
+        else
+            return false;
+    }
+
     public static string Truncate(string value, int maxChars)
     {
         string ellipsis = "...";

@@ -15,6 +15,7 @@ using Booski.Common.Options;
 using Booski.Contexts;
 using Booski.Helpers;
 using Booski.Lib;
+using Booski.Utilities;
 
 namespace Booski;
 
@@ -149,13 +150,13 @@ public class Program
         }
         catch (Exception e)
         {
-            var throwError = Environment.GetEnvironmentVariable("BOOSKI_DEBUG");
+            var throwError = StringUtilities.ConvertToBool(Environment.GetEnvironmentVariable("BOOSKI_DEBUG"));
 
 #if DEBUG
-            throwError = "true";
+            throwError = true;
 #endif
 
-            if (throwError == "1" || throwError == "true")
+            if (throwError)
                 throw;
             else
             {
@@ -201,9 +202,8 @@ public class Program
     // BUG: Using a tagged version triggers this
     private static async Task CheckUpdates(IGitHubContext _githubContext)
     {
-        var ignoreUpdates = Environment.GetEnvironmentVariable("BOOSKI_IGNORE_UPDATES");
-
-        if (ignoreUpdates == "1" || ignoreUpdates == "true")
+        var ignoreUpdates = StringUtilities.ConvertToBool(Environment.GetEnvironmentVariable("BOOSKI_IGNORE_UPDATES"));
+        if (ignoreUpdates)
             return;
 
         await _githubContext.CreateClient();
@@ -246,7 +246,7 @@ public class Program
     // TODO: Download yt-dlp?
     private static void CheckYtDlp(IYtDlpContext _ytDlpContext)
     {
-        var ignoreYtDlp = Environment.GetEnvironmentVariable("BOOSKI_IGNORE_YTDLP");
+        var ignoreYtDlp = StringUtilities.ConvertToBool(Environment.GetEnvironmentVariable("BOOSKI_IGNORE_YTDLP"));
         var customYtDlpPath = Environment.GetEnvironmentVariable("BOOSKI_YTDLP_PATH");
         if(!String.IsNullOrEmpty(customYtDlpPath))
             YtDlpPath = customYtDlpPath;
@@ -255,7 +255,7 @@ public class Program
 
         if(!YtDlpEnabled)
         {
-            if (ignoreYtDlp == "1" || ignoreYtDlp == "true")
+            if (ignoreYtDlp)
                 Say.Warning("yt-dlp not found");
             else
                 Say.Error(

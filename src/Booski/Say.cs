@@ -19,10 +19,7 @@ public class Say
 #if DEBUG
         say = true;
 #else
-        var isDebug = Environment.GetEnvironmentVariable("BOOSKI_DEBUG");
-
-        if (isDebug == "1" || isDebug == "true")
-            say = true;
+        say = StringUtilities.ConvertToBool(Environment.GetEnvironmentVariable("BOOSKI_DEBUG"));
 #endif
 
         if(say)
