@@ -173,6 +173,8 @@ public class PostLogs
         string repository,
         string mastodonInstanceDomain = "",
         string mastodonStatusId = "",
+        string nostrAuthor = "",
+        string nostrId = "",
         long telegramChatId = 0,
         int? telegramMessageCount = null,
         int telegramMessageId = 0,
@@ -195,6 +197,10 @@ public class PostLogs
                     postLog.Mastodon_InstanceDomain = mastodonInstanceDomain;
                 if(!String.IsNullOrEmpty(mastodonStatusId))
                     postLog.Mastodon_StatusId = mastodonStatusId;
+                if(!String.IsNullOrEmpty(nostrAuthor))
+                    postLog.Nostr_Author = nostrAuthor;
+                if(!String.IsNullOrEmpty(nostrId))
+                    postLog.Nostr_Id = nostrId;
                 if(telegramChatId != 0)
                     postLog.Telegram_ChatId = telegramChatId;
                 if(telegramMessageCount != null)

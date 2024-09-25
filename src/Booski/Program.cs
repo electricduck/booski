@@ -58,6 +58,13 @@ public class Program
 } 
 """;
 
+/*
+    "Nostr": {
+        "PrivateKey": "",
+        "Relay": "",
+    },
+*/
+
     public static async Task Main(string[] args)
     {
         Console.OutputEncoding = Encoding.UTF8; // NOTE: This *always* needs to be first
@@ -92,6 +99,8 @@ public class Program
             builder.Services.AddSingleton<IHttpContext, HttpContext>();
             builder.Services.AddSingleton<IMastodonContext, MastodonContext>();
             builder.Services.AddSingleton<IMastodonHelpers, MastodonHelpers>();
+            builder.Services.AddSingleton<INostrContext, NostrContext>();
+            builder.Services.AddSingleton<INostrHelpers, NostrHelpers>();
             builder.Services.AddSingleton<IPostHelpers, PostHelpers>();
             builder.Services.AddSingleton<IStartCommand, StartCommand>();
             builder.Services.AddSingleton<IStatusCommand, StatusCommand>();

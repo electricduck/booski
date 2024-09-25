@@ -17,6 +17,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.0-rc.1.24451.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.0-rc.1.24431.7" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0-rc.1.24431.7" />
+    <PackageReference Include="Nostr.Client" Version="2.0.0" />
     <PackageReference Include="Octokit" Version="13.0.1" />
   </ItemGroup>
 

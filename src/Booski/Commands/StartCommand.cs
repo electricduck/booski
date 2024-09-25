@@ -3,6 +3,11 @@ using Booski.Common.Config;
 using Booski.Common.Options;
 using Booski.Contexts;
 using Booski.Helpers;
+using Nostr.Client.Client;
+using Nostr.Client.Communicator;
+using Nostr.Client.Keys;
+using Nostr.Client.Messages;
+using Nostr.Client.Requests;
 
 namespace Booski.Commands;
 
@@ -23,6 +28,7 @@ internal sealed class StartCommand : IStartCommand
     private IFileCacheContext _fileCacheContext;
     private IHttpContext _httpContext;
     private IMastodonContext _mastodonContext;
+    private INostrContext _nostrContext;
     private IPostHelpers _postHelpers;
     private ITelegramContext _telegramContext;
     private IXContext _xContext;
@@ -32,6 +38,7 @@ internal sealed class StartCommand : IStartCommand
         IFileCacheContext fileCacheContext,
         IHttpContext httpContext,
         IMastodonContext mastodonContext,
+        INostrContext nostrContext,
         IPostHelpers postHelpers,
         ITelegramContext telegramContext,
         IXContext xContext
@@ -41,6 +48,7 @@ internal sealed class StartCommand : IStartCommand
         _fileCacheContext = fileCacheContext;
         _httpContext = httpContext;
         _mastodonContext = mastodonContext;
+        _nostrContext = nostrContext;
         _postHelpers = postHelpers;
         _telegramContext = telegramContext;
         _xContext = xContext;
@@ -138,6 +146,13 @@ internal sealed class StartCommand : IStartCommand
         }
     }
 
+    // TODO: Maintain connections?
+    //       Note sure if we even need to bother. If a post fails due to a
+    //       busted client, it'll just try again later.
+    //       This has been tested in practice with Mastodon, Telegram and X;
+    //       Nostr needs investigating (this uses WS not HTTP).
+    //
+    // TODO: Say why clients were unable to be connected to
     private async Task CreateAdditionalClients(ClientsConfig clientsConfig, StartOptions o)
     {
         _httpContext.CreateClient($"Booski/{Program.GetVersion()}");
@@ -152,6 +167,7 @@ internal sealed class StartCommand : IStartCommand
             !String.IsNullOrEmpty(clientsConfig.Mastodon.Token)
         )
         {
+            Say.Debug("Connecting to Mastodon (Mastonet)...");
             await _mastodonContext.CreateClient(
                 clientsConfig.Mastodon.Instance,
                 clientsConfig.Mastodon.Token
@@ -164,12 +180,32 @@ internal sealed class StartCommand : IStartCommand
         }
 
         if (
+            !o.NoConnectNostr &&
+            clientsConfig.Nostr != null &&
+            !String.IsNullOrEmpty(clientsConfig.Nostr.PrivateKey) &&
+            !String.IsNullOrEmpty(clientsConfig.Nostr.Relay)
+        )
+        {
+            Say.Debug("Connecting to Nostr (Nostr.Client)...");
+            await _nostrContext.CreateClient(
+                clientsConfig.Nostr.PrivateKey,
+                new string[] { clientsConfig.Nostr.Relay }
+            );
+
+            if (_nostrContext.IsConnected && _nostrContext.State != null)
+                Say.Success($"Connected to Nostr: {_nostrContext.State.PublicKey} ({clientsConfig.Nostr.Relay})");
+            else
+                Say.Warning($"Unable to connect to Nostr");
+        }
+
+        if (
             !o.NoConnectTelegram &&
             clientsConfig.Telegram != null &&
             !String.IsNullOrEmpty(clientsConfig.Telegram.Channel) &&
             !String.IsNullOrEmpty(clientsConfig.Telegram.Token)
         )
         {
+            Say.Debug("Connecting to Telegram (Telegram.Bot)...");
             await _telegramContext.CreateClient(
                 clientsConfig.Telegram.Token,
                 clientsConfig.Telegram.Channel
@@ -190,6 +226,7 @@ internal sealed class StartCommand : IStartCommand
             !String.IsNullOrEmpty(clientsConfig.X.ApiSecret)
         )
         {
+            Say.Debug("Connecting to X (LinqToTwitter)...");
             await _xContext.CreateClient(
                 clientsConfig.X.ApiKey,
                 clientsConfig.X.ApiSecret,
@@ -206,6 +243,7 @@ internal sealed class StartCommand : IStartCommand
 
     private async Task CreateBskyClient(ClientsConfig clientsConfig)
     {
+        Say.Debug("Connecting to Bluesky...");
         await _bskyContext.CreateSession(clientsConfig);
 
         if (_bskyContext.IsConnected && _bskyContext.State != null)
