@@ -25,6 +25,7 @@ internal sealed class XHelpers : IXHelpers
 {
     private IBskyHelpers _bskyHelpers;
     private IFileCacheContext _fileCacheContext;
+    private II18nHelpers _i18nHelpers;
     private IXContext _xContext;
 
     static readonly int XPostTextLimit = 280;
@@ -32,11 +33,13 @@ internal sealed class XHelpers : IXHelpers
     public XHelpers(
         IBskyHelpers bskyHelpers,
         IFileCacheContext fileCacheContext,
+        II18nHelpers i18nHelpers,
         IXContext xContext
     )
     {
         _bskyHelpers = bskyHelpers;
         _fileCacheContext = fileCacheContext;
+        _i18nHelpers = i18nHelpers;
         _xContext = xContext;
     }
 
@@ -154,7 +157,7 @@ internal sealed class XHelpers : IXHelpers
             }
 
             if (replyId != null)
-                // NOTE: There's no "ReplyMediaAsync" function so it will quote for replies
+                // NOTE: There's no "ReplyMediaAsync" function so we'll quote for replies
                 sentMessage = await _xContext.Client.TweetMediaAsync(
                     mediaIds: mediaIds,
                     quoteTweetID: replyId,
@@ -216,34 +219,23 @@ internal sealed class XHelpers : IXHelpers
 
         bool forceReadMoreText = false;
         string readMoreLink = _bskyHelpers.GetPostLink(post);
-        string readMoreSuffix = "";
+        string readMoreText = "";
 
         if (!String.IsNullOrEmpty(captionText))
-            readMoreSuffix = $"{Environment.NewLine}—{Environment.NewLine}";
+            readMoreText = $"{Environment.NewLine}—{Environment.NewLine}";
 
         if (hasEmbedsButFailed)
         {
             forceReadMoreText = true;
-
-            switch (embedType)
-            {
-                case EmbedType.Images:
-                    readMoreSuffix += $"📷 See Photos:";
-                    break;
-                case EmbedType.Video:
-                    readMoreSuffix += $"▶️ Watch Video:";
-                    break;
-                default:
-                    readMoreSuffix += $"🔗 See Attachment:";
-                    break;
-            }
+            readMoreText += embedType switch {
+                EmbedType.Images => _i18nHelpers.GetPhrase(Phrase.SeeMore_Photos, post.Language, readMoreLink),
+                EmbedType.Video => _i18nHelpers.GetPhrase(Phrase.SeeMore_Video, post.Language, readMoreLink),
+                _ => _i18nHelpers.GetPhrase(Phrase.SeeMore_Attachment, post.Language, readMoreLink)
+            };
         }
         else
-        {
-            readMoreSuffix += $"➡️";
-        }
+            readMoreText += _i18nHelpers.GetPhrase(Phrase.SeeMore_Read, post.Language, readMoreLink);
 
-        string readMoreText = $"{readMoreSuffix} {readMoreLink}";
         int captionTextLength = Encoding.UTF8.GetBytes(captionText).Length;
         int readMoreTextLength = Encoding.UTF8.GetBytes(readMoreText).Length;
 
@@ -251,9 +243,7 @@ internal sealed class XHelpers : IXHelpers
             forceReadMoreText ||
             captionTextLength > XPostTextLimit
         )
-        {
             captionText = StringUtilities.Truncate(captionText, XPostTextLimit - readMoreTextLength) + readMoreText;
-        }
 
         return captionText;
     }

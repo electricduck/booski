@@ -23,18 +23,21 @@ internal sealed class MastodonHelpers : IMastodonHelpers
 {
     private IBridgyFedHelpers _bridgyFedHelpers;
     private IBskyHelpers _bskyHelpers;
+    private II18nHelpers _i18nHelpers;
     private IFileCacheContext _fileCacheContext;
     private IMastodonContext _mastodonContext;
 
     public MastodonHelpers(
         IBridgyFedHelpers bridgyFedHelpers,
         IBskyHelpers bskyHelpers,
+        II18nHelpers i18nHelpers,
         IFileCacheContext fileCacheContext,
         IMastodonContext mastodonContext
     )
     {
         _bridgyFedHelpers = bridgyFedHelpers;
         _bskyHelpers = bskyHelpers;
+        _i18nHelpers = i18nHelpers;
         _fileCacheContext = fileCacheContext;
         _mastodonContext = mastodonContext;
     }
@@ -110,14 +113,18 @@ internal sealed class MastodonHelpers : IMastodonHelpers
             sensitive = true;
             spoiler = post.Sensitivity switch
             {
-                Sensitivity.Suggestive => "🔞 Suggestive",
-                Sensitivity.Nudity => "🔞 Nudity",
-                Sensitivity.Porn => "🔞 Porn",
+                Sensitivity.Suggestive => _i18nHelpers.GetPhrase(Phrase.Sensitivity_Suggestive, post.Language),
+                Sensitivity.Nudity => _i18nHelpers.GetPhrase(Phrase.Sensitivity_Nudity, post.Language),
+                Sensitivity.Porn =>_i18nHelpers.GetPhrase(Phrase.Sensitivity_Porn, post.Language),
                 _ => String.Empty
             };
+
+            if(!String.IsNullOrEmpty(spoiler))
+                spoiler = $"🔞 {spoiler}";
         }
 
         sentMessage = await _mastodonContext.Client.PublishStatus(
+            language: _i18nHelpers.GetLangForLanguage(post.Language),
             mediaIds: mediaIds,
             replyStatusId: replyId,
             sensitive: sensitive,
@@ -154,6 +161,9 @@ internal sealed class MastodonHelpers : IMastodonHelpers
         if(_mastodonContext.State.NoRichText)
             statusText = RichTextUtilities.UnTruncateMarkdownLinks(statusText);
 
+        hasEmbedsButFailed = true;
+        _mastodonContext.State.NoRichText = true;
+
         if(hasEmbedsButFailed)
         {
             string attachmentLink = _bskyHelpers.GetPostLink(post);
@@ -163,15 +173,15 @@ internal sealed class MastodonHelpers : IMastodonHelpers
 
             if(_mastodonContext.State.NoRichText)
                 statusText += embedType switch {
-                    EmbedType.Images => $"📷 See Photos: {attachmentLink}",
-                    EmbedType.Video => $"▶️ Watch Video: {attachmentLink}",
-                    _ => $"🔗 See Attachment: {attachmentLink}"
+                    EmbedType.Images => _i18nHelpers.GetPhrase(Phrase.SeeMore_Photos, post.Language, attachmentLink),
+                    EmbedType.Video => _i18nHelpers.GetPhrase(Phrase.SeeMore_Video, post.Language, attachmentLink),
+                    _ => _i18nHelpers.GetPhrase(Phrase.SeeMore_Attachment, post.Language, attachmentLink),
                 };
             else
                 statusText += embedType switch {
-                    EmbedType.Images => $"[📷 See Photos on Bluesky]({attachmentLink})",
-                    EmbedType.Video => $"[▶️ Watch Video on Bluesky]({attachmentLink})",
-                    _ => $"[🔗 See Attachment on Bluesky]({attachmentLink})"
+                    EmbedType.Images => $"[{_i18nHelpers.GetPhrase(Phrase.SeeMoreRich_Photos, post.Language)}]({attachmentLink})",
+                    EmbedType.Video => $"[{_i18nHelpers.GetPhrase(Phrase.SeeMoreRich_Video, post.Language)}]({attachmentLink})",
+                    _ => $"[{_i18nHelpers.GetPhrase(Phrase.SeeMoreRich_Attachment, post.Language)}]({attachmentLink})"
                 };
         }
 

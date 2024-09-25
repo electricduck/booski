@@ -80,6 +80,7 @@ public class Program
             HostApplicationBuilder builder = Host.CreateApplicationBuilder();
 
             builder.Services.AddBooskiLib();
+            builder.Services.AddSingleton<II18nHelpers, I18nHelpers>();
             builder.Services.AddSingleton<IBridgyFedHelpers, BridgyFedHelpers>();
             builder.Services.AddSingleton<IBskyContext, BskyContext>();
             builder.Services.AddSingleton<IBskyHelpers, BskyHelpers>();

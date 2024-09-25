@@ -23,6 +23,7 @@ internal sealed class PostHelpers : IPostHelpers
 
     private IBskyContext _bskyContext;
     private IBskyHelpers _bskyHelpers;
+    private II18nHelpers _i18nHelpers;
     private IMastodonContext _mastodonContext;
     private IMastodonHelpers _mastodonHelpers;
     private ITelegramContext _telegramContext;
@@ -33,6 +34,7 @@ internal sealed class PostHelpers : IPostHelpers
     public PostHelpers(
         IBskyContext bskyContext,
         IBskyHelpers bskyHelpers,
+        II18nHelpers i18nHelpers,
         IMastodonContext mastodonContext,
         IMastodonHelpers mastodonHelpers,
         ITelegramContext telegramContext,
@@ -43,6 +45,7 @@ internal sealed class PostHelpers : IPostHelpers
     {
         _bskyContext = bskyContext;
         _bskyHelpers = bskyHelpers;
+        _i18nHelpers = i18nHelpers;
         _mastodonContext = mastodonContext;
         _mastodonHelpers = mastodonHelpers;
         _telegramContext = telegramContext;
@@ -153,6 +156,11 @@ internal sealed class PostHelpers : IPostHelpers
 
             Embed? embed = await GetEmbedForPost(post);
             PostLog? replyParentPostLog = await GetReplyParentForPost(post);
+
+            if (post.Record.Langs != null && post.Record.Langs.Length > 0)
+                post.Language = _i18nHelpers.GetLanguageForLang(post.Record.Langs[0]);
+            else
+                post.Language = Language.En;
 
             if (post.Record.Labels != null)
                 post.Sensitivity = _bskyHelpers.ParseLabels(post.Record.Labels);

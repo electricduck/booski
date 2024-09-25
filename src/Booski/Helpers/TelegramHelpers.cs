@@ -26,16 +26,19 @@ internal sealed class TelegramHelpers : ITelegramHelpers
 {
     private IBskyHelpers _bskyHelpers;
     private IFileCacheContext _fileCacheContext;
+    private II18nHelpers _i18nHelpers;
     private ITelegramContext _telegramContext;
 
     public TelegramHelpers(
         IBskyHelpers bskyHelpers,
         IFileCacheContext fileCacheContext,
+        II18nHelpers i18nHelpers,
         ITelegramContext telegramContext
     )
     {
         _bskyHelpers = bskyHelpers;
         _fileCacheContext = fileCacheContext;
+        _i18nHelpers = i18nHelpers;
         _telegramContext = telegramContext;
     }
 
@@ -215,18 +218,11 @@ internal sealed class TelegramHelpers : ITelegramHelpers
             
             captionText = $"{Environment.NewLine}—{Environment.NewLine}{captionText}";
 
-            switch(embedType)
-            {
-                case EmbedType.Images:
-                    captionText = $"<a href=\"{attachmentLink}\">📷 See Photos on Bluesky</a>{captionText}";
-                    break;
-                case EmbedType.Video:
-                    captionText = $"<a href=\"{attachmentLink}\">▶️ Watch Video on Bluesky</a>{captionText}";
-                    break;
-                default:
-                    captionText = $"<a href=\"{attachmentLink}\">🔗 See Attachment on Bluesky</a>{captionText}";
-                    break;
-            }
+            captionText = embedType switch {
+                EmbedType.Images => $"<a href=\"{attachmentLink}\">{_i18nHelpers.GetPhrase(Phrase.SeeMoreRich_Photos, post.Language)}</a>{captionText}",
+                EmbedType.Video => $"<a href=\"{attachmentLink}\">{_i18nHelpers.GetPhrase(Phrase.SeeMoreRich_Video, post.Language)}</a>{captionText}",
+                _ => $"<a href=\"{attachmentLink}\">{_i18nHelpers.GetPhrase(Phrase.SeeMoreRich_Attachment, post.Language)}</a>{captionText}",
+            };
         }
 
         if (!String.IsNullOrEmpty(originalCaptionText))
