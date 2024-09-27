@@ -29,7 +29,7 @@ public class Say
 
     public static void Error(string message, string reason = "")
     {
-        ConsoleMessage($"Error: {message}", "🛑", reason);
+        ConsoleMessage(message, "🛑", reason);
     }
 
     public static void Error(Exception e)
