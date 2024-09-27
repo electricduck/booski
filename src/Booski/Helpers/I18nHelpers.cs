@@ -17,6 +17,7 @@ public interface II18nHelpers
 internal sealed class I18nHelpers : II18nHelpers
 {
     private Language DefaultLanguage = Language.En;
+    private readonly Language FallbackLanguage = Language.En;
     private readonly string FallbackText = "(?)";
 
     public string GetLangForLanguage(Language language)
@@ -94,8 +95,10 @@ internal sealed class I18nHelpers : II18nHelpers
 
             if(!String.IsNullOrEmpty(output))
                 return output;
-            else
+            else if(String.IsNullOrEmpty(output) && language == FallbackLanguage)
                 return FallbackText;
+            else
+                return GetPhrase(phrase, FallbackLanguage, replacements);
         }
     }
 
