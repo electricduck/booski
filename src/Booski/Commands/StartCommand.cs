@@ -2,12 +2,8 @@ using System.Diagnostics;
 using Booski.Common.Config;
 using Booski.Common.Options;
 using Booski.Contexts;
+using Booski.Enums;
 using Booski.Helpers;
-using Nostr.Client.Client;
-using Nostr.Client.Communicator;
-using Nostr.Client.Keys;
-using Nostr.Client.Messages;
-using Nostr.Client.Requests;
 
 namespace Booski.Commands;
 
@@ -27,6 +23,7 @@ internal sealed class StartCommand : IStartCommand
     private IBskyContext _bskyContext;
     private IFileCacheContext _fileCacheContext;
     private IHttpContext _httpContext;
+    private II18nHelpers _i18n;
     private IMastodonContext _mastodonContext;
     private INostrContext _nostrContext;
     private IPostHelpers _postHelpers;
@@ -37,6 +34,7 @@ internal sealed class StartCommand : IStartCommand
         IBskyContext bskyContext,
         IFileCacheContext fileCacheContext,
         IHttpContext httpContext,
+        II18nHelpers i18nHelpers,
         IMastodonContext mastodonContext,
         INostrContext nostrContext,
         IPostHelpers postHelpers,
@@ -47,6 +45,7 @@ internal sealed class StartCommand : IStartCommand
         _bskyContext = bskyContext;
         _fileCacheContext = fileCacheContext;
         _httpContext = httpContext;
+        _i18n = i18nHelpers;
         _mastodonContext = mastodonContext;
         _nostrContext = nostrContext;
         _postHelpers = postHelpers;
@@ -71,13 +70,17 @@ internal sealed class StartCommand : IStartCommand
 
             if (String.IsNullOrEmpty(currentProcessPath))
             {
-                Say.Error("Unable to run as daemon");
+                Say.Error(
+                    _i18n.GetPhrase(Phrase.Console_StartCommand_DaemonError)
+                );
                 Program.Exit();
             }
 
             if (Pid.GetPid() != null)
             {
-                Say.Error("Already running daemon");
+                Say.Error(
+                    _i18n.GetPhrase(Phrase.Console_StartCommand_DaemonAlreadyRunning)
+                );
             }
             else
             {
@@ -85,7 +88,12 @@ internal sealed class StartCommand : IStartCommand
                 var newProcessPid = newProcess.Id;
                 Pid.CreatePid(newProcessPid);
 
-                Say.Success($"Started daemon ({newProcessPid})");
+                Say.Success(
+                    _i18n.GetPhrase(
+                        Phrase.Console_StartCommand_DaemonStarted,
+                        newProcessPid.ToString()
+                    )
+                );
             }
 
             Program.Exit(kill: true);
@@ -110,8 +118,13 @@ internal sealed class StartCommand : IStartCommand
         _postHelpers.HornyOnlyOnX = o.HornyOnlyOnX;
 
         var sleepTimeSeconds = o.SleepTime / 1000;
-        var sleepTimeSecondsUnit = sleepTimeSeconds == 1 ? "second" : "seconds";
-        Say.Info($"Fetching posts every {sleepTimeSeconds} {sleepTimeSecondsUnit}", "Change this with --sleep-time/-s (in seconds)");
+        Say.Info(
+            _i18n.GetPhrase(
+                Phrase.Console_StartCommand_FetchingPosts,
+                sleepTimeSeconds.ToString(),
+                sleepTimeSeconds == 1 ? _i18n.GetPhrase(Phrase.SecondUnit_Single) : _i18n.GetPhrase(Phrase.SecondUnit_Multiple)
+            )
+        );
 
         while (true)
         {
@@ -122,7 +135,10 @@ internal sealed class StartCommand : IStartCommand
             catch (Exception e)
             {
                 // TODO: Handle different exceptions appropriately
-                Say.Warning("Unable to cache posts", e.Message);
+                Say.Warning(
+                    _i18n.GetPhrase(Phrase.Console_StartCommand_FetchingPostsError),
+                    e.Message
+                );
             }
             finally
             {
@@ -188,9 +204,12 @@ internal sealed class StartCommand : IStartCommand
             }
 
             if (_mastodonContext.IsConnected && _mastodonContext.State != null)
-                Say.Success($"Connected to {_mastodonContext.State.InstanceSoftware}: {_mastodonContext.State.Username} ({_mastodonContext.State.UserId})");
+                SayClientConnected(_mastodonContext.State.InstanceSoftware, $"{_mastodonContext.State.Username} ({_mastodonContext.State.UserId})");
             else
-                Say.Warning($"Unable to connect to Mastodon");
+                if(_mastodonContext.State != null && _mastodonContext.State.InstanceSoftware != null)
+                    SayClientConnectedError(_mastodonContext.State.InstanceSoftware);
+                else
+                    SayClientConnectedError("Mastodon");
         }
 
         if (
@@ -207,9 +226,9 @@ internal sealed class StartCommand : IStartCommand
             );
 
             if (_nostrContext.IsConnected && _nostrContext.State != null)
-                Say.Success($"Connected to Nostr: {_nostrContext.State.PublicKey} ({clientsConfig.Nostr.Relay})");
+                SayClientConnected("Nostr", $"{_nostrContext.State.PublicKey} ({clientsConfig.Nostr.Relay})");
             else
-                Say.Warning($"Unable to connect to Nostr");
+                SayClientConnectedError("Nostr");
         }
 
         if (
@@ -226,9 +245,9 @@ internal sealed class StartCommand : IStartCommand
             );
 
             if (_telegramContext.IsConnected && _telegramContext.State != null)
-                Say.Success($"Connected to Telegram: {_telegramContext.State.Username} ({_telegramContext.State.UserId})");
+                SayClientConnected("Telegram", $"{_telegramContext.State.Username} ({_telegramContext.State.UserId})");
             else
-                Say.Warning("Unable to connect to Telegram");
+                SayClientConnectedError("Telegram");
         }
 
         if (
@@ -249,9 +268,9 @@ internal sealed class StartCommand : IStartCommand
             );
 
             if (_xContext.IsConnected && _xContext.State != null)
-                Say.Success($"Connected to X: {_xContext.State.Username}");
+                SayClientConnected("X", _xContext.State.Username);
             else
-                Say.Warning("Unable to connect to X");
+                SayClientConnectedError("X");
         }
     }
 
@@ -262,12 +281,32 @@ internal sealed class StartCommand : IStartCommand
 
         if (_bskyContext.IsConnected && _bskyContext.State != null)
         {
-            Say.Success($"Connected to Bluesky: {_bskyContext.State.Handle} ({_bskyContext.State.Did})");
+            SayClientConnected("Bluesky", $"{_bskyContext.State.Handle} ({_bskyContext.State.Did})");
         }
         else
         {
             _bskyContext.ClearSession();
-            Say.Warning("Unable to connect to Bluesky");
+            SayClientConnectedError("Bluesky");
         }
+    }
+
+    private void SayClientConnected(string name, string meta)
+    {
+        Say.Success(
+            _i18n.GetPhrase(
+                Phrase.Console_StartCommand_ClientConnected,
+                name, meta
+            )
+        );
+    }
+
+    private void SayClientConnectedError(string name)
+    {
+        Say.Warning(
+            _i18n.GetPhrase(
+                Phrase.Console_StartCommand_ClientConnectedError,
+                name
+            )
+        );
     }
 }

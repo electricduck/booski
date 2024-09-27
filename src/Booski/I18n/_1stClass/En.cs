@@ -5,6 +5,15 @@ namespace Booski.I18n;
 public class En : II18n {
     public static Dictionary<Phrase, string> Strings = new Dictionary<Phrase, string>() {
         { Phrase.Console_HelloWorld, "Hello, [0]!"},
+        { Phrase.Console_StartCommand_ClientConnected, "Connecting to [0]: [1]"},
+        { Phrase.Console_StartCommand_ClientConnectedError, "Unable to connect to [0]" },
+        { Phrase.Console_StartCommand_DaemonAlreadyRunning, "Already running daemon"},
+        { Phrase.Console_StartCommand_DaemonError, "Unable to run as daemon"},
+        { Phrase.Console_StartCommand_DaemonStarted, "Started daemon ([0])" },
+        { Phrase.Console_StartCommand_FetchingPosts, "Fetching posts every [0] [1]. Change this with --sleep-time/-s (in seconds)" },
+        { Phrase.Console_StartCommand_FetchingPostsError, "Unable to cache posts" },
+        { Phrase.SecondUnit_Single, "second" },
+        { Phrase.SecondUnit_Multiple, "seconds" },
         { Phrase.SeeMore_Attachment, "🔗 See Attachment: [0]" },
         { Phrase.SeeMore_Photos, "📷 See Photos: [0]" },
         { Phrase.SeeMore_Read, "➡️ Read More: [0]" },

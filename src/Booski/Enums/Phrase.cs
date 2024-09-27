@@ -16,5 +16,15 @@ public enum Phrase
     Sensitivity_Porn,
     Sensitivity_Suggestive,
 
-    Console_HelloWorld
+    Console_HelloWorld,
+    Console_StartCommand_ClientConnected,
+    Console_StartCommand_ClientConnectedError,
+    Console_StartCommand_DaemonAlreadyRunning,
+    Console_StartCommand_DaemonError,
+    Console_StartCommand_DaemonStarted,
+    Console_StartCommand_FetchingPosts,
+    Console_StartCommand_FetchingPostsError,
+
+    SecondUnit_Single,
+    SecondUnit_Multiple
 }
