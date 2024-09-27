@@ -128,18 +128,6 @@ public class Program
             var _usernameMap = host.Services.GetRequiredService<IUsernameMapCommand>();
             var _i18n = host.Services.GetRequiredService<II18nHelpers>();
 
-            if(!EnvUtilities.GetEnvBool("IGNORE_UPDATES"))
-            {
-                Say.Debug("Checking for updates...");
-                await CheckUpdates(host.Services.GetRequiredService<IGitHubContext>());
-            }
-
-            Say.Debug("Configuring...");
-            Configure();
-
-            Say.Debug("Migrating database...");
-            Database.Migrate();
-
             if(!EnvUtilities.GetEnvBool("IGNORE_LOCALE"))
             {
                 var language = GetEnvLanguage();
@@ -157,6 +145,21 @@ public class Program
                     );
                 }
             }
+
+            if(!EnvUtilities.GetEnvBool("IGNORE_UPDATES"))
+            {
+                Say.Debug("Checking for updates...");
+                await CheckUpdates(
+                    host.Services.GetRequiredService<IGitHubContext>(),
+                    _i18n
+                );
+            }
+
+            Say.Debug("Configuring...");
+            Configure(_i18n);
+
+            Say.Debug("Migrating database...");
+            Database.Migrate();
 
             Say.Debug("Parsing arguments...");
             await Parser.Default
@@ -223,7 +226,7 @@ public class Program
     }
 
     // BUG: Using a tagged version triggers this
-    private static async Task CheckUpdates(IGitHubContext _githubContext)
+    private static async Task CheckUpdates(IGitHubContext _githubContext, II18nHelpers _i18n)
     {
         await _githubContext.CreateClient();
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
@@ -252,9 +255,15 @@ public class Program
 
                 if (latestVersion != runningVersion)
                 {
-                    Say.Separate();
-                    Say.Warning("An update is available", $"Version {latestVersion} is available. Download from {latestVersionLink}");
-                    Say.Separate();
+                    Say.Warning(
+                        _i18n.GetPhrase(Phrase.Console_Program_UpdateAvailable),
+                        _i18n.GetPhrase(
+                            Phrase.Console_Program_UpdateAvailableDownload,
+                            latestVersion,
+                            latestVersionLink
+                        ),
+                        true
+                    );
                 }
             }
         }
@@ -262,7 +271,7 @@ public class Program
         _githubContext.ResetClient();
     }
 
-    static void Configure()
+    static void Configure(II18nHelpers _i18n)
     {
         ConfigDir = !String.IsNullOrEmpty(EnvUtilities.GetEnvString("CONFIG_DIR")) ?
             EnvUtilities.GetEnvString("CONFIG_DIR") :
@@ -362,7 +371,13 @@ public class Program
         if (firstRun)
         {
             File.WriteAllText(ConfigPath, DefaultConfigFileContent);
-            Say.Custom("Hey there, seems like you haven't ran Booski before!", $"Edit the config at '{ConfigPath}'", "👋", true);
+            Say.Custom(
+                _i18n.GetPhrase(Phrase.Console_Program_FirstRun),
+                _i18n.GetPhrase(
+                    Phrase.Console_Program_FirstRunEditConfig,
+                    ConfigPath
+                ),
+                "👋", true);
 
             Exit();
         }
