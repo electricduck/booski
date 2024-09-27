@@ -135,8 +135,6 @@ internal sealed class TelegramHelpers : ITelegramHelpers
             )
             {
                 var firstEmbedItem = embed.Items.First();
-                if(firstEmbedItem.Ref == null || firstEmbedItem.Uri == null)
-                    break;
                     
                 var fileStream = await _fileCacheContext.GetFileFromUri(firstEmbedItem.Uri);
 
