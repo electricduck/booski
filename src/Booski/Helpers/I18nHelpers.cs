@@ -32,6 +32,8 @@ internal sealed class I18nHelpers : II18nHelpers
             "fi" => Language.Fi,
             "fr" => Language.Fr,
             "ja" => Language.Ja,
+            "jp" => Language.Ja,
+            "nl" => Language.Nl,
             "pt" => Language.Pt,
             _ => Language.En
         };
@@ -104,6 +106,7 @@ internal sealed class I18nHelpers : II18nHelpers
             Language.Fi => Fi.Strings,
             Language.Fr => Fr.Strings,
             Language.Ja => Ja.Strings,
+            Language.Nl => Nl.Strings,
             Language.Pt => Pt.Strings,
             _ => GetPhrases(DefaultLanguage)
         };
