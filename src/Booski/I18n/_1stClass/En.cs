@@ -28,6 +28,8 @@ public class En : II18n {
         { Phrase.Console_StartCommand_DaemonStarted, "Started daemon ([0])" },
         { Phrase.Console_StartCommand_FetchingPosts, "Fetching posts every [0] [1]. Change this with --sleep-time/-s (in seconds)" },
         { Phrase.Console_StartCommand_FetchingPostsError, "Unable to cache posts" },
+        { Phrase.Unit_Hour_Multiple, "hours" },
+        { Phrase.Unit_Hour_Single, "hour" },
         { Phrase.Unit_Second_Single, "second" },
         { Phrase.Unit_Second_Multiple, "seconds" },
         { Phrase.SeeMore_Attachment, "🔗 See Attachment: [0]" },
