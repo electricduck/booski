@@ -145,6 +145,17 @@ public class Program
                 var language = GetEnvLanguage();
                 Say.Debug("Translating...", $"Setting '{language.Item1}' from '{language.Item2}'");
                 _i18nHelpers.SetDefaultLanguage(language.Item1);
+
+                if(EnvUtilities.GetEnvBool("TEST_LOCALE"))
+                {
+                    Say.Custom(
+                        message: _i18nHelpers.GetPhrase(
+                            Phrase.Console_HelloWorld,
+                            language.Item2
+                            ),
+                        emoji: "👋"
+                    );
+                }
             }
 
             Say.Debug("Parsing arguments...");

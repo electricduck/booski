@@ -13,7 +13,7 @@ public class Say
         ConsoleMessage(message, emoji, reason, separate);
     }
 
-    public static void Debug(string message, string reason = "")
+    public static void Debug(string message, string reason = "", string emoji = "⚙️")
     {
         bool say = false;
 
@@ -24,7 +24,7 @@ public class Say
 #endif
 
         if(say)
-            ConsoleMessage(message, "⚙️", reason);
+            ConsoleMessage(message, emoji, reason);
     }
 
     public static void Error(string message, string reason = "")

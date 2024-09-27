@@ -10,7 +10,7 @@ public class EnvUtilities
         string? output = Environment.GetEnvironmentVariable(variable);
         
         if(variable != "BOOSKI_DEBUG")
-            Say.Debug($"{variable}: {(String.IsNullOrEmpty(output) ? "(Empty)" : output)}");
+            Say.Debug($"{variable}: {(String.IsNullOrEmpty(output) ? "(Empty)" : output)}", emoji: "✏️");
         
         return output;
     }

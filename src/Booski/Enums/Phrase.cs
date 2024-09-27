@@ -4,6 +4,7 @@ namespace Booski.Enums;
 public enum Phrase
 {
     Empty = 0,
+
     SeeMore_Attachment,
     SeeMore_Photos,
     SeeMore_Read,
@@ -13,5 +14,7 @@ public enum Phrase
     SeeMoreRich_Video,
     Sensitivity_Nudity,
     Sensitivity_Porn,
-    Sensitivity_Suggestive
+    Sensitivity_Suggestive,
+
+    Console_HelloWorld
 }
