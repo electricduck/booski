@@ -10,5 +10,6 @@ public enum Language
     Fr,
     Ja,
     Nl,
-    Pt
+    Pt,
+    Ru
 }
