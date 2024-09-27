@@ -126,7 +126,7 @@ public class Program
             var _statusCommand = host.Services.GetRequiredService<IStatusCommand>();
             var _stopCommand = host.Services.GetRequiredService<IStopCommand>();
             var _usernameMap = host.Services.GetRequiredService<IUsernameMapCommand>();
-            var _i18nHelpers = host.Services.GetRequiredService<II18nHelpers>();
+            var _i18n = host.Services.GetRequiredService<II18nHelpers>();
 
             if(!EnvUtilities.GetEnvBool("IGNORE_UPDATES"))
             {
@@ -144,12 +144,12 @@ public class Program
             {
                 var language = GetEnvLanguage();
                 Say.Debug("Translating...", $"Setting '{language.Item1}' from '{language.Item2}'");
-                _i18nHelpers.SetDefaultLanguage(language.Item1);
+                _i18n.SetDefaultLanguage(language.Item1);
 
                 if(EnvUtilities.GetEnvBool("TEST_LOCALE"))
                 {
                     Say.Custom(
-                        message: _i18nHelpers.GetPhrase(
+                        message: _i18n.GetPhrase(
                             Phrase.Console_HelloWorld,
                             language.Item2
                             ),
