@@ -182,8 +182,12 @@ internal sealed class StartCommand : IStartCommand
             !String.IsNullOrEmpty(clientsConfig.Mastodon.Instance)
         )
         {
+            bool attemptedConnection = false;
+
             if(!String.IsNullOrEmpty(clientsConfig.Mastodon.Token))
             {
+                attemptedConnection = true;
+
                 Say.Debug("Connecting to Mastodon (Mastonet) (with token)...");
                 await _mastodonContext.CreateClient(
                     clientsConfig.Mastodon.Instance,
@@ -195,6 +199,8 @@ internal sealed class StartCommand : IStartCommand
                 !String.IsNullOrEmpty(clientsConfig.Mastodon.Username)
             )
             {
+                attemptedConnection = true;
+
                 Say.Debug("Connecting to Mastodon (Mastonet) (with username/password)...");
                 await _mastodonContext.CreateClient(
                     clientsConfig.Mastodon.Instance,
@@ -203,13 +209,16 @@ internal sealed class StartCommand : IStartCommand
                 );
             }
 
-            if (_mastodonContext.IsConnected && _mastodonContext.State != null)
-                SayClientConnected(_mastodonContext.State.InstanceSoftware, $"{_mastodonContext.State.Username} ({_mastodonContext.State.UserId})");
-            else
-                if(_mastodonContext.State != null && _mastodonContext.State.InstanceSoftware != null)
-                    SayClientConnectedError(_mastodonContext.State.InstanceSoftware);
+            if(attemptedConnection)
+            {
+                if (_mastodonContext.IsConnected && _mastodonContext.State != null)
+                    SayClientConnected(_mastodonContext.State.InstanceSoftware, $"{_mastodonContext.State.Username} ({_mastodonContext.State.UserId})");
                 else
-                    SayClientConnectedError("Mastodon");
+                    if(_mastodonContext.State != null && _mastodonContext.State.InstanceSoftware != null)
+                        SayClientConnectedError(_mastodonContext.State.InstanceSoftware);
+                    else
+                        SayClientConnectedError("Mastodon");
+            }
         }
 
         if (
