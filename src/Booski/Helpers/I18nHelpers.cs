@@ -28,6 +28,7 @@ internal sealed class I18nHelpers : II18nHelpers
         {
             "de" => Language.De,
             "en" => Language.En,
+            "es" => Language.Es,
             "fr" => Language.Fr,
             "ja" => Language.Ja,
             "pt" => Language.Pt,
@@ -98,6 +99,7 @@ internal sealed class I18nHelpers : II18nHelpers
         {
             Language.De => De.Strings,
             Language.En => En.Strings,
+            Language.Es => Es.Strings,
             Language.Fr => Fr.Strings,
             Language.Ja => Ja.Strings,
             Language.Pt => Pt.Strings,
