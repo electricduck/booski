@@ -256,15 +256,6 @@ public class Program
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             appName = appName.ToLower().Replace(" ", "-");
 
-        try
-        {
-            if(
-                RuntimeInformation.IsOSPlatform(OSPlatform.Linux) &&
-                Directory.Exists("/etc/Booski")
-            )
-                Directory.Move("/etc/Booski", "/etc/booski");
-        } catch {}
-
         if (String.IsNullOrEmpty(ConfigDir))
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
