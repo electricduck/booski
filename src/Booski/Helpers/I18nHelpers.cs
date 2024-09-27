@@ -9,6 +9,7 @@ public interface II18nHelpers
     Language GetLanguageForLang(string lang);
     string GetPhrase(Phrase phrase, params string[]? replacements);
     string GetPhrase(Phrase phrase, Language? language = null, params string[]? replacements);
+    string GetUnitSuffix(int amount, Unit unit);
     void SetDefaultLanguage(Language language);
     void SetDefaultLanguage(string lang);
 }
@@ -16,6 +17,7 @@ public interface II18nHelpers
 internal sealed class I18nHelpers : II18nHelpers
 {
     private Language DefaultLanguage = Language.En;
+    private readonly string FallbackText = "(?)";
 
     public string GetLangForLanguage(Language language)
     {
@@ -93,8 +95,43 @@ internal sealed class I18nHelpers : II18nHelpers
             if(!String.IsNullOrEmpty(output))
                 return output;
             else
-                return "(?)";
+                return FallbackText;
         }
+    }
+
+    public string GetUnitSuffix(int amount, Unit unit)
+    {
+        Phrase? phrase;
+
+        if(amount == 1)
+#pragma warning disable CS8509 // The switch expression does not handle all possible values of its input type (it is not exhaustive).
+            phrase = unit switch
+            {
+                Unit.Hour => Phrase.Unit_Hour_Single,
+                Unit.Second => Phrase.Unit_Second_Single
+            };
+#pragma warning restore CS8509 // The switch expression does not handle all possible values of its input type (it is not exhaustive).
+        else
+#pragma warning disable CS8509 // The switch expression does not handle all possible values of its input type (it is not exhaustive).
+            phrase = unit switch
+            {
+                Unit.Hour => Phrase.Unit_Hour_Multiple,
+                Unit.Second => Phrase.Unit_Second_Multiple
+            };
+#pragma warning restore CS8509 // The switch expression does not handle all possible values of its input type (it is not exhaustive).
+
+        if (phrase != null)
+            return GetPhrase((Phrase)phrase);
+        else
+            return FallbackText;
+    }
+
+    public void SetDefaultLanguage(Language language) {
+        DefaultLanguage = language;
+    }
+
+    public void SetDefaultLanguage(string lang) {
+        DefaultLanguage = GetLanguageForLang(lang);
     }
 
     private Dictionary<Phrase, string> GetPhrases(Language language) {        
@@ -111,13 +148,5 @@ internal sealed class I18nHelpers : II18nHelpers
             Language.Ru => Ru.Strings,
             _ => GetPhrases(DefaultLanguage)
         };
-    }
-
-    public void SetDefaultLanguage(Language language) {
-        DefaultLanguage = language;
-    }
-
-    public void SetDefaultLanguage(string lang) {
-        DefaultLanguage = GetLanguageForLang(lang);
     }
 }

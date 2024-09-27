@@ -537,10 +537,24 @@ internal sealed class PostHelpers : IPostHelpers
         string consoleMessageSuffix = $"{postLog.RecordKey} ({postLog.Mastodon_InstanceDomain}/{postLog.Mastodon_StatusId})";
 
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
-        if (postLog.Mastodon_InstanceDomain != _mastodonContext.State.Domain)
+        if (
+            postLog.Mastodon_InstanceDomain != null &&
+            postLog.Mastodon_InstanceDomain != _mastodonContext.State.Domain
+        )
         {
             deletedFromMastodon = false;
-            Say.Warning($"Not deleting from {_mastodonContext.State.InstanceSoftware}: {consoleMessageSuffix}", $"Current instance domain ({_mastodonContext.State.Domain} does not match logged domain ({postLog.Mastodon_InstanceDomain}))");
+            Say.Warning(
+                _i18n.GetPhrase(
+                    Phrase.Console_PostHelpers_PostNotDeleting,
+                    _mastodonContext.State.InstanceSoftware,
+                    consoleMessageSuffix
+                ),
+                _i18n.GetPhrase(
+                    Phrase.Console_PostHelpers_PostNotDeletingErrorMastodonInstanceDomainNotMatch,
+                    _mastodonContext.State.Domain,
+                    postLog.Mastodon_InstanceDomain
+                )
+            );
         }
         else
         {
@@ -647,7 +661,13 @@ internal sealed class PostHelpers : IPostHelpers
                 // BUG: If you start Booski after a long period and an un-synced post is a reply
                 //      to an un-synced parent it will be inadvertently ignored.
                 //      --retry-ignored can be passed by the user to attempt to repair these.
-                Say.Warning($"Ignoring: {postLog.RecordKey}", "Post is a reply, but parent doesn't exist (either deleted, ignored or not ours)");
+                Say.Warning(
+                    _i18n.GetPhrase(
+                        Phrase.Console_PostHelpers_Ignoring,
+                        postLog.RecordKey
+                    ),
+                    _i18n.GetPhrase(Phrase.Console_PostHelpers_IgnoringReplyButNoParent)
+                );
                 ignoredReason = IgnoredReason.ReplyButNoParent;
             }
 
@@ -658,25 +678,43 @@ internal sealed class PostHelpers : IPostHelpers
                 embed.Type != EmbedType.Unknown
             )
             {
-                Say.Warning($"Ignoring: {postLog.RecordKey}", "Post has embeds but none are supported");
+                Say.Warning(
+                    _i18n.GetPhrase(
+                        Phrase.Console_PostHelpers_Ignoring,
+                        postLog.RecordKey
+                    ),
+                    _i18n.GetPhrase(Phrase.Console_PostHelpers_IgnoringEmbedsButNotSupported)
+                );
                 ignoredReason = IgnoredReason.EmbedsButNotSupported;
             }
 
             // OldCreatedDate (5)
             if (post.Record.CreatedAt.AddHours(OldPostHours) < DateTime.UtcNow)
             {
-                var hoursUnit = "hours";
-                if (OldPostHours == 1)
-                    hoursUnit = "hour";
-
-                Say.Warning($"Ignoring: {postLog.RecordKey}", $"Post is older than {OldPostHours} {hoursUnit}");
+                Say.Warning(
+                    _i18n.GetPhrase(
+                        Phrase.Console_PostHelpers_Ignoring,
+                        postLog.RecordKey
+                    ),
+                    _i18n.GetPhrase(
+                        Phrase.Console_PostHelpers_IgnoringOldCreatedAtDate,
+                        OldPostHours.ToString(),
+                        _i18n.GetUnitSuffix(OldPostHours, Unit.Hour)
+                    )
+                );
                 ignoredReason = IgnoredReason.OldCreatedAtDate;
             }
 
             // StartsWithMention (4)
             if (post.Record.Text.StartsWith("@")) // TODO: Check if this is a real mention?
             {
-                Say.Warning($"Ignoring: {postLog.RecordKey}", "Post starts with \"@\"");
+                Say.Warning(
+                    _i18n.GetPhrase(
+                        Phrase.Console_PostHelpers_Ignoring,
+                        postLog.RecordKey
+                    ),
+                    _i18n.GetPhrase(Phrase.Console_PostHelpers_IgnoringStartsWithMention)
+                );
                 ignoredReason = IgnoredReason.StartsWithMention;
             }
 

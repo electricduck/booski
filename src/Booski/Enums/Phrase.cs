@@ -27,6 +27,8 @@ public enum Phrase
     Console_PostHelpers_IgnoringOldCreatedAtDate,
     Console_PostHelpers_IgnoringReplyButNoParent,
     Console_PostHelpers_IgnoringStartsWithMention,
+    Console_PostHelpers_PostNotDeleting,
+    Console_PostHelpers_PostNotDeletingErrorMastodonInstanceDomainNotMatch,
     Console_StartCommand_ClientConnected,
     Console_StartCommand_ClientConnectedError,
     Console_StartCommand_DaemonAlreadyRunning,

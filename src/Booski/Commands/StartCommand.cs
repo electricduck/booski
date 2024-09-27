@@ -122,7 +122,7 @@ internal sealed class StartCommand : IStartCommand
             _i18n.GetPhrase(
                 Phrase.Console_StartCommand_FetchingPosts,
                 sleepTimeSeconds.ToString(),
-                sleepTimeSeconds == 1 ? _i18n.GetPhrase(Phrase.Unit_Second_Single) : _i18n.GetPhrase(Phrase.Unit_Second_Multiple)
+                _i18n.GetUnitSuffix(sleepTimeSeconds, Unit.Second)
             )
         );
 
