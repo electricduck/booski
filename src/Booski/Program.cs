@@ -12,6 +12,7 @@ using Booski.Commands;
 using Booski.Common.Config;
 using Booski.Common.Options;
 using Booski.Contexts;
+using Booski.Enums;
 using Booski.Helpers;
 using Booski.Lib;
 using Booski.Utilities;
@@ -120,20 +121,31 @@ public class Program
             Say.Debug("Building host...");
             using IHost host = builder.Build();
 
-            Say.Debug("Resolving command services...");
+            Say.Debug("Resolving required pre-startup services...");
             var _startCommand = host.Services.GetRequiredService<IStartCommand>();
             var _statusCommand = host.Services.GetRequiredService<IStatusCommand>();
             var _stopCommand = host.Services.GetRequiredService<IStopCommand>();
             var _usernameMap = host.Services.GetRequiredService<IUsernameMapCommand>();
+            var _i18nHelpers = host.Services.GetRequiredService<II18nHelpers>();
 
-            Say.Debug("Checking for updates...");
-            await CheckUpdates(host.Services.GetRequiredService<IGitHubContext>());
+            if(!EnvUtilities.GetEnvBool("IGNORE_UPDATES"))
+            {
+                Say.Debug("Checking for updates...");
+                await CheckUpdates(host.Services.GetRequiredService<IGitHubContext>());
+            }
 
             Say.Debug("Configuring...");
             Configure();
 
             Say.Debug("Migrating database...");
             Database.Migrate();
+
+            if(!EnvUtilities.GetEnvBool("IGNORE_LOCALE"))
+            {
+                var language = GetEnvLanguage();
+                Say.Debug("Translating...", $"Setting '{language.Item1}' from '{language.Item2}'");
+                _i18nHelpers.SetDefaultLanguage(language.Item1);
+            }
 
             Say.Debug("Parsing arguments...");
             await Parser.Default
@@ -202,10 +214,6 @@ public class Program
     // BUG: Using a tagged version triggers this
     private static async Task CheckUpdates(IGitHubContext _githubContext)
     {
-        var ignoreUpdates = EnvUtilities.GetEnvBool("Ignore_Updates");
-        if (ignoreUpdates)
-            return;
-
         await _githubContext.CreateClient();
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
         var releases = await _githubContext.Client.Repository.Release.GetAll("electricduck", "booski");
@@ -397,5 +405,28 @@ public class Program
                     Config.Clients.Telegram.Channel = $"@{Config.Clients.Telegram.Channel}";
             }
         }
+    }
+
+    static (Language, string) GetEnvLanguage()
+    {
+        var culture = System.Globalization.CultureInfo.InstalledUICulture;
+        var cultureName = culture.Name;
+        var cultureParent = culture.Parent.ToString();
+
+        Language foundLanguage = cultureParent switch
+        {
+            "de" => Language.De,
+            "en" => Language.En,
+            "es" => Language.Es,
+            "fi" => Language.Fi,
+            "fr" => Language.Fr,
+            "jp" => Language.Ja,
+            "nl" => Language.Nl,
+            "pt" => Language.Pt,
+            "ru" => Language.Ru,
+            _ => Language.En
+        };
+
+        return (foundLanguage, cultureName);
     }
 }
