@@ -17,6 +17,11 @@ public enum Phrase
     Sensitivity_Suggestive,
 
     Console_HelloWorld,
+    Console_PostHelpers_FirstRun,
+    Console_PostHelpers_PostAdded,
+    Console_PostHelpers_PostCrossposted,
+    Console_PostHelpers_PostCrosspostedError,
+    Console_PostHelpers_PostDeleted,
     Console_StartCommand_ClientConnected,
     Console_StartCommand_ClientConnectedError,
     Console_StartCommand_DaemonAlreadyRunning,

@@ -6,6 +6,11 @@ public class Pt : II18n
 {
     public static Dictionary<Phrase, string> Strings = new Dictionary<Phrase, string>() {
         { Phrase.Console_HelloWorld, "Olá, [0]!" },
+        { Phrase.Console_PostHelpers_FirstRun, "Primeira execução. Armazenar em cache e ignorar todas as postagens" },
+        { Phrase.Console_PostHelpers_PostAdded, "Adicionado: [0]" },
+        { Phrase.Console_PostHelpers_PostCrossposted, "Postado em [0]: [1]" },
+        { Phrase.Console_PostHelpers_PostCrosspostedError, "Não foi possível postar na [0]: [1]" },
+        { Phrase.Console_PostHelpers_PostDeleted, "Eliminado: [0]" },
         { Phrase.Console_StartCommand_ClientConnected, "Conectado à [0]: [1]"},
         { Phrase.Console_StartCommand_ClientConnectedError, "Não é possível conectar-se à [0]" },
         { Phrase.Console_StartCommand_DaemonAlreadyRunning, "Daemon já em execução" },

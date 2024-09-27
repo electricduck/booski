@@ -23,7 +23,7 @@ internal sealed class PostHelpers : IPostHelpers
 
     private IBskyContext _bskyContext;
     private IBskyHelpers _bskyHelpers;
-    private II18nHelpers _i18nHelpers;
+    private II18nHelpers _i18n;
     private IMastodonContext _mastodonContext;
     private IMastodonHelpers _mastodonHelpers;
     private INostrContext _nostrContext;
@@ -47,7 +47,7 @@ internal sealed class PostHelpers : IPostHelpers
     {
         _bskyContext = bskyContext;
         _bskyHelpers = bskyHelpers;
-        _i18nHelpers = i18nHelpers;
+        _i18n = i18nHelpers;
         _mastodonContext = mastodonContext;
         _mastodonHelpers = mastodonHelpers;
         _nostrContext = nostrContext;
@@ -112,7 +112,9 @@ internal sealed class PostHelpers : IPostHelpers
         bool firstRun = await IsFirstRun();
 
         if (firstRun)
-            Say.Warning($"First run. Caching and ignoring all previous posts");
+            Say.Warning(
+                _i18n.GetPhrase(Phrase.Console_PostHelpers_FirstRun)
+            );
 
         if (PostCache == null)
             return;
@@ -132,7 +134,12 @@ internal sealed class PostHelpers : IPostHelpers
                 );
 
                 if (!firstRun)
-                    Say.Success($"Added: {postLog.RecordKey}");
+                    Say.Success(
+                        _i18n.GetPhrase(
+                            Phrase.Console_PostHelpers_PostAdded,
+                            postLog.RecordKey
+                        )
+                    );
             }
 
             if (
@@ -161,7 +168,7 @@ internal sealed class PostHelpers : IPostHelpers
             PostLog? replyParentPostLog = await GetReplyParentForPost(post);
 
             if (post.Record.Langs != null && post.Record.Langs.Length > 0)
-                post.Language = _i18nHelpers.GetLanguageForLang(post.Record.Langs[0]);
+                post.Language = _i18n.GetLanguageForLang(post.Record.Langs[0]);
             else
                 post.Language = Language.En;
 
@@ -252,7 +259,12 @@ internal sealed class PostHelpers : IPostHelpers
 
                     if (deleteSuccess)
                     {
-                        Say.Success($"Deleted: {postLog.RecordKey}");
+                        Say.Success(
+                            _i18n.GetPhrase(
+                                Phrase.Console_PostHelpers_PostDeleted,
+                                postLog.RecordKey
+                            )
+                        );
                         await PostLogs.DeletePostLog(postLog.RecordKey, _bskyContext.State.Did);
                         Thread.Sleep(syncSleep);
                     }
@@ -387,14 +399,27 @@ internal sealed class PostHelpers : IPostHelpers
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
 
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
-                Say.Success($"Posted to {_mastodonContext.State.InstanceSoftware}: {postLog.RecordKey} ({postLog.Mastodon_InstanceDomain}/{postLog.Mastodon_StatusId})");
+                Say.Success(
+                    _i18n.GetPhrase(
+                        Phrase.Console_PostHelpers_PostCrossposted,
+                        _mastodonContext.State.InstanceSoftware,
+                        $"{postLog.RecordKey} ({postLog.Mastodon_InstanceDomain}/{postLog.Mastodon_StatusId})"
+                    )
+                );
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
             }
         }
         catch (Exception e)
         {
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
-            Say.Warning($"Unable to post to {_mastodonContext.State.InstanceSoftware}: {post.RecordKey}", e.Message);
+            Say.Warning(
+                _i18n.GetPhrase(
+                    Phrase.Console_PostHelpers_PostCrosspostedError,
+                    _mastodonContext.State.InstanceSoftware,
+                    post.RecordKey
+                ),
+                e.Message
+            );
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
         }
     }
@@ -431,13 +456,26 @@ internal sealed class PostHelpers : IPostHelpers
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
 
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
-                Say.Success($"Posted to Telegram: {postLog.RecordKey} ({postLog.Telegram_ChatId}/{postLog.Telegram_MessageId})");
+                Say.Success(
+                    _i18n.GetPhrase(
+                        Phrase.Console_PostHelpers_PostCrossposted,
+                        "Telegram",
+                        $"{postLog.RecordKey} ({postLog.Telegram_ChatId}/{postLog.Telegram_MessageId})"
+                    )
+                );
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
             }
         }
         catch (Exception e)
         {
-            Say.Warning($"Unable to post to Telegram: {post.RecordKey}", e.Message);
+            Say.Warning(
+                _i18n.GetPhrase(
+                    Phrase.Console_PostHelpers_PostCrosspostedError,
+                    "Telegram",
+                    post.RecordKey
+                ),
+                e.Message
+            );
         }
     }
 
@@ -469,13 +507,26 @@ internal sealed class PostHelpers : IPostHelpers
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
 
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
-                Say.Success($"Posted to X: {postLog.RecordKey} ({postLog.X_PostId})");
+                Say.Success(
+                    _i18n.GetPhrase(
+                        Phrase.Console_PostHelpers_PostCrossposted,
+                        "X",
+                        $"{postLog.RecordKey} ({postLog.X_PostId})"
+                    )
+                );
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
             }
         }
         catch (Exception e)
         {
-            Say.Warning($"Unable to post to X: {post.RecordKey}", e.Message);
+            Say.Warning(
+                _i18n.GetPhrase(
+                    Phrase.Console_PostHelpers_PostCrosspostedError,
+                    "X",
+                    post.RecordKey
+                ),
+                e.Message
+            );
         }
     }
 

@@ -5,6 +5,11 @@ namespace Booski.I18n;
 public class Ja : II18n {
     public static Dictionary<Phrase, string> Strings = new Dictionary<Phrase, string>() {
         { Phrase.Console_HelloWorld, "こんにちは、[0]！"},
+        { Phrase.Console_PostHelpers_FirstRun, "最初の実行 キャッシュと全投稿の無視" },
+        { Phrase.Console_PostHelpers_PostAdded, "追加：[0]" },
+        { Phrase.Console_PostHelpers_PostCrossposted, "[0]に投稿されました：[1]" },
+        { Phrase.Console_PostHelpers_PostCrosspostedError, "[0]に投稿できません：[1]" },
+        { Phrase.Console_PostHelpers_PostDeleted, "削除された：[0]" },
         { Phrase.Console_StartCommand_ClientConnected, "[0]に接続：[1]"},
         { Phrase.Console_StartCommand_ClientConnectedError, "[0]に接続できない" },
         { Phrase.Console_StartCommand_DaemonAlreadyRunning, "すでに実行中のデーモン"},

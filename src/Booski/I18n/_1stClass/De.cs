@@ -5,6 +5,11 @@ namespace Booski.I18n;
 public class De : II18n {
     public static Dictionary<Phrase, string> Strings = new Dictionary<Phrase, string>() {
         { Phrase.Console_HelloWorld, "Hallo, [0]!"},
+        { Phrase.Console_PostHelpers_FirstRun, "Erster Lauf. Zwischenspeichern und Ignorieren aller Beiträge" },
+        { Phrase.Console_PostHelpers_PostAdded, "Hinzugefügt: [0]" },
+        { Phrase.Console_PostHelpers_PostCrossposted, "Eingestellt bei [0]: [1]" },
+        { Phrase.Console_PostHelpers_PostCrosspostedError, "Kann nicht an [0] gepostet werden: [1]" },
+        { Phrase.Console_PostHelpers_PostDeleted, "Gelöscht: [0]" },
         { Phrase.Console_StartCommand_ClientConnected, "Verbinden mit [0]: [1]"},
         { Phrase.Console_StartCommand_ClientConnectedError, "Verbindung zu [0] nicht möglich" },
         { Phrase.Console_StartCommand_DaemonAlreadyRunning, "Bereits laufender Daemon"},
