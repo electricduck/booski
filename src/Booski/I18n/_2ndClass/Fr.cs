@@ -4,6 +4,7 @@ namespace Booski.I18n;
 
 public class Fr : II18n {
     public static Dictionary<Phrase, string> Strings = new Dictionary<Phrase, string>() {
+        { Phrase.Console_HelloWorld, "Bonjour, [0]!"},
         { Phrase.SeeMore_Attachment, "🔗 Voir la pièce jointe : [0]" },
         { Phrase.SeeMore_Photos, "📷 Voir les photos : [0]" },
         { Phrase.SeeMore_Read, "➡️ En savoir plus : [0]" },

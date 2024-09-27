@@ -431,7 +431,7 @@ public class Program
             "es" => Language.Es,
             "fi" => Language.Fi,
             "fr" => Language.Fr,
-            "jp" => Language.Ja,
+            "ja" => Language.Ja,
             "nl" => Language.Nl,
             "pt" => Language.Pt,
             "ru" => Language.Ru,

@@ -32,7 +32,6 @@ internal sealed class I18nHelpers : II18nHelpers
             "fi" => Language.Fi,
             "fr" => Language.Fr,
             "ja" => Language.Ja,
-            "jp" => Language.Ja,
             "nl" => Language.Nl,
             "pt" => Language.Pt,
             "ru" => Language.Ru,
