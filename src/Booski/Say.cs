@@ -18,7 +18,7 @@ public class Say
         bool say = false;
 
 #if DEBUG
-        say = false;
+        say = true;
 #else
         say = EnvUtilities.GetEnvBool("Debug");
 #endif
