@@ -91,7 +91,7 @@ public class Program
         try
         {
             Say.Debug("Creating host...");
-            HostApplicationBuilder builder = Host.CreateApplicationBuilder();
+            HostApplicationBuilder builder = Host.CreateApplicationBuilder(EnvUtilities.GetEnvStringArray("HOST_BUILDER_ARGS"));
 
             Say.Debug("Adding Booski.Lib service...");
             builder.Services.AddBooskiLib();

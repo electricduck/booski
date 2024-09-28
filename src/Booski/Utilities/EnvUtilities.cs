@@ -29,4 +29,14 @@ public class EnvUtilities
     {
         return GetEnv(variable, prefix);
     }
+
+    public static string[]? GetEnvStringArray(string variable, bool prefix = true)
+    {
+        var output = GetEnv(variable, prefix);
+
+        if(!String.IsNullOrEmpty(output))
+            return output.Split(" ");
+        else
+            return null;
+    }
 }
