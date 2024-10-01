@@ -1,5 +1,7 @@
 using System.Diagnostics;
 using Booski.Common.Options;
+using Booski.Enums;
+using Booski.Helpers;
 
 namespace Booski.Commands;
 
@@ -14,6 +16,15 @@ internal sealed class StopCommand : IStopCommand
 {
     public StopOptions Options { get; set; }
 
+    private II18nHelpers _i18n;
+
+    public StopCommand(
+        II18nHelpers i18nHelpers
+    )
+    {
+        _i18n = i18nHelpers;
+    }
+
     public async Task Invoke(StopOptions o)
     {
         int? pid = Pid.GetPid();
@@ -25,16 +36,26 @@ internal sealed class StopCommand : IStopCommand
                 var runningProcess = Process.GetProcessById((int)pid);
                 runningProcess.Kill();
                 Pid.DeletePid();
-                Say.Success("Stopped daemon");
+
+                Say.Success(
+                    _i18n.GetPhrase(Phrase.Console_StopCommand_DaemonStopped)
+                );
             }
             catch
-            {
-                Say.Error($"Unable to stop daemon ({pid})");
+            {                
+                Say.Error(
+                    _i18n.GetPhrase(
+                        Phrase.Console_StopCommand_DaemonError,
+                        pid.ToString()
+                    )
+                );
             }
         }
         else
         {
-            Say.Error("Daemon not running");
+            Say.Error(
+                _i18n.GetPhrase(Phrase.Console_StopCommand_DaemonNotRunning)
+            );
         }
     }
 }

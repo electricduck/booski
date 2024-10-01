@@ -40,6 +40,9 @@ public enum Phrase
     Console_StartCommand_DaemonStarted,
     Console_StartCommand_FetchingPosts,
     Console_StartCommand_FetchingPostsError,
+    Console_StopCommand_DaemonError,
+    Console_StopCommand_DaemonNotRunning,
+    Console_StopCommand_DaemonStopped,
 
     Unit_Hour_Single,
     Unit_Hour_Multiple,
