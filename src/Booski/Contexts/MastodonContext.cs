@@ -64,7 +64,9 @@ internal sealed class MastodonContext : IMastodonContext
 
                 if(
                     webFingerRequest != null &&
-                    webFingerRequest.Subject != null
+                    webFingerRequest.Subject != null &&
+                    webFingerRequest.Subject.StartsWith("acct:") &&
+                    webFingerRequest.Subject.Contains("@")
                 )
                     State.Username = webFingerRequest.Subject.Replace("acct:", "@");
             }
