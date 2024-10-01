@@ -32,10 +32,7 @@ public class Pt : II18n
         { Phrase.Console_StopCommand_DaemonNotRunning, "Daemon não está em execução"},
         { Phrase.Console_StopCommand_DaemonError, "Não foi possível parar o daemon ([0])" },
         { Phrase.Console_StopCommand_DaemonStopped, "Daemon interrompido" },
-        { Phrase.Unit_Hour_Multiple, "horas" },
-        { Phrase.Unit_Hour_Single, "hora" },
-        { Phrase.Unit_Second_Multiple, "segundos" },
-        { Phrase.Unit_Second_Single, "segundo" },
+        { Phrase.Generic_Compatible, "compatível" },
         { Phrase.SeeMore_Attachment, "🔗 Veja o anexo: [0]" },
         { Phrase.SeeMore_Photos, "📷 Veja as fotos: [0]" },
         { Phrase.SeeMore_Read, "➡️ Leia mais: [0]" },
@@ -45,6 +42,10 @@ public class Pt : II18n
         { Phrase.SeeMoreRich_Video, "▶️ Assistir ao vídeo no Bluesky" },
         { Phrase.Sensitivity_Nudity, "Nudez" },
         { Phrase.Sensitivity_Porn, "Pornô" },
-        { Phrase.Sensitivity_Suggestive, "Sugestiva" }
+        { Phrase.Sensitivity_Suggestive, "Sugestiva" },
+        { Phrase.Unit_Hour_Multiple, "horas" },
+        { Phrase.Unit_Hour_Single, "hora" },
+        { Phrase.Unit_Second_Multiple, "segundos" },
+        { Phrase.Unit_Second_Single, "segundo" }
     };
 }

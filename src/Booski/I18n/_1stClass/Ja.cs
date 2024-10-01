@@ -31,10 +31,7 @@ public class Ja : II18n {
         { Phrase.Console_StopCommand_DaemonNotRunning, "デーモンが実行されていません" },
         { Phrase.Console_StopCommand_DaemonError, "デーモンを停止できません ([0])" },
         { Phrase.Console_StopCommand_DaemonStopped, "デーモンの停止" },
-        { Phrase.Unit_Hour_Multiple, "時間" },
-        { Phrase.Unit_Hour_Single, "時間" },
-        { Phrase.Unit_Second_Multiple, "秒" },
-        { Phrase.Unit_Second_Single, "秒" },
+        { Phrase.Generic_Compatible, "適合" },
         { Phrase.SeeMore_Attachment, "🔗 添付ファイルを見る: [0]" },
         { Phrase.SeeMore_Photos, "📷 写真を見る: [0]" },
         { Phrase.SeeMore_Read, "➡️ 続きを読む: [0]" },
@@ -44,6 +41,10 @@ public class Ja : II18n {
         { Phrase.SeeMoreRich_Video, "▶️ Blueskyでビデオを見る" },
         { Phrase.Sensitivity_Nudity, "ヌード" },
         { Phrase.Sensitivity_Porn, "ポルノ" },
-        { Phrase.Sensitivity_Suggestive, "暗示的" }
+        { Phrase.Sensitivity_Suggestive, "暗示的" },
+        { Phrase.Unit_Hour_Multiple, "時間" },
+        { Phrase.Unit_Hour_Single, "時間" },
+        { Phrase.Unit_Second_Multiple, "秒" },
+        { Phrase.Unit_Second_Single, "秒" }
     };
 }

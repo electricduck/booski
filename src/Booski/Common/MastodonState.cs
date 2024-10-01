@@ -7,6 +7,7 @@ public class MastodonState
 {
     public Account Account { get; set; }
     public string Domain { get; set; }
+    public string FallbackInstanceSoftwareString { get; set; } = "Mastodon (compatible)";
     public InstanceV2 Instance { get; set; }
     public MastodonSoftware InstanceSoftware { get; set; }
     public bool NoRichText { get; set; } = true;
@@ -16,7 +17,7 @@ public class MastodonState
     public string GetInstanceSoftwareString()
     {
         return InstanceSoftware switch {
-            MastodonSoftware.Compatible => "Mastodon (compatible)",
+            MastodonSoftware.Compatible => FallbackInstanceSoftwareString,
             MastodonSoftware.GoToSocial => "GoToSocial",
             MastodonSoftware.Mastodon => "Mastodon",
             MastodonSoftware.MastodonGlitch => "Glitch (Mastodon)",

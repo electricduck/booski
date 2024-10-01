@@ -1,7 +1,7 @@
 using Booski.Common;
+using Booski.Enums;
 using Booski.Helpers;
 using Mastonet;
-using Mastonet.Entities;
 
 namespace Booski.Contexts;
 
@@ -23,14 +23,17 @@ internal sealed class MastodonContext : IMastodonContext
     public MastodonState? State { get; set; }
 
     private IHttpContext _httpContext;
+    private II18nHelpers _i18n;
     private IWebFingerHelpers _webFingerHelpers;
 
     public MastodonContext(
         IHttpContext httpContext,
+        II18nHelpers i18nHelpers,
         IWebFingerHelpers webFingerHelpers
     )
     {
         _httpContext = httpContext;
+        _i18n = i18nHelpers;
         _webFingerHelpers = webFingerHelpers;
     }
 
@@ -58,7 +61,10 @@ internal sealed class MastodonContext : IMastodonContext
             )
             {
                 State.SetAdditionalFields();
+                State.FallbackInstanceSoftwareString = $"Mastodon ({_i18n.GetPhrase(Phrase.Generic_Compatible)})";
                 IsConnected = true;
+
+                Console.WriteLine(State.FallbackInstanceSoftwareString);
 
                 var webFingerRequest = await _webFingerHelpers.GetResource(State.Domain, State.Username);
 

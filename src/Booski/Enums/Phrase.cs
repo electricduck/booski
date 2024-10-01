@@ -5,6 +5,7 @@ public enum Phrase
 {
     Empty = 0,
 
+    // Post
     SeeMore_Attachment,
     SeeMore_Photos,
     SeeMore_Read,
@@ -16,6 +17,7 @@ public enum Phrase
     Sensitivity_Porn,
     Sensitivity_Suggestive,
 
+    // Console
     Console_HelloWorld,
     Console_PostHelpers_FirstRun,
     Console_PostHelpers_PostAdded,
@@ -44,8 +46,12 @@ public enum Phrase
     Console_StopCommand_DaemonNotRunning,
     Console_StopCommand_DaemonStopped,
 
+    // Units
     Unit_Hour_Single,
     Unit_Hour_Multiple,
     Unit_Second_Single,
-    Unit_Second_Multiple
+    Unit_Second_Multiple,
+
+    // Generic
+    Generic_Compatible
 }
