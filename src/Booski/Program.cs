@@ -114,6 +114,7 @@ public class Program
             builder.Services.AddSingleton<ITelegramContext, TelegramContext>();
             builder.Services.AddSingleton<ITelegramHelpers, TelegramHelpers>();
             builder.Services.AddSingleton<IUsernameMapCommand, UsernameMapCommand>();
+            builder.Services.AddSingleton<IWebFingerHelpers, WebFingerHelpers>();
             builder.Services.AddSingleton<IXContext, XContext>();
             builder.Services.AddSingleton<IXHelpers, XHelpers>();
             builder.Services.RemoveAll<IHttpMessageHandlerBuilderFilter>();

@@ -212,10 +212,10 @@ internal sealed class StartCommand : IStartCommand
             if(attemptedConnection)
             {
                 if (_mastodonContext.IsConnected && _mastodonContext.State != null)
-                    SayClientConnected(_mastodonContext.State.InstanceSoftware, $"{_mastodonContext.State.Username} ({_mastodonContext.State.UserId})");
+                    SayClientConnected(_mastodonContext.State.GetInstanceSoftwareString(), $"{_mastodonContext.State.Username} ({_mastodonContext.State.UserId})");
                 else
                     if(_mastodonContext.State != null && _mastodonContext.State.InstanceSoftware != null)
-                        SayClientConnectedError(_mastodonContext.State.InstanceSoftware);
+                        SayClientConnectedError(_mastodonContext.State.GetInstanceSoftwareString());
                     else
                         SayClientConnectedError("Mastodon");
             }

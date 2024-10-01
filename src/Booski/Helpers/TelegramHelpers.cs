@@ -27,19 +27,25 @@ internal sealed class TelegramHelpers : ITelegramHelpers
     private IBskyHelpers _bskyHelpers;
     private IFileCacheContext _fileCacheContext;
     private II18nHelpers _i18nHelpers;
+    private IMastodonContext _mastodonContext;
     private ITelegramContext _telegramContext;
+    private IXContext _xContext;
 
     public TelegramHelpers(
         IBskyHelpers bskyHelpers,
         IFileCacheContext fileCacheContext,
         II18nHelpers i18nHelpers,
-        ITelegramContext telegramContext
+        IMastodonContext mastodonContext,
+        ITelegramContext telegramContext,
+        IXContext xContext
     )
     {
         _bskyHelpers = bskyHelpers;
         _fileCacheContext = fileCacheContext;
         _i18nHelpers = i18nHelpers;
+        _mastodonContext = mastodonContext;
         _telegramContext = telegramContext;
+        _xContext = xContext;
     }
 
     public async Task DeleteFromTelegram(
@@ -227,9 +233,61 @@ internal sealed class TelegramHelpers : ITelegramHelpers
         );
         originalCaptionText = await ReplaceUsernames(originalCaptionText);
 
+        PostLog? fetchedPostLog = null;
+
         string captionText = $"""
-<a href="https://bsky.app/profile/{post.Profile.Did}">🦋 @{post.Profile.Handle}</a>
+<a href="https://bsky.app/profile/{post.Profile.Did}/post/{post.RecordKey}">🦋 @{post.Profile.Handle}</a>
 """;
+
+        if(
+            _mastodonContext.IsConnected &&
+            _mastodonContext.State != null
+        )
+        {
+            if(fetchedPostLog == null)
+                fetchedPostLog = await PostLogs.GetPostLogByRecordKey(post.RecordKey, post.Profile.Did);
+
+            if(
+                fetchedPostLog != null &&
+                !String.IsNullOrEmpty(fetchedPostLog.Mastodon_InstanceDomain) &&
+                !String.IsNullOrEmpty(fetchedPostLog.Mastodon_StatusId) &&
+                _mastodonContext.State.Instance.Domain == fetchedPostLog.Mastodon_InstanceDomain
+            )
+            {
+                string mastodonUrl = _mastodonContext.State.InstanceSoftware switch {
+                    MastodonSoftware.GoToSocial =>
+                        $"https://{_mastodonContext.State.Instance.Domain}/@{_mastodonContext.State.Account.UserName}/statuses/{fetchedPostLog.Mastodon_StatusId}",
+                    MastodonSoftware.Pixelfed =>
+                        $"https://{_mastodonContext.State.Instance.Domain}/p/{_mastodonContext.State.Account.UserName}/{fetchedPostLog.Mastodon_StatusId}",
+                    MastodonSoftware.Compatible => String.Empty, // NOTE: We cannot guarantee support
+                    _ =>
+                        $"https://{_mastodonContext.State.Instance.Domain}/@{_mastodonContext.State.Account.UserName}/{fetchedPostLog.Mastodon_StatusId}"
+                };
+
+                if(!String.IsNullOrEmpty(mastodonUrl))
+                {
+                    captionText += $" | <a href=\"{mastodonUrl}\">🐘 {_mastodonContext.State.Username}</a>";
+                }
+            }
+        }
+
+        if(
+            _xContext.IsConnected &&
+            _xContext.State != null
+        )
+        {
+            if(fetchedPostLog == null)
+                fetchedPostLog = await PostLogs.GetPostLogByRecordKey(post.RecordKey, post.Profile.Did);
+
+            if(
+                fetchedPostLog != null &&
+                !String.IsNullOrEmpty(fetchedPostLog.X_PostId)
+            )
+                captionText += $" | <a href=\"https://x.com/{_xContext.State.Username}/status/{fetchedPostLog.X_PostId}\">🐦 {_xContext.State.Username}</a>";
+        }
+
+        if(captionText.Length > 60)
+            captionText = captionText.Replace(" | ", Environment.NewLine);
 
         if(hasEmbedsButFailed)
         {

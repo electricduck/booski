@@ -1,4 +1,5 @@
 using Booski.Common;
+using Booski.Helpers;
 using Mastonet;
 using Mastonet.Entities;
 
@@ -22,12 +23,15 @@ internal sealed class MastodonContext : IMastodonContext
     public MastodonState? State { get; set; }
 
     private IHttpContext _httpContext;
+    private IWebFingerHelpers _webFingerHelpers;
 
     public MastodonContext(
-        IHttpContext httpContext
+        IHttpContext httpContext,
+        IWebFingerHelpers webFingerHelpers
     )
     {
         _httpContext = httpContext;
+        _webFingerHelpers = webFingerHelpers;
     }
 
     public async Task CreateClient(
@@ -55,6 +59,14 @@ internal sealed class MastodonContext : IMastodonContext
             {
                 State.SetAdditionalFields();
                 IsConnected = true;
+
+                var webFingerRequest = await _webFingerHelpers.GetResource(State.Domain, State.Username);
+
+                if(
+                    webFingerRequest != null &&
+                    webFingerRequest.Subject != null
+                )
+                    State.Username = webFingerRequest.Subject.Replace("acct:", "@");
             }
             else
                 ResetClient();

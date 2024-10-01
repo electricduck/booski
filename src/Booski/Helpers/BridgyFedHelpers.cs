@@ -14,16 +14,19 @@ internal sealed class BridgyFedHelpers : IBridgyFedHelpers
 {
     private IBskyHelpers _bskyHelpers;
     private IHttpContext _httpContext;
+    private IWebFingerHelpers _webFingerHelpers;
 
     private string BridgyFedEndpoint { get; } = "https://fed.brid.gy";
 
     public BridgyFedHelpers(
         IBskyHelpers bskyHelpers,
-        IHttpContext httpContext
+        IHttpContext httpContext,
+        IWebFingerHelpers webFingerHelpers
     )
     {
         _bskyHelpers = bskyHelpers;
         _httpContext = httpContext;
+        _webFingerHelpers = webFingerHelpers;
     }
 
     public async Task<string?> GetBridgyBskyHandle(string did)
@@ -45,17 +48,6 @@ internal sealed class BridgyFedHelpers : IBridgyFedHelpers
 
     public async Task<WebFinger?> GetResource(string resource)
     {
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-        var httpResponse = await
-            _httpContext.Client.GetAsync($"{BridgyFedEndpoint}/.well-known/webfinger?resource={resource}");
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
-
-        if (
-            httpResponse != null &&
-            httpResponse.IsSuccessStatusCode
-        )
-            return await httpResponse.Content.ReadFromJsonAsync<WebFinger>();
-
-        return null;
+        return await _webFingerHelpers.GetResource(BridgyFedEndpoint, resource);
     }
 }

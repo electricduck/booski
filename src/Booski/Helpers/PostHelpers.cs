@@ -184,15 +184,6 @@ internal sealed class PostHelpers : IPostHelpers
                 await SyncAddedPostWithMastodon(postLog, post, embed, replyParentPostLog);
 
             if (
-                _telegramContext.IsConnected &&
-                postLog != null &&
-                postLog.Telegram_ChatId == null &&
-                postLog.Telegram_MessageCount == null &&
-                postLog.Telegram_MessageId == null
-            )
-                await SyncAddedPostWithTelegram(postLog, post, embed, replyParentPostLog);
-
-            if (
                 _xContext.IsConnected &&
                 postLog != null &&
                 postLog.X_PostId == null
@@ -204,6 +195,16 @@ internal sealed class PostHelpers : IPostHelpers
 
                 await SyncAddedPostWithX(postLog, post, embed, replyParentPostLog);
             }
+
+            // NOTE: Telegram needs to be last as it links to Mastodon and X
+            if (
+                _telegramContext.IsConnected &&
+                postLog != null &&
+                postLog.Telegram_ChatId == null &&
+                postLog.Telegram_MessageCount == null &&
+                postLog.Telegram_MessageId == null
+            )
+                await SyncAddedPostWithTelegram(postLog, post, embed, replyParentPostLog);
 
             Thread.Sleep(syncSleep);
         }
@@ -402,7 +403,7 @@ internal sealed class PostHelpers : IPostHelpers
                 Say.Success(
                     _i18n.GetPhrase(
                         Phrase.Console_PostHelpers_PostCrossposted,
-                        _mastodonContext.State.InstanceSoftware,
+                        _mastodonContext.State.GetInstanceSoftwareString(),
                         $"{postLog.RecordKey} ({postLog.Mastodon_InstanceDomain}/{postLog.Mastodon_StatusId})"
                     )
                 );
@@ -415,7 +416,7 @@ internal sealed class PostHelpers : IPostHelpers
             Say.Warning(
                 _i18n.GetPhrase(
                     Phrase.Console_PostHelpers_PostCrosspostedError,
-                    _mastodonContext.State.InstanceSoftware,
+                    _mastodonContext.State.GetInstanceSoftwareString(),
                     post.RecordKey
                 ),
                 e.Message
@@ -546,7 +547,7 @@ internal sealed class PostHelpers : IPostHelpers
             Say.Warning(
                 _i18n.GetPhrase(
                     Phrase.Console_PostHelpers_PostNotDeleting,
-                    _mastodonContext.State.InstanceSoftware,
+                    _mastodonContext.State.GetInstanceSoftwareString(),
                     consoleMessageSuffix
                 ),
                 _i18n.GetPhrase(
