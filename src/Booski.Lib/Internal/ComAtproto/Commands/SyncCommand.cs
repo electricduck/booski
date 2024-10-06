@@ -1,7 +1,7 @@
 using Booski.Lib.Common;
 using Booski.Lib.Internal.ComAtproto.Requests;
 using Booski.Lib.Internal.ComAtproto.Responses;
-using Booski.Lib.Lexicon;
+using Booski.Lib.Xrpc;
 
 namespace Booski.Lib.Internal.ComAtproto.Commands {
     public class SyncCommand : Com.Atproto.Sync

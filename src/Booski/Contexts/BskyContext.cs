@@ -1,7 +1,7 @@
 using Booski.Common;
 using Booski.Common.Config;
 using Booski.Lib;
-using BskyApi = Booski.Lib.Lexicon;
+using BskyApi = Booski.Lib.Xrpc;
 
 namespace Booski.Contexts;
 

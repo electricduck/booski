@@ -286,9 +286,6 @@ internal sealed class TelegramHelpers : ITelegramHelpers
                 captionText += $" | <a href=\"https://x.com/{_xContext.State.Username}/status/{fetchedPostLog.X_PostId}\">🐦 {_xContext.State.Username}</a>";
         }
 
-        if(captionText.Length > 60)
-            captionText = captionText.Replace(" | ", Environment.NewLine);
-
         if(hasEmbedsButFailed)
         {
             string attachmentLink = _bskyHelpers.GetPostLink(post);

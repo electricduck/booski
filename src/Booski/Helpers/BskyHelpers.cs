@@ -4,9 +4,9 @@ using Booski.Common;
 using Booski.Contexts;
 using Booski.Enums;
 using Booski.Lib.Common;
-using Booski.Lib.Polymorphs.AppBsky;
-using Booski.Lib.Polymorphs.ComAtproto;
-using BskyApi = Booski.Lib.Lexicon;
+using Booski.Lib.Lexicons.AppBsky;
+using Booski.Lib.Lexicons.ComAtproto;
+using BskyApi = Booski.Lib.Xrpc;
 
 namespace Booski.Helpers;
 
@@ -16,7 +16,7 @@ public interface IBskyHelpers
     Task<string?> GetHandleForDid(string did);
     string GetPostLink(Post post, string app = "bsky.app");
     Task<Lib.Internal.ComAtproto.Responses.ListRecordsResponse> GetProfileFeed(string cursor);
-    Embed ParseEmbeds(Polymorph embed, string did);
+    Embed ParseEmbeds(Lexicon embed, string did);
     string ParseFacets(
         string originalString,
         List<Booski.Lib.Internal.AppBsky.Common.Facet> facets,
@@ -27,7 +27,7 @@ public interface IBskyHelpers
         string tagStringStart = "<a href=\"https://bsky.app/search?q=%23[tag]\">",
         string tagStringEnd = "</a>"
     );
-    Sensitivity ParseLabels(Polymorph labels);
+    Sensitivity ParseLabels(Lexicon labels);
 }
 
 internal sealed class BskyHelpers : IBskyHelpers
@@ -93,7 +93,7 @@ internal sealed class BskyHelpers : IBskyHelpers
     }
 
     public Embed ParseEmbeds(
-        Polymorph embed,
+        Lexicon embed,
         string did
     )
     {
@@ -208,8 +208,8 @@ internal sealed class BskyHelpers : IBskyHelpers
 
                     switch (facetFeatureType)
                     {
-                        case Type when facetFeatureType == typeof(RichtextFacetLink):
-                            var linkFacet = facetFeature as RichtextFacetLink;
+                        case Type when facetFeatureType == typeof(RichtextFacet_Link):
+                            var linkFacet = facetFeature as RichtextFacet_Link;
 
                             parsedFacet = ParseIndividualFacet(
                                 originalString,
@@ -223,8 +223,8 @@ internal sealed class BskyHelpers : IBskyHelpers
                             );
                             break;
 
-                        case Type when facetFeatureType == typeof(RichtextFacetMention):
-                            var mentionFacet = facetFeature as RichtextFacetMention;
+                        case Type when facetFeatureType == typeof(RichtextFacet_Mention):
+                            var mentionFacet = facetFeature as RichtextFacet_Mention;
 
                             parsedFacet = ParseIndividualFacet(
                                 originalString,
@@ -238,8 +238,8 @@ internal sealed class BskyHelpers : IBskyHelpers
                             );
                             break;
 
-                        case Type when facetFeatureType == typeof(RichtextFacetTag):
-                            var tagFacet = facetFeature as RichtextFacetTag;
+                        case Type when facetFeatureType == typeof(RichtextFacet_Tag):
+                            var tagFacet = facetFeature as RichtextFacet_Tag;
 
                             parsedFacet = ParseIndividualFacet(
                                 originalString,
@@ -295,13 +295,13 @@ internal sealed class BskyHelpers : IBskyHelpers
         return parsedFacet;
     }
 
-    public Sensitivity ParseLabels(Polymorph labels)
+    public Sensitivity ParseLabels(Lexicon labels)
     {
         Sensitivity contentWarning = Sensitivity.None;
 
-        if(labels.GetType() == typeof(LabelDefsSelfLabels))
+        if(labels.GetType() == typeof(LabelDefs_SelfLabels))
         {
-            var selfLabels = labels as LabelDefsSelfLabels;
+            var selfLabels = labels as LabelDefs_SelfLabels;
 
             if(selfLabels != null)
             {

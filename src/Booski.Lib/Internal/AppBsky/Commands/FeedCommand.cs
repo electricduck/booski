@@ -3,7 +3,7 @@ using Booski.Lib.Internal.AppBsky.Common;
 using Booski.Lib.Internal.AppBsky.Enums;
 using Booski.Lib.Internal.AppBsky.Requests;
 using Booski.Lib.Internal.AppBsky.Responses;
-using Booski.Lib.Lexicon;
+using Booski.Lib.Xrpc;
 using Booski.Lib.Utilities;
 using AppBskyConstants = Booski.Lib.Internal.AppBsky.Common.Constants;
 

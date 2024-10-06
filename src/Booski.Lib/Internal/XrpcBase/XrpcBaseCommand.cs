@@ -1,6 +1,6 @@
 using Booski.Lib.Common;
 using Booski.Lib.Internal.XrpcBase.Responses;
-using Booski.Lib.Lexicon;
+using Booski.Lib.Xrpc;
 
 namespace Booski.Lib.Internal.XrpcBase {
     public class XrpcBaseCommand : _ {

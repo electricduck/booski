@@ -1,8 +1,8 @@
 using Booski.Common.Options;
 using Booski.Contexts;
 using Booski.Data;
-using AppBskyResponses = Booski.Lib.Internal.AppBsky.Responses;
-using BskyApi = Booski.Lib.Lexicon;
+using AppBskyLexicons = Booski.Lib.Lexicons.AppBsky;
+using BskyApi = Booski.Lib.Xrpc;
 
 namespace Booski.Commands;
 
@@ -90,7 +90,7 @@ internal sealed class UsernameMapCommand : IUsernameMapCommand
         }
     }
 
-    async Task AddOrUpdateMapEntry(UsernameMapOptions o, AppBskyResponses.GetProfileResponse bskyProfile)
+    async Task AddOrUpdateMapEntry(UsernameMapOptions o, AppBskyLexicons.Actor.Defs_ProfileViewDetailed bskyProfile)
     {
         var bskyDid = bskyProfile.Did;
 
@@ -149,7 +149,7 @@ internal sealed class UsernameMapCommand : IUsernameMapCommand
         
     }
 
-    async Task GetMapEntry(AppBskyResponses.GetProfileResponse bskyProfile)
+    async Task GetMapEntry(AppBskyLexicons.Actor.Defs_ProfileViewDetailed bskyProfile)
     {
         var bskyDid = bskyProfile.Did;
 
@@ -176,7 +176,7 @@ string outputBody = $@"↳ Mastodon: {mastodonHandle}
         Say.Custom(outputHeader, outputBody, "🔀");
     }
 
-    async Task RemoveMapEntry(AppBskyResponses.GetProfileResponse bskyProfile)
+    async Task RemoveMapEntry(AppBskyLexicons.Actor.Defs_ProfileViewDetailed bskyProfile)
     {
         var bskyDid = bskyProfile.Did;
 
@@ -192,9 +192,9 @@ string outputBody = $@"↳ Mastodon: {mastodonHandle}
         Say.Success($"Removed maps for @{bskyProfile.Handle} ({bskyDid})");
     }
 
-    async Task<AppBskyResponses.GetProfileResponse?> ResolveBskyProfileFromHandle(string handle)
+    async Task<AppBskyLexicons.Actor.Defs_ProfileViewDetailed?> ResolveBskyProfileFromHandle(string handle)
     {
-        AppBskyResponses.GetProfileResponse? resolvedProfile = null;
+        AppBskyLexicons.Actor.Defs_ProfileViewDetailed? resolvedProfile = null;
 
         if (
             !_bskyContext.IsConnected &&

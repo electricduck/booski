@@ -1,6 +1,6 @@
 using Booski.Lib.Common;
 using Booski.Lib.Internal.ComAtproto.Responses;
-using Booski.Lib.Lexicon;
+using Booski.Lib.Xrpc;
 
 namespace Booski.Lib.Internal.ComAtproto.Commands {
     public class IdentityCommand : Com.Atproto.Identity

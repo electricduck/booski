@@ -1,7 +1,7 @@
 using Booski.Lib.Common;
 using Booski.Lib.Internal.ComAtproto.Requests;
 using Booski.Lib.Internal.ComAtproto.Responses;
-using Booski.Lib.Lexicon;
+using Booski.Lib.Xrpc;
 using ComAtprotoConstants = Booski.Lib.Internal.ComAtproto.Common.Constants;
 
 namespace Booski.Lib.Internal.ComAtproto.Commands {
@@ -17,7 +17,7 @@ namespace Booski.Lib.Internal.ComAtproto.Commands {
 
         public async Task<AtProtoApiResponse<ApplyWritesResponse>> ApplyWrites(
             string repo,
-            List<Polymorph> writes,
+            List<Lexicon> writes,
             string swapCommit = "",
             bool validate = true
         ) {

@@ -2,7 +2,7 @@ using Booski.Lib.Common;
 using Booski.Lib.Internal.ComAtproto.Common;
 using Booski.Lib.Internal.ComAtproto.Enums;
 using Booski.Lib.Internal.ComAtproto.Responses;
-using Booski.Lib.Lexicon;
+using Booski.Lib.Xrpc;
 using Booski.Lib.Utilities;
 using ComAtprotoConstants = Booski.Lib.Internal.ComAtproto.Common.Constants;
 

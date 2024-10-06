@@ -1,17 +1,19 @@
 using Booski.Lib.Internal.AppBsky.Common;
 using AppBskyCommon = Booski.Lib.Internal.AppBsky.Common;
-using AppBskyPolymorphs = Booski.Lib.Polymorphs.AppBsky;
+using AppBskyLexicons = Booski.Lib.Lexicons.AppBsky;
 using ComAtprotoCommon = Booski.Lib.Internal.ComAtproto.Common;
+
+// TODO: Move to Helpers
 
 namespace Booski.Lib.Records {
     public static class BskyRecords {
-        public static AppBskyPolymorphs.FeedPost BskyPost(
+        public static AppBskyLexicons.FeedPost BskyPost(
             string text,
             DateTime? createdAt = null,
             List<Facet> facets = null,
             string[] langs = null
         ) {
-            AppBskyPolymorphs.FeedPost post = new AppBskyPolymorphs.FeedPost();
+            AppBskyLexicons.FeedPost post = new AppBskyLexicons.FeedPost();
 
             createdAt = createdAt == null ? DateTime.UtcNow : createdAt;
             text = text == null ? "" : text;
@@ -24,19 +26,19 @@ namespace Booski.Lib.Records {
             return post;
         }
 
-        public static AppBskyPolymorphs.FeedPost BskyPostWithImagesEmbed(
+        public static AppBskyLexicons.FeedPost BskyPostWithImagesEmbed(
             string text,
             List<AppBskyCommon.Image> images,
             DateTime? createdAt = null,
             List<Facet> facets = null,
             string[] langs = null
         ) {
-            AppBskyPolymorphs.FeedPost post = new AppBskyPolymorphs.FeedPost();
+            AppBskyLexicons.FeedPost post = new AppBskyLexicons.FeedPost();
 
             createdAt = createdAt == null ? DateTime.UtcNow : createdAt;
             text = text == null ? "" : text;
 
-            var imageEmbedPoly = new AppBskyPolymorphs.EmbedImages {
+            var imageEmbedPoly = new AppBskyLexicons.EmbedImages {
                 Images = images
             };
 
@@ -49,7 +51,7 @@ namespace Booski.Lib.Records {
             return post;
         }
 
-        public static AppBskyPolymorphs.FeedPost BskyPostWithExternalEmbed(
+        public static AppBskyLexicons.FeedPost BskyPostWithExternalEmbed(
             string text,
             AppBskyCommon.External external,
             DateTime? createdAt = null,
@@ -57,14 +59,14 @@ namespace Booski.Lib.Records {
             List<Facet> facets = null,
             string[] langs = null
         ) {
-            AppBskyPolymorphs.FeedPost post = new AppBskyPolymorphs.FeedPost();
+            AppBskyLexicons.FeedPost post = new AppBskyLexicons.FeedPost();
 
             createdAt = createdAt == null ? DateTime.UtcNow : createdAt;
             text = text == null ? "" : text;
 
             external.Thumb = externalThumb == null ? external.Thumb : externalThumb;
 
-            var externalEmbedPoly = new AppBskyPolymorphs.EmbedExternal {
+            var externalEmbedPoly = new AppBskyLexicons.EmbedExternal {
                 External = external
             };
 

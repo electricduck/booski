@@ -72,9 +72,9 @@ internal sealed class PostHelpers : IPostHelpers
             {
                 foreach (var record in feed.Records)
                 {
-                    if (record.Value.GetType() == typeof(Lib.Polymorphs.AppBsky.FeedPost))
+                    if (record.Value.GetType() == typeof(Lib.Lexicons.AppBsky.FeedPost))
                     {
-                        var recordValue = record.Value as Lib.Polymorphs.AppBsky.FeedPost;
+                        var recordValue = record.Value as Lib.Lexicons.AppBsky.FeedPost;
 
                         if (
                             _bskyContext.State != null &&
@@ -189,11 +189,10 @@ internal sealed class PostHelpers : IPostHelpers
                 postLog.X_PostId == null
             )
             {
-                // BUG: If the user forgets to pass --horny-only-x, their X will be irreversibly flooded
-                if (HornyOnlyOnX && post.Sensitivity == Enums.Sensitivity.None)
-                    continue;
-
-                await SyncAddedPostWithX(postLog, post, embed, replyParentPostLog);
+                //if(_filtersContext.CanPost(Service.X, ...)) // something like that?
+                if (HornyOnlyOnX && post.Sensitivity == Enums.Sensitivity.None) { }
+                else
+                    await SyncAddedPostWithX(postLog, post, embed, replyParentPostLog);
             }
 
             // NOTE: Telegram needs to be last as it links to Mastodon and X
@@ -285,8 +284,8 @@ internal sealed class PostHelpers : IPostHelpers
             Type embedType = post.Record.Embed.GetType();
 
             if (
-                embedType == typeof(Lib.Polymorphs.AppBsky.EmbedRecord) ||
-                post.Record.Embed.GetType() == typeof(Lib.Polymorphs.AppBsky.EmbedRecordWithMedia)
+                embedType == typeof(Lib.Lexicons.AppBsky.EmbedRecord) ||
+                post.Record.Embed.GetType() == typeof(Lib.Lexicons.AppBsky.EmbedRecordWithMedia)
             )
             {
                 string recordEmbedCid = "";
@@ -294,19 +293,19 @@ internal sealed class PostHelpers : IPostHelpers
 
                 switch (embedType)
                 {
-                    case Type when embedType == typeof(Lib.Polymorphs.AppBsky.EmbedRecord):
-                        var recordEmbed = post.Record.Embed as Lib.Polymorphs.AppBsky.EmbedRecord;
+                    case Type when embedType == typeof(Lib.Lexicons.AppBsky.EmbedRecord):
+                        var recordEmbed = post.Record.Embed as Lib.Lexicons.AppBsky.EmbedRecord;
                         if (recordEmbed != null)
                         {
                             recordEmbedCid = recordEmbed.Record.Cid;
                             recordEmbedUri = recordEmbed.Record.Uri;
                         }
                         break;
-                    case Type when embedType == typeof(Lib.Polymorphs.AppBsky.EmbedRecordWithMedia):
-                        var recordEmbedWithMedia = post.Record.Embed as Lib.Polymorphs.AppBsky.EmbedRecordWithMedia;
+                    case Type when embedType == typeof(Lib.Lexicons.AppBsky.EmbedRecordWithMedia):
+                        var recordEmbedWithMedia = post.Record.Embed as Lib.Lexicons.AppBsky.EmbedRecordWithMedia;
                         if (recordEmbedWithMedia != null)
                         {
-                            var recordEmbedWithMediaRecord = recordEmbedWithMedia.Record as Lib.Polymorphs.AppBsky.EmbedRecord;
+                            var recordEmbedWithMediaRecord = recordEmbedWithMedia.Record as Lib.Lexicons.AppBsky.EmbedRecord;
                             if (recordEmbedWithMediaRecord != null)
                             {
                                 recordEmbedCid = recordEmbedWithMediaRecord.Record.Cid;

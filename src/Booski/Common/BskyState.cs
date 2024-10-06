@@ -1,4 +1,4 @@
-using AppBskyResponses = Booski.Lib.Internal.AppBsky.Responses;
+using AppBskyLexicons = Booski.Lib.Lexicons.AppBsky;
 
 namespace Booski.Common;
 
@@ -7,7 +7,7 @@ public class BskyState
     public string Did { get; set; }
     public string Handle { get; set; }
     public string PdsHost { get; set; }
-    public AppBskyResponses.GetProfileResponse Profile { get; set; }
+    public AppBskyLexicons.Actor.Defs_ProfileViewDetailed Profile { get; set; }
 
     public void SetAdditionalFields()
     {

@@ -64,8 +64,6 @@ internal sealed class MastodonContext : IMastodonContext
                 State.FallbackInstanceSoftwareString = $"Mastodon ({_i18n.GetPhrase(Phrase.Generic_Compatible)})";
                 IsConnected = true;
 
-                Console.WriteLine(State.FallbackInstanceSoftwareString);
-
                 var webFingerRequest = await _webFingerHelpers.GetResource(State.Domain, State.Username);
 
                 if(

@@ -73,7 +73,7 @@ internal sealed class StatusCommand : IStatusCommand
             if(File.Exists(Program.PidLogPath))
             {
                 // BUG: Performance issues if the logfile is huge
-                var log = File.ReadLines(Program.PidLogPath).Reverse().Take(o.LogLines).ToList();
+                var log = File.ReadLines(Program.PidLogPath).Take(o.LogLines).ToList();
                 foreach(var line in log)
                     Console.WriteLine(line);
             }

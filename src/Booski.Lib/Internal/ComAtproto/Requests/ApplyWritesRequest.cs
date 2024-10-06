@@ -5,6 +5,6 @@ namespace Booski.Lib.Internal.ComAtproto.Requests {
         public string Repo { get; set; }
         public string SwapCommit { get; set; }
         public bool Validate { get; set; }
-        public List<Polymorph> Writes { get; set; }
+        public List<Lexicon> Writes { get; set; }
     }
 }

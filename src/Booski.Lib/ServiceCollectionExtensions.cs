@@ -4,6 +4,7 @@ using Booski.Lib.Services;
 using Booski.Lib.Internal.AppBsky.Commands;
 using Booski.Lib.Internal.ComAtproto.Commands;
 using Booski.Lib.Internal.XrpcBase;
+using AppBskyServices = Booski.Lib.Services.AppBsky;
 
 namespace Booski.Lib
 {
@@ -18,14 +19,14 @@ namespace Booski.Lib
             services.TryAddSingleton(options);
 
             services.AddScoped<AtProto, AtProtoService>();
-            services.AddScoped<Lexicon.App.Bsky.Actor, ActorCommand>();
-            services.AddScoped<Lexicon.App.Bsky.Feed, FeedCommand>();
-            services.AddScoped<Lexicon.Com.Atproto.Admin, AdminCommand>();
-            services.AddScoped<Lexicon.Com.Atproto.Identity, IdentityCommand>();
-            services.AddScoped<Lexicon.Com.Atproto.Repo, RepoCommand>();
-            services.AddScoped<Lexicon.Com.Atproto.Server, ServerCommand>();
-            services.AddScoped<Lexicon.Com.Atproto.Sync, SyncCommand>();
-            services.AddScoped<Lexicon._, XrpcBaseCommand>();
+            services.AddScoped<Xrpc.App.Bsky.Actor, AppBskyServices.ActorService>();
+            services.AddScoped<Xrpc.App.Bsky.Feed, FeedCommand>();
+            services.AddScoped<Xrpc.Com.Atproto.Admin, AdminCommand>();
+            services.AddScoped<Xrpc.Com.Atproto.Identity, IdentityCommand>();
+            services.AddScoped<Xrpc.Com.Atproto.Repo, RepoCommand>();
+            services.AddScoped<Xrpc.Com.Atproto.Server, ServerCommand>();
+            services.AddScoped<Xrpc.Com.Atproto.Sync, SyncCommand>();
+            services.AddScoped<Xrpc._, XrpcBaseCommand>();
         
             //services.AddScoped<Booski.LibOptions, BlueskyApi>();
             //return services.AddHttpClient(Constants.BlueskyApiClient, (_, client) =>
