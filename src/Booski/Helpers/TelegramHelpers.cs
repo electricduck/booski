@@ -202,6 +202,7 @@ internal sealed class TelegramHelpers : ITelegramHelpers
         EmbedType embedType = EmbedType.Unknown
     )
     {
+        post.Record.Text = post.Record.Text.Replace("<", "&lt;").Replace(">", "&gt;");
         string originalCaptionText = _bskyHelpers.ParseFacets(
             post.Record.Text,
             post.Record.Facets
